@@ -157,14 +157,14 @@ Utilizando la sesión autenticada de `gh` (`edgonbr88`):
 
 ## 6. Checklist de Implementación Paso a Paso (Para `trello_implementer`)
 
-- [ ] **Paso 1:** Configurar `.gitignore` en la raíz para ignorar `postgresql/data`, `.env` y temporales.
-- [ ] **Paso 2:** Crear el archivo `.env` con las variables de base de datos local.
-- [ ] **Paso 3:** Crear el archivo `docker-compose.yml` con la red `talentus-net`, los servicios `docker-postgresql` y `dbmate`.
-- [ ] **Paso 4:** Crear el directorio `talentus-scout-migrations` con su carpeta `migrations/` y el archivo ejecutable `init_dbmate.sh` (`chmod +x`).
-- [ ] **Paso 5:** Crear scripts auxiliares `scripts/dev-up.sh` y `scripts/dev-down.sh` (`chmod +x`).
-- [ ] **Paso 6:** Levantar el entorno con `docker compose up -d` y verificar logs del contenedor `docker-postgresql` y `dbmate`.
-- [ ] **Paso 7:** Inicializar git y publicar los repositorios en GitHub mediante `gh repo create`.
-- [ ] **Paso 8:** Validar Criterios de Aceptación (DoD) y ejecutar `move_to_testing.py 6abbe1f192330f55fb666892`.
+- [x] **Paso 1:** Configurar `.gitignore` en la raíz para ignorar `postgresql/data`, `.env` y temporales.
+- [x] **Paso 2:** Crear el archivo `.env` con las variables de base de datos local.
+- [x] **Paso 3:** Crear el archivo `docker-compose.yml` con la red `talentus-net`, los servicios `docker-postgresql` y `dbmate`.
+- [x] **Paso 4:** Crear el directorio `talentus-scout-migrations` con su carpeta `migrations/` y el archivo ejecutable `init_dbmate.sh` (`chmod +x`).
+- [x] **Paso 5:** Crear scripts auxiliares `scripts/dev-up.sh` y `scripts/dev-down.sh` (`chmod +x`).
+- [x] **Paso 6:** Levantar el entorno con `docker compose up -d` y verificar logs del contenedor `docker-postgresql` y `dbmate`.
+- [x] **Paso 7:** Inicializar git y publicar los repositorios en GitHub mediante `gh repo create`.
+- [x] **Paso 8:** Validar Criterios de Aceptación (DoD) y ejecutar `move_to_testing.py 6abbe1f192330f55fb666892`.
 
 ---
 
