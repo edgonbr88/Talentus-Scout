@@ -1,0 +1,30 @@
+# Entorno y Secretos
+.env
+.env.local
+*.env
+
+# Datos persistentes locales de Docker
+postgresql/data/
+postgresql/
+uploads/
+
+# Binarios y compilaciones
+target/
+dist/
+node_modules/
+*.class
+*.jar
+*.war
+
+# Logs
+*.log
+logs/
+
+# IDE y Sistema
+.idea/
+.vscode/
+*.swp
+*.DS_Store
+
+# Archivos de soporte de pruebas / scratch
+scratch/
