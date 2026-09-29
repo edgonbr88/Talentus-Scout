@@ -36,6 +36,30 @@ services:
     networks:
       - talentus-net
 
+  # 3. BACKEND SPRING BOOT 3
+  talentus-scout-be:
+    build:
+      context: ./talentus-scout-be
+      dockerfile: Dockerfile
+    image: talentus-scout-be:latest
+    container_name: talentus-backend-dev
+    ports:
+      - "8080:8080"
+    depends_on:
+      dbmate:
+        condition: service_completed_successfully
+    environment:
+      DB_HOST: docker-postgresql
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER:-postgres}
+      DB_PWD: ${POSTGRES_PASSWORD:-postgrespassword2026}
+      DB_NAME: ${POSTGRES_DB:-talentus_scout_dev}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
+      ENCRYPTION_SECRET_KEY: ${ENCRYPTION_SECRET_KEY:-clave_secreta_local_talentus_2026}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:-super_secret_jwt_key_local_64_chars_talentus_scout_2026_dev_for_security}
+    networks:
+      - talentus-net
+
 networks:
   talentus-net:
     driver: bridge
