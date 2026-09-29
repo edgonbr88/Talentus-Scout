@@ -130,17 +130,158 @@ El objetivo es salir a canchas a validar con los primeros 100-200 atletas federa
 
 ## 8. Stack Técnico y Arquitectura de Infraestructura
 
-* **Frontend:** **Angular** (con soporte SSR / Server-Side Rendering para perfiles públicos ultrarrápidos y generación dinámica de tarjetas Open Graph / SEO para WhatsApp e Instagram) alojado en servicios en la nube / CDN (ej. Firebase Hosting, Vercel o Cloudflare Pages).
-* **Backend:** **Java con Spring Boot** (Spring Boot 3 / Java 17/21) modular y contenerizado (Docker), desplegado en **GCP Cloud Run** (o contenedor administrado) para APIs REST, lógica de negocio, seguridad y gestión de eventos (~$5 - $40/mes según demanda).
-* **Base de Datos:** **Neon** (Serverless PostgreSQL) con escalado automático y backups (~$5 - $25/mes).
-* **Video y Streaming (Núcleo Operativo):** **Cloudflare Stream** o **Bunny.net Stream**:
-  * Carga directa cliente-a-nube vía URLs prefirmadas (sin saturar ni pasar gigabytes por el backend).
-  * Transcodificación automática a HLS multipantalla adaptada a conexiones móviles lentas.
-  * Costo unitario proyectado: ~$5 USD por cada 1.000 minutos almacenados y ~$1 USD por cada 1.000 minutos reproducidos.
+La arquitectura técnica de Talentus Scout está diseñada bajo un principio de desacoplamiento modular, alta resiliencia y soberanía de datos, equilibrando costos operativos mínimos con rendimiento de nivel profesional:
+
+```mermaid
+graph TD
+    ClientFE["Frontend Web / PWA (Angular 18+ SSR)"]
+    CDN["Cloud CDN / Edge Delivery (Vercel / Cloudflare)"]
+    API["API Gateway / Backend (Spring Boot 3 / Java 21)"]
+    AuthSec["Spring Security 6 (Stateless JWT + RBAC)"]
+    PostgresDB[("PostgreSQL 16 (Dbmate / Neon Serverless)")]
+    MediaStorage["Cloudflare Stream / Bunny.net (Video HLS)"]
+
+    ClientFE <-->|HTTPS / HTTP-2| CDN
+    CDN <-->|REST API / JSON| API
+    API --> AuthSec
+    AuthSec --> API
+    API <-->|HikariCP / JPA| PostgresDB
+    ClientFE <-->|TUS / Direct Upload (Presigned)| MediaStorage
+    API -.->|Webhooks / Status Sync| MediaStorage
+```
+
+* **Frontend:**
+  * **Framework:** **Angular 18+** con soporte **SSR (Server-Side Rendering)** y Renderizado Hidratado.
+  * **Propósito del SSR:** Generación ultrarrápida de vistas públicas de la cédula del atleta (`/atleta/:slug`), renderizando en el servidor los meta-tags dinámicos Open Graph (OG Title, OG Image, OG Description) para una visualización enriquecida al compartir enlaces por WhatsApp, Instagram o Twitter.
+  * **Alojamiento:** Vercel, Cloudflare Pages o Firebase App Hosting con distribución global en CDN perimetral.
+* **Backend:**
+  * **Framework:** **Java 21 con Spring Boot 3.4.x**, estructurado en capas limpias (Domain Entities, Repositories, Services, Web Controllers, DTOs y Handlers de Excepciones).
+  * **Seguridad:** Spring Security 6 con autenticación apátrida (Stateless JWT con firma HMAC-SHA384), autorización por roles (RBAC) y control de acceso a nivel de método con SpEL (`@PreAuthorize`).
+  * **Despliegue de Producción:** GCP Cloud Run (contenedor Docker serverless) con autoescalado de 0 a N instancias según demanda, garantizando costes fijos cercanos a cero en valles de tráfico y escalado automático en picos de torneos.
+* **Base de Datos y Persistencia:**
+  * **Motor Canónico:** **PostgreSQL 16**.
+  * **Producción:** **Neon Serverless PostgreSQL** con auto-suspend, pooling de conexiones transaccional vía PgBouncer y ramificaciones de bases de datos (*branching*) para validación de migraciones.
+  * **Herramienta de Migración:** **Dbmate** (gestor agnóstico y declarativo de migraciones en SQL puro, ejecutado tanto en local vía Docker como en pipelines de CI/CD).
+* **Almacenamiento y Streaming de Video (Núcleo Multimedia):**
+  * **Servicio:** **Cloudflare Stream** o **Bunny.net Stream**.
+  * **Arquitectura de Carga Directa:** Las cargas de video nunca atraviesan el backend de Spring Boot. El backend valida el consentimiento legal y cuota del atleta, genera una URL de carga directa prefirmada (vía API segura) y el navegador/móvil del usuario sube el archivo binario directamente al CDN de video mediante el protocolo resumible **TUS**.
+  * **Transcodificación:** Automática a perfiles multipantalla HLS y DASH optimizados para redes móviles 3G/4G/5G con baja latencia.
 
 ---
 
-## 9. Estimación de Costos Operativos por Escenario
+## 9. Ecosistema de Repositorios y Topología de Código (Multi-Repo)
+
+El código fuente del proyecto se organiza en una topología multi-repositorio desacoplada pero orquestable centralmente, alojada en la organización / usuario de GitHub `edgonbr88`:
+
+| Repositorio | Propósito y Contenido | Tecnologías Clave | Estado en Git |
+| :--- | :--- | :--- | :--- |
+| **`Talentus-Scout`** (Raíz / Orquestador) | Orquestación local de Docker Compose, planes de desarrollo detallados (`plans/`), directivas de agentes IA (`.agents/`), y documentación estratégica maestra ("La Biblia"). | Docker Compose, Bash, Python, Markdown | Sincronizado (`origin/main`) |
+| **`talentus-scout-migrations`** | Definición canónica del DDL en SQL puro, configuración de base de datos y migraciones versionadas ejecutadas por dbmate. | PostgreSQL 16 DDL, Dbmate, SQL | Sincronizado (`origin/main`) |
+| **`talentus-scout-be`** | Microservicio backend RESTful, lógica de negocio, seguridad JWT, entidades JPA, reglas LOPNNA y validación multitenant. | Java 21, Spring Boot 3.4.x, Docker Multi-stage, Maven | Sincronizado (`origin/main`) |
+| **`talentus-scout-fe`** | Aplicación web cliente, interfaz de usuario para representantes y scouts, perfiles Bento y renderizado SSR. | Angular 18+, TypeScript, Tailwind/Vanilla CSS | Planificado / En inicialización |
+
+---
+
+## 10. Estrategia de Ambientes y Filosofía "Local-First"
+
+Antes de realizar despliegues a servicios en la nube de pago o con límites gratuitos sensibles (Neon, GCP, Vercel), el proyecto adopta una **política estricta de validación Local-First**:
+
+1. **Aislamiento en Red Docker Dedicada (`talentus-net`):**
+   * Todos los componentes del sistema se comunican dentro de la red tipo puente `talentus-net`.
+2. **PostgreSQL Local Versionado:**
+   * Contenedor `talentus-postgres-dev` basado en `postgres:16-alpine`, con persistencia en volumen Docker local y puerto 5432 expuesto.
+3. **Pipeline Automático de Migración en Arranque:**
+   * Contenedor efímero `talentus-dbmate` que se ejecuta sobre `talentus-scout-migrations`, esperando a que Postgres esté en estado `healthy` para aplicar todas las migraciones DDL (`dbmate up`) antes de permitir el inicio de cualquier servicio dependiente.
+4. **Backend Contenerizado Multi-Stage:**
+   * Contenedor `talentus-backend-dev` que compila el código fuente Java con Maven en una etapa de construcción (`eclipse-temurin:21-jdk-alpine`) y empaqueta el binario final en una imagen ligera de ejecución (`eclipse-temurin:21-jre-alpine`), corriendo bajo un usuario sin privilegios de root (`talentus`).
+5. **Transición hacia la Nube:**
+   * Una vez estabilizado y testeado el comportamiento funcional en local (100% de suites de prueba verdes), el esquema de Dbmate se aplica idénticamente sobre Neon Serverless y el contenedor se publica en el registro de contenedores de GCP para ser levantado en Cloud Run.
+
+---
+
+## 11. Modelo Canónico de Datos y Reglas de Integridad (PostgreSQL 16)
+
+El modelo de datos relacional está formalizado en [20260929171117_create_initial_schema.sql](file:///home/edgar/Talentus%20Scout/talentus-scout-migrations/migrations/20260929171117_create_initial_schema.sql) y comprende **12 tablas relacionales**, **9 tipos enumerados nativos (ENUMs)** y **5 índices especializados**:
+
+```mermaid
+erDiagram
+    users ||--o{ tutor_legal_consents : "registra consentimiento"
+    users ||--o{ athletes : "es tutor legal de"
+    users ||--o| scout_profiles : "perfil profesional"
+    club_organizations ||--o{ athletes : "ficha en club"
+    athletes ||--o{ athletic_metrics : "posee mediciones"
+    athletes ||--o{ sport_videos : "publica clips"
+    athletes ||--o{ trust_badges : "acumula insignias"
+    users ||--o{ subscriptions : "contrata plan"
+    subscriptions ||--o{ payments : "registra pagos"
+    athletes ||--o{ profile_views : "recibe visitas"
+    athletes ||--o{ contact_leads : "recibe intenciones de scout"
+```
+
+### 11.1. Tablas y Entidades del Sistema
+1. **`users`:** Cuentas maestras del sistema con autenticación por email, hash bcrypt de contraseña, rol principal (`user_role`) y estado de cuenta (`account_status`). Clave foránea referencial para auditoría.
+2. **`tutor_legal_consents`:** Bitácora jurídica inmutable del consentimiento LOPNNA Art. 65. Registra el `user_id` del tutor, cédula de identidad, relación de tutela (`PADRE`, `MADRE`, `REPRESENTANTE_LEGAL`), timestamp exacto, dirección IP del cliente y cadena User-Agent del navegador.
+3. **`club_organizations`:** Directorio de clubes, academias y escuelas deportivas con su código de afiliación federativa (FVF), estado geográfico y bandera de verificación oficial.
+4. **`athletes`:** Cédula deportiva digital del menor. Incluye `tutor_id` obligatorio, `slug` único para SEO, posición principal y secundaria, lateralidad (`dominant_foot`), biometría (estatura, peso), pasaportes secundarios y número de ficha federativa.
+5. **`athletic_metrics`:** Registro histórico versionado de pruebas físicas (velocidad 30m, salto vertical, VO2 max, envergadura, etc.) asociadas a la entidad o laboratorio certificador.
+6. **`sport_videos`:** Catálogo de highlights y jugadas del atleta con ID de video externo en CDN, estado de procesamiento (`READY`, `PROCESSING`), URLs HLS y bandera de video destacado.
+7. **`trust_badges`:** Insignias de confianza otorgadas a un atleta por un club, asociación o administrador (`CLUB_OFFICIAL`, `ASSOCIATION_VERIFIED`, `SCOUT_ENDORSED`), implementando el foso defensivo de verificación dual.
+8. **`scout_profiles`:** Perfil profesional de los scouts y reclutadores, con organización de origen, documento de acreditación y estado de auditoría (`PENDING_APPROVAL`, `APPROVED`, `REJECTED`).
+9. **`subscriptions`:** Suscripciones activas (`FREE`, `PRO`, `SEASON_PASS`) vinculadas al usuario pagador y al atleta beneficiario.
+10. **`payments`:** Transacciones financieras multimoneda (USD / VED) con método de pago (`PAGO_MOVIL`, `BINANCE_PAY`, `ZELLE`, `STRIPE`), número de referencia externa, comprobante y estado de conciliación.
+11. **`profile_views`:** Registro de telemetría de visualizaciones de perfiles por scouts para retroalimentar el loop de retención de las familias.
+12. **`contact_leads`:** Registro de clics en el botón de WhatsApp hacia el representante para auditar el interés comercial y deportivo generado por el atleta.
+
+### 11.2. Mapeo de ENUMs en Java / JPA
+Para evitar incompatibilidades entre los tipos ENUM nativos de PostgreSQL y Hibernate 6/7, los campos enumerados en las entidades JPA utilizan explícitamente:
+```java
+@Enumerated(EnumType.STRING)
+@JdbcTypeCode(SqlTypes.NAMED_ENUM)
+private UserRole role;
+```
+
+---
+
+## 12. Arquitectura de Seguridad, Identidad y Blindaje Legal (LOPNNA Art. 65)
+
+Talentus Scout maneja datos de menores de edad en el contexto de la legislación venezolana e internacional, por lo que su arquitectura de seguridad aplica principios de defensa en profundidad:
+
+### 12.1. Autenticación y Autorización (Spring Security 6)
+* **Tokens Apátridas (Stateless JWT):**
+  * Los tokens se firman mediante el algoritmo HMAC-SHA384 con expiración estricta de 24 horas (`86400s`).
+  * El payload incluye claims esenciales: `userId`, `sub` (email), `role` y `fullName`.
+* **Seguridad a Nivel de Método (SpEL & Ownership):**
+  * Para prevenir vulnerabilidades de referencia directa a objetos insegura (IDOR), la manipulación y consulta privada de atletas está blindada mediante una expresión SpEL delegada en el componente `AthleteSecurity`:
+  ```java
+  @PreAuthorize("@athleteSecurity.isOwner(#id, authentication)")
+  ```
+  * `AthleteSecurity.isOwner()` evalúa transaccionalmente que el `tutor.id` del atleta coincida con el ID del usuario extraído del JWT (o que el usuario ostente el rol `ROLE_ADMIN`), denegando cualquier intento ajeno con un código HTTP `403 Forbidden`.
+
+### 12.2. Registro Atómico de Onboarding del Tutor
+El endpoint `POST /api/v1/auth/register-tutor` ejecuta en una única transacción atómica (`@Transactional`):
+1. Validación de unicidad de correo y número de cédula.
+2. Validación de formato de teléfono bajo estándar internacional E.164 (`+58...`).
+3. Creación del usuario con rol `TUTOR` y contraseña cifrada con BCrypt.
+4. Generación inmutable del registro en `tutor_legal_consents` capturando la IP y User-Agent desde el servlet request.
+5. Emisión inmediata del JWT para permitir que el tutor cree inmediatamente la cédula de sus representados sin fricciones adicionales.
+
+---
+
+## 13. Cédula Deportiva: Identidad Digital y Algoritmo de Slug Único
+
+Cada atleta registrado en Talentus Scout recibe un identificador amigable único denominado `slug` que servirá de ruta para su cédula pública: `talentus.app/atleta/:slug`.
+
+### 13.1. Algoritmo de Normalización y Resolución de Colisiones (`SlugService`)
+1. **Normalización Unicode:** Descompone caracteres con tildes o diacríticos (`Normalizer.normalize(name, Normalizer.Form.NFD)`), eliminando marcas no espaciadas mediante la expresión regular `\p{InCombiningDiacriticalMarks}+`.
+2. **Saneamiento URL-Safe:** Convierte a minúsculas, reemplaza caracteres no alfanuméricos por guiones simples y elimina guiones redundantes en los extremos.
+   * *Ejemplo:* `"Gabriel José Pérez"` → `"gabriel-jose-perez"`.
+3. **Resolución Determinista de Colisiones:**
+   * Si la consulta `athleteRepository.findBySlug(baseSlug)` no arroja resultados, se asigna el slug base.
+   * Si el slug ya existe, se genera un sufijo numérico incremental verificando la existencia en bucle: `"gabriel-jose-perez-1"`, `"gabriel-jose-perez-2"`, etc.
+
+---
+
+## 14. Estimación de Costos Operativos por Escenario
 
 | Escenario | Atletas Activos | Video Almacenado (6 min c/u) | Streaming Estimado | Costo Total Infraestructura |
 | :--- | :--- | :--- | :--- | :--- |
@@ -150,3 +291,21 @@ El objetivo es salir a canchas a validar con los primeros 100-200 atletas federa
 
 *Costo marginal de infraestructura por atleta: ~$0.10 - $0.12 USD/mes.*  
 *Una tasa de conversión del 3% al 5% en suscripciones o pases de temporada de $3 a $5 USD/mes financia la totalidad de la infraestructura y genera margen operativo positivo.*
+
+---
+
+## 15. Protocolo de Desarrollo y Gobernanza de Agentes de IA
+
+El desarrollo de la plataforma se rige por un flujo riguroso y automatizado que conecta el tablero de gestión de proyectos (Trello) con los agentes autónomos de codificación en este workspace:
+
+1. **`trello_planner`:**
+   * Inspecciona las tarjetas en la lista `in development` de Trello.
+   * Contrasta los requerimientos con este documento ("La Biblia"), el DDL de base de datos y la especificación del MVP.
+   * Produce un documento exhaustivo de diseño y lista de comprobación en `plans/TS-XX-plan-<slug>.md`.
+2. **`trello_implementer`:**
+   * Toma el plan generado y ejecuta paso a paso la implementación del código fuente (backend, base de datos, frontend).
+   * Valida la suite de pruebas unitarias y de integración (`./mvnw clean test`), garantizando el 100% de aserciones exitosas.
+   * Levanta y valida los servicios en los contenedores Docker locales (`docker compose up --build -d`).
+   * Realiza commits y push a los repositorios remotos en GitHub (`edgonbr88/*`).
+   * Desplaza la tarjeta en Trello de `in development` a `in testing` y anota un comentario con el balance técnico de la entrega.
+
