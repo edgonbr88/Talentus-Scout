@@ -72,4 +72,6 @@ El `trello_planner` **DEBE** leer y cruzar la información de la tarjeta con los
 
 * **Entrada:** Lee el archivo generado en `plans/<TS-ID>-plan.md`.
 * **Acción:** Ejecuta el checklist paso a paso, escribe el código, corre las pruebas y valida la compilación.
+  * **Directiva Obligatoria de Frontend (Angular 18+ / UI):** Al construir componentes de Frontend, vistas o interfaces, el agente **DEBE** activar y aplicar estrictamente las directrices de diseño de [fe-desing.md](file:///home/edgar/Talentus%20Scout/fe-desing.md) (skill `frontend-design`). Debe huir de templates genéricos y clichés de IA (evitar el kit SaaS de tarjetas redondeadas idénticas con sombra suave, acentos aislados de una palabra, fondos crema-terracota no autorizados), aplicando diseño intencional y contemporáneo adaptado al fútbol juvenil de Talentus Scout (Bento Grid, accesibilidad, copywriting humano y tokens deliberados).
 * **Salida:** Cuando todos los Criterios de Aceptación están cumplidos y las pruebas pasan, mueve la tarjeta en Trello de `in development` a `in testing` y deja un comentario en la tarjeta con el resumen de la implementación.
+

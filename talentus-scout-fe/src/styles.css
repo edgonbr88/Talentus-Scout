@@ -1,0 +1,312 @@
+/* ==========================================================================
+   Talentus Scout — Design System Tokens (Conforme a fe-desing.md)
+   Identidad visual: Scouting deportivo atlético venezolano, Bento Grid contemporáneo
+   ========================================================================== */
+
+:root {
+  /* Paleta Base Intencional */
+  --color-bg-base: #0A0F1D;
+  --color-surface: #141D30;
+  --color-surface-hover: #1A253D;
+  --color-surface-elevated: #1E2B45;
+  --color-border: #22314D;
+  --color-border-focus: #10B981;
+  
+  /* Acentos de Energía Deportiva y Oficialidad */
+  --color-accent-pitch: #10B981;
+  --color-accent-pitch-hover: #059669;
+  --color-accent-gold: #F59E0B;
+  --color-accent-gold-hover: #D97706;
+  
+  /* Jerarquía Tipográfica y Contraste */
+  --color-text-main: #F8FAFC;
+  --color-text-muted: #94A3B8;
+  --color-text-dim: #64748B;
+  
+  /* Estados de Validación y Feedback */
+  --color-danger: #EF4444;
+  --color-danger-bg: rgba(239, 68, 68, 0.12);
+  --color-success: #10B981;
+  --color-success-bg: rgba(16, 185, 129, 0.12);
+  --color-warning-bg: rgba(245, 158, 11, 0.12);
+
+  /* Familias Tipográficas */
+  --font-family-display: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-family-body: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Espaciado y Radios */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+  
+  --max-content-width: 1200px;
+  --transition-fast: 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Reset y Base */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-bg-base);
+  color: var(--color-text-main);
+  font-family: var(--font-family-body);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Tipografía de Encabezados (Outfit) */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-display);
+  font-weight: 700;
+  color: var(--color-text-main);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-size: clamp(2rem, 4vw, 2.75rem);
+}
+
+h2 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+}
+
+h3 {
+  font-size: 1.35rem;
+}
+
+p {
+  max-width: 75ch; /* Disciplina de longitud de línea < 80ch */
+  color: var(--color-text-muted);
+}
+
+a {
+  color: var(--color-accent-pitch);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: #34D399;
+}
+
+/* Foco Accesible Teclado */
+:focus-visible {
+  outline: 2px solid var(--color-accent-pitch);
+  outline-offset: 3px;
+}
+
+/* Contenedores y Layout */
+.container {
+  width: 100%;
+  max-width: var(--max-content-width);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+/* Botones con Verbos de Acción y Microinteracción */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-family-body);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 11px 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), transform var(--transition-fast), border-color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn-primary {
+  background-color: var(--color-accent-pitch);
+  color: #042F1A;
+  border-color: var(--color-accent-pitch);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--color-accent-pitch-hover);
+  border-color: var(--color-accent-pitch-hover);
+  color: #FFFFFF;
+}
+
+.btn-secondary {
+  background-color: var(--color-surface);
+  color: var(--color-text-main);
+  border-color: var(--color-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--color-surface-hover);
+  border-color: #3B4E72;
+}
+
+.btn-gold {
+  background-color: var(--color-accent-gold);
+  color: #261603;
+  border-color: var(--color-accent-gold);
+}
+
+.btn-gold:hover:not(:disabled) {
+  background-color: var(--color-accent-gold-hover);
+  color: #FFFFFF;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Tarjetas y Estructura Bento Grid */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 20px;
+}
+
+.bento-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  transition: border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.bento-card:hover {
+  border-color: #33476B;
+}
+
+/* Insignias e Indicadores de Estado */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.02em;
+}
+
+.badge-official {
+  background-color: var(--color-warning-bg);
+  color: var(--color-accent-gold);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-verified {
+  background-color: var(--color-success-bg);
+  color: var(--color-accent-pitch);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-lopnna {
+  background-color: rgba(99, 102, 241, 0.12);
+  color: #818CF8;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+/* Formularios Atléticos y Accesibles */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-main);
+  margin-bottom: 6px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 12px 14px;
+  background-color: #0E1527;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-main);
+  font-family: var(--font-family-body);
+  font-size: 14px;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--color-border-focus);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+.form-control.is-invalid {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.form-error {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--color-danger);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.form-hint {
+  margin-top: 4px;
+  font-size: 12px;
+  color: var(--color-text-dim);
+}
+
+/* Alertas y Notificaciones */
+.alert {
+  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.alert-danger {
+  background-color: var(--color-danger-bg);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #FCA5A5;
+}
+
+.alert-success {
+  background-color: var(--color-success-bg);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #6EE7B7;
+}
+
+/* Respeto a Preferencias de Movimiento Reducido */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

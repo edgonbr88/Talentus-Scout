@@ -85,8 +85,10 @@ Write a new markdown file in the `plans/` directory:
   - Controller REST con anotaciones de seguridad (`@PreAuthorize`)
 
 ## 5. Frontend: Angular 18+ (Standalone & SSR)
+- Directiva de Diseño: Seguir [fe-desing.md](file:///home/edgar/Talentus%20Scout/fe-desing.md) / `frontend-design` (paleta intencional, tipografía, Bento Grid, cero clichés de IA).
 - Módulos / Componentes:
   - Archivo `.ts`, `.html`, `.css`
+  - Tokens visuales propuestos (paleta, tipografía, concepto de layout)
   - Servicio HTTP en `core/services/`
   - Rutas y Guards
 
