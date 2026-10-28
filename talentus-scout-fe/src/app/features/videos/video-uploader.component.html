@@ -1,0 +1,237 @@
+<div class="video-uploader-card" [class.is-dragging]="isDragging">
+  <!-- HEADER DEL COMPONENTE -->
+  <div class="uploader-header">
+    <div class="header-titles">
+      <div class="header-badge">ESTUDIO DE VIDEO ATLÉTICO</div>
+      <h3 class="uploader-title">
+        {{ athleteName ? 'Cargar Video de ' + athleteName : 'Cargar Video de Jugadas' }}
+      </h3>
+      <p class="uploader-subtitle">
+        Sube jugadas destacadas, goles o partidos para que clubes y scouts certificados puedan analizar el rendimiento técnico.
+      </p>
+    </div>
+    <button
+      *ngIf="progressState.status !== 'uploading' && progressState.status !== 'processing'"
+      class="btn-close"
+      (click)="onCancel()"
+      aria-label="Cerrar cargador de video"
+      type="button">
+      ✕
+    </button>
+  </div>
+
+  <!-- ESTADO 1: IDLE / DROP-ZONE -->
+  <div
+    *ngIf="progressState.status === 'idle'"
+    class="drop-zone"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+    (click)="fileInput.click()"
+    tabindex="0"
+    (keydown.enter)="fileInput.click()"
+    (keydown.space)="fileInput.click()">
+    
+    <input
+      #fileInput
+      type="file"
+      class="hidden-input"
+      accept="video/mp4,video/quicktime"
+      (change)="onFileInputChange($event)" />
+
+    <div class="drop-icon-wrapper">
+      <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+      </svg>
+    </div>
+
+    <div class="drop-texts">
+      <span class="drop-action-text">Arrastra el archivo de video aquí o haz clic para examinar</span>
+      <span class="drop-specs-text">
+        Formatos admitidos: MP4, MOV · Peso máximo permitido: 500 MB
+      </span>
+    </div>
+
+    <div class="drop-badges-row">
+      <span class="spec-pill">Resolución sugerida: 1080p / 720p</span>
+      <span class="spec-pill">Grabado en horizontal</span>
+    </div>
+  </div>
+
+  <!-- ESTADO 2: ARCHIVO SELECCIONADO (METADATOS + PREVIEW MINIATURA) -->
+  <div *ngIf="progressState.status === 'selected'" class="selected-state-container">
+    <div class="preview-layout">
+      <!-- Miniatura extraída en cliente -->
+      <div class="thumbnail-wrapper">
+        <img
+          *ngIf="localThumbnailUrl"
+          [src]="localThumbnailUrl"
+          alt="Miniatura capturada del video"
+          class="thumbnail-img" />
+        <div *ngIf="!localThumbnailUrl" class="thumbnail-placeholder">
+          <span>Generando miniatura...</span>
+        </div>
+        <div class="duration-badge">
+          {{ formatBytes(selectedFile?.size || 0) }}
+        </div>
+      </div>
+
+      <!-- Datos técnicos del archivo -->
+      <div class="file-summary">
+        <div class="file-name" [title]="selectedFile?.name">
+          {{ selectedFile?.name }}
+        </div>
+        <div class="file-meta">
+          <span>Tipo: {{ selectedFile?.type || 'video/mp4' }}</span>
+          <span>·</span>
+          <span>Listo para enviar</span>
+        </div>
+        <button
+          class="btn-text-action"
+          type="button"
+          (click)="resetSelection()">
+          Cambiar archivo
+        </button>
+      </div>
+    </div>
+
+    <!-- Formulario de Metadatos del Video -->
+    <div class="metadata-form">
+      <div class="form-group">
+        <label for="videoTitle" class="form-label">
+          Título descriptivo del video <span class="required">*</span>
+        </label>
+        <input
+          id="videoTitle"
+          type="text"
+          class="form-input"
+          [(ngModel)]="videoTitle"
+          placeholder="Ej: Jugadas vs Caracas FC — Torneo Apertura 2026"
+          maxlength="150" />
+        <span class="input-counter">{{ videoTitle.length }}/150</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">
+          Categoría técnica del clip <span class="required">*</span>
+        </label>
+        <div class="category-chips">
+          <button
+            *ngFor="let cat of categoryOptions"
+            type="button"
+            class="category-chip"
+            [class.is-active]="videoCategory === cat.value"
+            (click)="videoCategory = cat.value">
+            <span class="chip-icon">{{ cat.icon }}</span>
+            <span>{{ cat.label }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="action-footer">
+      <button class="btn btn-secondary" type="button" (click)="resetSelection()">
+        Cancelar
+      </button>
+      <button
+        class="btn btn-primary btn-submit-upload"
+        type="button"
+        [disabled]="!videoTitle.trim()"
+        (click)="startUpload()">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+        </svg>
+        <span>Iniciar Subida</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ESTADO 3 & 4: TRANSMITIENDO Y PROCESANDO -->
+  <div
+    *ngIf="progressState.status === 'requesting_ticket' || progressState.status === 'uploading' || progressState.status === 'processing'"
+    class="uploading-state-container">
+    
+    <div class="upload-headline">
+      <div class="pulse-indicator" [class.is-processing]="progressState.status === 'processing'"></div>
+      <span class="upload-stage-label">
+        {{ progressState.status === 'requesting_ticket' ? 'Preparando ticket de subida...' : (progressState.status === 'uploading' ? 'Transmitiendo video al servidor...' : 'Optimizando video para streaming adaptativo HLS...') }}
+      </span>
+    </div>
+
+    <!-- Barra de Progreso Atlética -->
+    <div class="progress-track" role="progressbar" [attr.aria-valuenow]="progressState.percentage" aria-valuemin="0" aria-valuemax="100">
+      <div class="progress-bar" [style.width.%]="progressState.percentage">
+        <div class="progress-glow"></div>
+      </div>
+    </div>
+
+    <div class="progress-metrics-row">
+      <span class="percentage-metric">{{ progressState.percentage }}% completado</span>
+      <span class="bytes-metric" *ngIf="progressState.status === 'uploading'">
+        {{ formatBytes(progressState.loadedBytes) }} de {{ formatBytes(progressState.totalBytes) }}
+        <span *ngIf="progressState.speedMbps > 0" class="speed-tag">({{ progressState.speedMbps.toFixed(1) }} MB/s)</span>
+      </span>
+    </div>
+
+    <div class="uploader-warning-notice">
+      Por favor, no cierres esta pestaña mientras se completa la transferencia de video.
+    </div>
+
+    <div class="cancel-upload-wrapper" *ngIf="progressState.status === 'uploading'">
+      <button class="btn btn-secondary-danger" type="button" (click)="cancelCurrentUpload()">
+        Detener subida
+      </button>
+    </div>
+  </div>
+
+  <!-- ESTADO 5: LISTO / ÉXITO (READY) -->
+  <div *ngIf="progressState.status === 'ready'" class="ready-state-container">
+    <div class="success-icon-badge">✓</div>
+    <h4 class="success-title">¡Video cargado con éxito!</h4>
+    <p class="success-description">
+      El clip <strong>"{{ lastUploadedVideo?.title || videoTitle }}"</strong> ha sido procesado correctamente y ya forma parte de la cédula deportiva del atleta.
+    </p>
+
+    <div class="ready-preview-card" *ngIf="lastUploadedVideo">
+      <div class="ready-thumb-box">
+        <img
+          *ngIf="localThumbnailUrl || lastUploadedVideo.thumbnailUrl"
+          [src]="lastUploadedVideo.thumbnailUrl || localThumbnailUrl"
+          alt="Miniatura del video listo"
+          class="ready-thumb-img" />
+      </div>
+      <div class="ready-info">
+        <span class="ready-category-badge">{{ lastUploadedVideo.category }}</span>
+        <div class="ready-video-title">{{ lastUploadedVideo.title }}</div>
+        <span class="ready-status-pill">ESTADO: LISTO</span>
+      </div>
+    </div>
+
+    <div class="ready-actions-row">
+      <button class="btn btn-secondary" type="button" (click)="resetAll()">
+        Cargar otro video
+      </button>
+      <button class="btn btn-primary" type="button" (click)="onComplete()">
+        Finalizar
+      </button>
+    </div>
+  </div>
+
+  <!-- ESTADO 6: ERROR -->
+  <div *ngIf="progressState.status === 'error'" class="error-state-container">
+    <div class="error-icon-badge">✕</div>
+    <h4 class="error-title">No se pudo completar la subida</h4>
+    <p class="error-message">
+      {{ progressState.errorMessage || 'Ocurrió un error inesperado al transmitir el video.' }}
+    </p>
+    <div class="error-actions-row">
+      <button class="btn btn-secondary" type="button" (click)="resetAll()">
+        Seleccionar otro archivo
+      </button>
+      <button class="btn btn-primary" type="button" (click)="retryUpload()" *ngIf="selectedFile">
+        Reintentar subida
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,136 @@
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-header">
+      <div style="margin-bottom: 20px; text-align: center;">
+        <app-brand-logo variant="imagotipo" theme="dark" [height]="105" [clickable]="true"></app-brand-logo>
+      </div>
+      <span class="badge badge-verified">PORTAL DE ACCESO OFICIAL</span>
+      <h1 class="auth-title">Iniciar Sesión</h1>
+      <p class="auth-subtitle">Acceso unificado para representantes legales, scouts y directivas deportivas</p>
+    </div>
+
+    @if (unverifiedEmail) {
+    <div class="alert alert-warning" role="alert"
+      style="display: flex; gap: 10px; align-items: flex-start; background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fde68a; padding: 12px 14px; border-radius: 8px; margin-bottom: 20px;">
+      <span style="font-size: 18px;">✉️</span>
+      <div>
+        <strong style="display: block; font-size: 13px;">Tu cuenta aún no ha sido verificada.</strong>
+        <p style="margin: 4px 0 0; font-size: 12.5px; line-height: 1.4;">
+          Debes confirmar tu correo para acceder al panel de control.
+          <a [routerLink]="['/auth/verify-email-pending']" [queryParams]="{ email: unverifiedEmail }"
+            style="color: #38bdf8; text-decoration: underline; font-weight: 700; margin-left: 4px;">
+            Reenviar correo de activación
+          </a>
+        </p>
+      </div>
+    </div>
+    }
+
+    @if (errorMessage) {
+    <div class="alert alert-danger" role="alert">
+      <span>⚠️</span>
+      <span>{{ errorMessage }}</span>
+    </div>
+    }
+
+    <!-- BOTONES DE AUTENTICACIÓN SOCIAL OFICIAL -->
+    <div class="social-auth-section">
+      <button type="button" class="btn-social btn-google" (click)="loginWithGoogle()" [disabled]="isLoading">
+        <svg class="social-icon" viewBox="0 0 24 24" width="20" height="20">
+          <path fill="#4285F4"
+            d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z" />
+          <path fill="#34A853"
+            d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z" />
+          <path fill="#FBBC05"
+            d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z" />
+          <path fill="#EA4335"
+            d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z" />
+        </svg>
+        <span>Continuar con Google</span>
+      </button>
+
+      <!--button
+        type="button"
+        class="btn-social btn-microsoft"
+        (click)="loginWithMicrosoft()"
+        [disabled]="isLoading"
+      >
+        <svg class="social-icon" viewBox="0 0 23 23" width="19" height="19">
+          <rect x="1" y="1" width="10" height="10" fill="#f25022"/>
+          <rect x="12" y="1" width="10" height="10" fill="#7fba00"/>
+          <rect x="1" y="12" width="10" height="10" fill="#00a4ef"/>
+          <rect x="12" y="12" width="10" height="10" fill="#ffb900"/>
+        </svg>
+        <span>Continuar con Microsoft</span>
+      </button-->
+
+      <div class="oauth-config-trigger">
+        <button type="button" class="btn-config-oauth" (click)="openConfigModal('all')">
+          <span>⚙️</span>
+          <span>Configurar Client IDs de OAuth2</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="auth-divider">
+      <span>o ingresa con tu correo</span>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="auth-form" novalidate>
+      <div class="form-group">
+        <label for="email" class="form-label">Correo electrónico</label>
+        <input id="email" type="email" formControlName="email" class="form-control"
+          [class.is-invalid]="isFieldInvalid('email')" placeholder="nombre@ejemplo.com" autocomplete="email" />
+        @if (isFieldInvalid('email')) {
+        <div class="form-error">
+          <span>Ingresa un correo electrónico válido</span>
+        </div>
+        }
+      </div>
+
+      <div class="form-group">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+          <label for="password" class="form-label" style="margin-bottom: 0;">Contraseña</label>
+          <a routerLink="/auth/forgot-password" class="link-forgot-password"
+            style="font-size: 12.5px; color: #38bdf8; text-decoration: none; font-weight: 500; transition: color 0.15s ease;">
+            ¿Olvidaste tu contraseña?
+          </a>
+        </div>
+        <input id="password" type="password" formControlName="password" class="form-control"
+          [class.is-invalid]="isFieldInvalid('password')" placeholder="••••••••" autocomplete="current-password" />
+        @if (isFieldInvalid('password')) {
+        <div class="form-error">
+          <span>La contraseña es obligatoria</span>
+        </div>
+        }
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="loginForm.invalid || isLoading">
+        @if (isLoading) {
+        <span>Verificando credenciales...</span>
+        } @else {
+        <span>Entrar a mi Cuenta</span>
+        }
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>¿Aún no tienes cuenta registrada?</p>
+      <a routerLink="/register-tutor" class="link-register">
+        Crear cuenta de Representante Legal
+      </a>
+      <div style="margin: 12px 0 8px; height: 1px; background-color: var(--color-border);"></div>
+      <p style="margin-bottom: 4px; font-size: 12.5px; color: var(--color-text-muted);">
+        ¿Eres cazatalentos o club federado?
+      </p>
+      <a routerLink="/register-scout" class="link-register" style="color: #38bdf8; font-size: 12.5px;">
+        Solicita tu acreditación de Scout oficial aquí
+      </a>
+    </div>
+  </div>
+</div>
+
+@if (showConfigModal) {
+<app-oauth-config-modal [targetProvider]="configModalProvider" (saved)="onConfigSaved($event)"
+  (closed)="closeConfigModal()"></app-oauth-config-modal>
+}

@@ -1,0 +1,436 @@
+<div class="modal-backdrop" (click)="closeModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="modal-header">
+      <div>
+        <span class="badge-modal">CÉDULA DEPORTIVA OFICIAL</span>
+        <h2 class="modal-title">Registrar Nuevo Atleta Menor de Edad</h2>
+        <p class="modal-subtitle">
+          Crea la ficha deportiva oficial bajo tu patria potestad y representación legal verificada.
+        </p>
+      </div>
+      <button type="button" class="btn-close" (click)="closeModal()" aria-label="Cerrar">✕</button>
+    </div>
+
+    <!-- Body / Form -->
+    <div class="modal-body">
+      @if (errorMessage) {
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px; font-size: 13px;">
+          <span>⚠️ {{ errorMessage }}</span>
+        </div>
+      }
+
+      <form [formGroup]="athleteForm" (ngSubmit)="onSubmit()" id="athleteForm" novalidate>
+        <!-- SECCIÓN 1: BIOGRAFÍA Y BIOTIPO -->
+        <div class="section-title">
+          <span>👤</span>
+          <span>1. Datos de Identidad y Biotipo</span>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="firstName">
+              <span>Nombres del Menor *</span>
+            </label>
+            <input
+              id="firstName"
+              type="text"
+              class="form-control"
+              formControlName="firstName"
+              placeholder="ej. Gabriel Alejandro"
+              [class.is-invalid]="isFieldInvalid('firstName')"
+            />
+            @if (isFieldInvalid('firstName')) {
+              <span class="form-error">El nombre es obligatorio (máx. 100 caracteres)</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="lastName">
+              <span>Apellidos del Menor *</span>
+            </label>
+            <input
+              id="lastName"
+              type="text"
+              class="form-control"
+              formControlName="lastName"
+              placeholder="ej. Pérez Silva"
+              [class.is-invalid]="isFieldInvalid('lastName')"
+            />
+            @if (isFieldInvalid('lastName')) {
+              <span class="form-error">El apellido es obligatorio (máx. 100 caracteres)</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="birthDate">
+              <span>Fecha de Nacimiento *</span>
+            </label>
+            <input
+              id="birthDate"
+              type="date"
+              class="form-control"
+              formControlName="birthDate"
+              (change)="onBirthDateChange()"
+              [class.is-invalid]="isFieldInvalid('birthDate') || ageError"
+            />
+            @if (ageError) {
+              <span class="form-error">{{ ageError }}</span>
+            } @else if (isFieldInvalid('birthDate')) {
+              <span class="form-error">La fecha de nacimiento es obligatoria</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="gender">
+              <span>Género *</span>
+            </label>
+            <select id="gender" class="form-control" formControlName="gender">
+              <option value="MALE">Masculino</option>
+              <option value="FEMALE">Femenino</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="nationality">
+              <span>Nacionalidad Principal *</span>
+            </label>
+            <select
+              id="nationality"
+              class="form-control"
+              formControlName="nationality"
+            >
+              @for (c of authorizedCountries; track c) {
+                <option [value]="c">{{ c }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="secondaryPassports">
+              <span>Pasaporte Secundario / Comunitario</span>
+            </label>
+            <input
+              id="secondaryPassports"
+              type="text"
+              class="form-control"
+              formControlName="secondaryPassports"
+              placeholder="ej. Español (UE), Italiano (UE)"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="heightCm">
+              <span>Estatura (cm)</span>
+            </label>
+            <input
+              id="heightCm"
+              type="number"
+              step="0.5"
+              class="form-control"
+              formControlName="heightCm"
+              placeholder="ej. 172.5"
+              [class.is-invalid]="isFieldInvalid('heightCm')"
+            />
+            @if (isFieldInvalid('heightCm')) {
+              <span class="form-error">Indica una estatura válida (90 - 230 cm)</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="weightKg">
+              <span>Peso Corporal (kg)</span>
+            </label>
+            <input
+              id="weightKg"
+              type="number"
+              step="0.5"
+              class="form-control"
+              formControlName="weightKg"
+              placeholder="ej. 64.0"
+              [class.is-invalid]="isFieldInvalid('weightKg')"
+            />
+            @if (isFieldInvalid('weightKg')) {
+              <span class="form-error">Indica un peso válido (20 - 150 kg)</span>
+            }
+          </div>
+        </div>
+
+        <!-- SECCIÓN 2: PERFIL DE FÚTBOL -->
+        <div class="section-title">
+          <span>⚽</span>
+          <span>2. Posición y Lateralidad en Cancha</span>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="primaryPosition">
+              <span>Posición Principal *</span>
+            </label>
+            <select id="primaryPosition" class="form-control" formControlName="primaryPosition">
+              @for (pos of positions; track pos) {
+                <option [value]="pos">{{ pos }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="secondaryPosition">
+              <span>Posición Secundaria (Opcional)</span>
+            </label>
+            <select id="secondaryPosition" class="form-control" formControlName="secondaryPosition">
+              <option value="">Ninguna / No aplica</option>
+              @for (pos of positions; track pos) {
+                <option [value]="pos">{{ pos }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="preferredFoot">
+              <span>Pierna Hábil *</span>
+            </label>
+            <select id="preferredFoot" class="form-control" formControlName="preferredFoot">
+              @for (foot of preferredFeet; track foot.value) {
+                <option [value]="foot.value">{{ foot.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="currentClubId">
+              <span>Club o Academia Formativa Actual</span>
+            </label>
+            <select id="currentClubId" class="form-control" formControlName="currentClubId">
+              <option value="">Sin afiliación actual / Independiente</option>
+              @for (club of clubs; track club.id) {
+                <option [value]="club.id">
+                  {{ club.name }} ({{ club.city }}, {{ club.state }})
+                </option>
+              }
+              <option value="OTHER">Otro (indicar club o academia)...</option>
+            </select>
+          </div>
+
+          @if (isOtherClubSelected) {
+            <div class="form-group col-span-2 custom-club-group">
+              <label class="form-label" for="customClubName">
+                <span>Nombre de tu Escuela o Club Formativo *</span>
+              </label>
+              <input
+                id="customClubName"
+                type="text"
+                class="form-control"
+                formControlName="customClubName"
+                placeholder="ej. Academia Tricolor FC"
+                [class.is-invalid]="isFieldInvalid('customClubName')"
+              />
+              @if (isFieldInvalid('customClubName')) {
+                <span class="form-error">Indica el nombre de la escuela o club formativo (máx. 150 caracteres)</span>
+              }
+            </div>
+
+            <div class="form-group custom-club-group">
+              <label class="form-label" for="customClubCity">
+                <span>Ciudad de la Sede *</span>
+              </label>
+              <input
+                id="customClubCity"
+                type="text"
+                class="form-control"
+                formControlName="customClubCity"
+                placeholder="ej. Valencia"
+                [class.is-invalid]="isFieldInvalid('customClubCity')"
+              />
+              @if (isFieldInvalid('customClubCity')) {
+                <span class="form-error">Indica la ciudad de la academia (máx. 100 caracteres)</span>
+              }
+            </div>
+
+            <div class="form-group custom-club-group">
+              <label class="form-label" for="customClubState">
+                <span>Estado / Región *</span>
+              </label>
+              <input
+                id="customClubState"
+                type="text"
+                class="form-control"
+                formControlName="customClubState"
+                placeholder="ej. Carabobo"
+                [class.is-invalid]="isFieldInvalid('customClubState')"
+              />
+              @if (isFieldInvalid('customClubState')) {
+                <span class="form-error">Indica el estado o región (máx. 100 caracteres)</span>
+              }
+            </div>
+
+            <div class="form-group col-span-2 custom-club-group">
+              <label class="form-label" for="customClubCountry">
+                <span>País de la Organización *</span>
+              </label>
+              <select
+                id="customClubCountry"
+                class="form-control"
+                formControlName="customClubCountry"
+                [class.is-invalid]="isFieldInvalid('customClubCountry')"
+              >
+                @for (country of authorizedCountries; track country) {
+                  <option [value]="country">{{ country }}</option>
+                }
+              </select>
+              @if (isFieldInvalid('customClubCountry')) {
+                <span class="form-error">Selecciona el país de la escuela formativa</span>
+              }
+            </div>
+          }
+
+          <div class="federation-info-callout col-span-2">
+            <div class="callout-icon" aria-hidden="true">ℹ️</div>
+            <div class="callout-content">
+              <p class="callout-title">¿Tu representado cuenta con carnet o ficha federativa?</p>
+              <p class="callout-description">
+                Podrás consignar el comprobante oficial y solicitar su validación auditada con insignia verificada desde la sección <strong>"Certificar"</strong> de tu panel de tutor.
+              </p>
+            </div>
+          </div>
+
+          <div class="form-group col-span-2">
+            <label class="form-label" for="bio">
+              <span>Breve Perfil o Características del Jugador</span>
+            </label>
+            <textarea
+              id="bio"
+              rows="3"
+              class="form-control"
+              formControlName="bio"
+              placeholder="Describe habilidades técnicas, trayectoria destacada o estilo de juego..."
+              style="resize: vertical;"
+            ></textarea>
+          </div>
+
+          <!-- SECCIÓN OPCIONAL: FOTOGRAFÍA DE PERFIL -->
+          <div class="form-group col-span-2 photo-upload-section">
+            <label class="form-label">
+              <span>Fotografía Deportiva de Perfil (Opcional)</span>
+              <span class="label-hint">Formatos: JPG, PNG, WEBP (Máx. 5MB)</span>
+            </label>
+            
+            <div class="photo-picker-container">
+              <div class="photo-preview-box">
+                @if (photoPreviewUrl) {
+                  <img [src]="photoPreviewUrl" alt="Previsualización de foto" class="photo-preview-thumb" />
+                } @else {
+                  <div class="photo-placeholder-thumb">⚽</div>
+                }
+              </div>
+
+              <div class="photo-picker-actions">
+                <input
+                  #regPhotoInput
+                  type="file"
+                  accept=".png,.jpg,.jpeg,.webp"
+                  (change)="onPhotoFileSelected($event)"
+                  style="display: none;"
+                />
+                
+                @if (!selectedPhotoFile) {
+                  <div>
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="regPhotoInput.click()">
+                      📷 Seleccionar Foto del Atleta
+                    </button>
+                  </div>
+                  <span class="photo-picker-hint">Puedes adjuntarla ahora o gestionarla después desde tu panel.</span>
+                } @else {
+                  <div class="photo-selected-info">
+                    <span class="photo-file-name">{{ selectedPhotoFile.name }} ({{ (selectedPhotoFile.size / 1024 / 1024).toFixed(2) }} MB)</span>
+                    <button type="button" class="btn-remove-photo" (click)="removePhoto($event, regPhotoInput)" title="Remover fotografía">
+                      ✕ Descartar
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+
+            @if (photoError) {
+              <span class="form-error" style="margin-top: 6px;">{{ photoError }}</span>
+            }
+
+            <div class="photo-lopnna-hint">
+              <span>🛡️</span>
+              <span>Al adjuntar la foto declaras bajo fe de juramento la patria potestad del menor (Art. 65 LOPNNA) para su difusión deportiva formativa.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- BANNER DE REINTENTO SI FALLA LA SUBIDA DE FOTO -->
+        @if (photoUploadFailed && createdAthlete) {
+          <div class="photo-retry-banner">
+            <span class="retry-icon">⚠️</span>
+            <div class="retry-content">
+              <h4 class="retry-title">¡Cédula deportiva creada exitosamente!</h4>
+              <p class="retry-desc">{{ photoUploadErrorMessage }}</p>
+              <div class="retry-actions">
+                <button
+                  type="button"
+                  class="btn btn-primary btn-sm"
+                  (click)="retryPhotoUpload()"
+                  [disabled]="isRetryingPhoto"
+                >
+                  @if (isRetryingPhoto) {
+                    <span>Reintentando subida...</span>
+                  } @else {
+                    <span>🔄 Reintentar Subida de Foto</span>
+                  }
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary btn-sm"
+                  (click)="continueWithoutPhoto()"
+                  [disabled]="isRetryingPhoto"
+                >
+                  Continuar al Panel
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- AVISO LEGAL Y SALVAGUARDA -->
+        <div class="legal-notice">
+          <span style="font-size: 18px;">🛡️</span>
+          <div>
+            <strong>Salvaguarda y Protección Integral del Menor:</strong>
+            Al registrar la cédula deportiva, los datos biométricos quedan automáticamente amparados bajo tu consentimiento legal registrado como tutor (Art. 65 LOPNNA / FIFA). Cualquier contacto de scouts hacia el menor requerirá tu autorización directa mediante el radar.
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="modal-footer">
+      @if (photoUploadFailed && createdAthlete) {
+        <button type="button" class="btn btn-secondary" (click)="continueWithoutPhoto()" [disabled]="isRetryingPhoto">
+          Ir al Panel de Tutor
+        </button>
+        <button type="button" class="btn btn-primary" (click)="retryPhotoUpload()" [disabled]="isRetryingPhoto">
+          @if (isRetryingPhoto) {
+            <span>Reintentando...</span>
+          } @else {
+            <span>🔄 Reintentar Foto</span>
+          }
+        </button>
+      } @else {
+        <button type="button" class="btn btn-secondary" (click)="closeModal()" [disabled]="isSubmitting">
+          Cancelar
+        </button>
+        <button type="submit" form="athleteForm" class="btn btn-primary" [disabled]="athleteForm.invalid || isSubmitting || !!ageError">
+          @if (isSubmitting) {
+            <span>Creando Cédula...</span>
+          } @else {
+            <span>Crear Cédula Deportiva Oficial</span>
+          }
+        </button>
+      }
+    </div>
+  </div>
+</div>

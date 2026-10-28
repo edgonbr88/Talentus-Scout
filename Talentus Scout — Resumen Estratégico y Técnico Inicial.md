@@ -298,14 +298,20 @@ Cada atleta registrado en Talentus Scout recibe un identificador amigable único
 
 El desarrollo de la plataforma se rige por un flujo riguroso y automatizado que conecta el tablero de gestión de proyectos (Trello) con los agentes autónomos de codificación en este workspace:
 
-1. **`trello_planner`:**
+1. **`trello_refiner`:**
+   * Inspecciona las tarjetas en estado crudo en la lista `to refine` de Trello.
+   * Analiza los requerimientos cruzándolos con este documento ("La Biblia"), las normativas de protección de menores (LOPNNA / FIFA) y la especificación del MVP.
+   * Entrevista proactivamente al usuario para aclarar cualquier vacío, duda o ambigüedad de negocio o técnica.
+   * Asigna el correlativo `[TS-XX]`, estructura la tarjeta con especificación técnica, criterios de aceptación (DoD) y dependencias, y la traslada a `To Do`.
+2. **`trello_planner`:**
    * Inspecciona las tarjetas en la lista `in development` de Trello.
    * Contrasta los requerimientos con este documento ("La Biblia"), el DDL de base de datos y la especificación del MVP.
    * Produce un documento exhaustivo de diseño y lista de comprobación en `plans/TS-XX-plan-<slug>.md`.
-2. **`trello_implementer`:**
+3. **`trello_implementer`:**
    * Toma el plan generado y ejecuta paso a paso la implementación del código fuente (backend, base de datos, frontend).
    * Valida la suite de pruebas unitarias y de integración (`./mvnw clean test`), garantizando el 100% de aserciones exitosas.
    * Levanta y valida los servicios en los contenedores Docker locales (`docker compose up --build -d`).
    * Realiza commits y push a los repositorios remotos en GitHub (`edgonbr88/*`).
    * Desplaza la tarjeta en Trello de `in development` a `in testing` y anota un comentario con el balance técnico de la entrega.
+
 

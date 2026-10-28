@@ -7,6 +7,10 @@ export const authGuard: CanActivateFn = () => {
   const router = inject(Router);
 
   if (authService.isAuthenticated()) {
+    if (authService.needsProfileCompletion()) {
+      router.navigate(['/auth/complete-profile']);
+      return false;
+    }
     return true;
   }
 

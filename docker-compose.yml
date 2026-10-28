@@ -57,6 +57,21 @@ services:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-local}
       ENCRYPTION_SECRET_KEY: ${ENCRYPTION_SECRET_KEY:-clave_secreta_local_talentus_2026}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-super_secret_jwt_key_local_64_chars_talentus_scout_2026_dev_for_security}
+      MAIL_ENABLED: ${MAIL_ENABLED:-true}
+      MAIL_FROM: ${MAIL_FROM:-contacto@robomatic.cloud}
+      MAIL_SERVER: ${MAIL_SERVER:-smtp.gmail.com}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-contacto@robomatic.cloud}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-vyuoxcjawklsgryu}
+      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost}
+    volumes:
+      - ./talentus-scout-be/uploads:/app/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 8080 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 15s
     networks:
       - talentus-net
 
@@ -72,9 +87,14 @@ services:
       - "${FRONTEND_PORT:-80}:80"
       - "${FRONTEND_SSL_PORT:-443}:443"
     depends_on:
-      - talentus-scout-be
+      talentus-scout-be:
+        condition: service_healthy
+    environment:
+      BACKEND_INTERNAL_URL: "http://talentus-scout-be:8080"
     volumes:
       - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./talentus-scout-fe/nginx.conf:/etc/nginx/http.d/default.conf:ro
+      - ./talentus-scout-fe/entrypoint.sh:/app/entrypoint.sh:ro
     networks:
       - talentus-net
 

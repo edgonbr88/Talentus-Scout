@@ -1,0 +1,701 @@
+<div class="dashboard-page container">
+  <!-- HEADER DEL PANEL -->
+  <header class="dashboard-header">
+    <div class="header-info">
+      <div class="header-badges">
+        <span class="badge badge-verified">TUTOR LEGAL VERIFICADO</span>
+        <span class="badge badge-verified">CONSENTIMIENTO LEGAL ACTIVO</span>
+      </div>
+      <h1 class="dashboard-title">
+        Panel de Gestión: {{ authService.currentUser()?.fullName || 'Tutor Deportivo' }}
+      </h1>
+      <p class="dashboard-subtitle">
+        Administra las cédulas deportivas de tus representados, clips de video y consentimientos legales.
+      </p>
+    </div>
+
+    <div class="header-actions">
+      <button 
+        (click)="openQuickVideoUploader()" 
+        class="btn btn-primary btn-upload-header" 
+        type="button"
+        [disabled]="athletes.length === 0"
+        [title]="athletes.length === 0 ? 'Debes registrar al menos un atleta antes de subir videos' : 'Subir Video Deportivo'">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+        </svg>
+        <span>Subir Video</span>
+      </button>
+      <button (click)="logout()" class="btn btn-secondary">
+        Cerrar Sesión
+      </button>
+    </div>
+  </header>
+
+  <!-- NOTIFICACIÓN DE ÉXITO DE CARGA -->
+  <div *ngIf="lastUploadedNotice" class="upload-success-toast">
+    <span>✓ {{ lastUploadedNotice }}</span>
+    <button class="toast-close" (click)="lastUploadedNotice = null">✕</button>
+  </div>
+
+  <!-- BENTO GRID DEL DASHBOARD -->
+  <div class="bento-grid dashboard-grid">
+    <!-- Tarjeta Principal: Atletas Representados (Span 8) -->
+    <div class="bento-card col-span-12 md-col-8">
+      <div class="card-top-bar">
+        <div class="title-with-badge">
+          <h3>Mis Atletas Representados</h3>
+          <span class="badge badge-official">{{ athletes.length }} REGISTRADOS</span>
+        </div>
+        <button *ngIf="athletes.length > 0" class="btn btn-primary btn-sm" (click)="openAthleteModal()" type="button">
+          + Registrar Atleta
+        </button>
+      </div>
+
+      <!-- TS-39: BANNER GLOBAL DE VISIBILIDAD EN DIRECTORIO -->
+      <div *ngIf="hasNonVisibleAthletes()" class="global-visibility-alert-banner">
+        <div class="alert-banner-header">
+          <span class="alert-banner-icon">📡⚠️</span>
+          <div class="alert-banner-content">
+            <div class="alert-banner-title">
+              <strong>Atletas fuera del Directorio Nacional de Scouts</strong>
+              <span class="badge-alert-count">{{ getNonVisibleCount() }} PENDIENTE{{ getNonVisibleCount() > 1 ? 'S' : '' }}</span>
+            </div>
+            <p class="alert-banner-desc">
+              Los cazatalentos y clubes federados solo pueden descubrir fichas con Plan Pro activo y comprobante de patria potestad consignado. Revisa los requisitos de tus atletas a continuación para activar su visibilidad.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado con Atletas Registrados -->
+      <div *ngIf="athletes.length > 0" class="athletes-list">
+        <div *ngFor="let athlete of athletes" class="athlete-card">
+          <!-- NIVEL 1: BLOQUE SUPERIOR DE IDENTIDAD Y DATOS FORMATIVOS -->
+          <div class="athlete-header-row">
+            <div class="athlete-avatar athlete-avatar-clickable" (click)="openPhotoModal(athlete)" title="Subir o cambiar fotografía de perfil">
+              <img *ngIf="athlete.profilePhotoUrl" [src]="athlete.profilePhotoUrl | mediaUrl" [alt]="athlete.fullName" />
+              <span *ngIf="!athlete.profilePhotoUrl">{{ athlete.firstName.charAt(0) }}{{ athlete.lastName.charAt(0) }}</span>
+              <div class="avatar-camera-overlay">📷</div>
+            </div>
+            <div class="athlete-main-info">
+              <h4 class="athlete-name">{{ athlete.fullName }}</h4>
+              
+              <div class="athlete-badges-row">
+                <span *ngIf="athlete.subscriptionStatus === 'ACTIVE'" class="badge badge-pro-active">⭐ PRO ACTIVO</span>
+                <span *ngIf="athlete.subscriptionStatus === 'PENDING_AUDIT'" class="badge badge-pending-audit">⏳ CONCILIACIÓN PENDIENTE</span>
+                <span *ngIf="!athlete.subscriptionStatus || athlete.subscriptionStatus === 'INACTIVE'" class="badge badge-inactive">🔒 NO VISIBLE EN DIRECTORIO</span>
+                <span *ngIf="athlete.legalVerificationStatus === 'APPROVED'" class="badge badge-legal-approved" title="Patria potestad auditada y verificada oficialmente">🛡️ PATRIA POTESTAD VERIFICADA</span>
+                <span *ngIf="athlete.hasIdentityDocument && (!athlete.legalVerificationStatus || athlete.legalVerificationStatus === 'PENDING_REVIEW')" class="badge badge-legal-pending" title="Documentación en revisión por el equipo legal">⏳ REVISIÓN LEGAL PENDIENTE</span>
+                <span *ngIf="athlete.legalVerificationStatus === 'REJECTED'" class="badge badge-legal-rejected" title="Documentación observada, requiere corrección">❌ DOCUMENTACIÓN OBSERVADA</span>
+                <span *ngIf="!athlete.hasIdentityDocument" class="badge badge-doc-pending" title="Pendiente consignar documento de identidad">⚠️ DOC. IDENTIDAD PENDIENTE</span>
+              </div>
+
+              <div class="athlete-specs">
+                <span class="spec-position">{{ athlete.primaryPosition }}</span>
+                <span class="spec-dot">·</span>
+                <span class="spec-age">{{ athlete.age }} años</span>
+                <span class="spec-dot">·</span>
+                <span class="spec-foot">Pie: {{ athlete.preferredFoot }}</span>
+              </div>
+
+              <div *ngIf="athlete.legalVerificationStatus === 'REJECTED'" class="legal-rejection-banner">
+                <span class="rejection-banner-icon">⚠️</span>
+                <div class="rejection-banner-text">
+                  <span class="rejection-banner-title">Observación Legal (Patria Potestad):</span>
+                  <p class="rejection-banner-desc">{{ athlete.legalVerificationNotes || 'Por favor carga nuevamente una copia legible de la partida de nacimiento o cédula.' }}</p>
+                </div>
+                <button (click)="openIdentityModal(athlete)" class="btn btn-warning-action btn-sm" type="button">
+                  Subir Documento Corregido
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TS-39: CHECKLIST CONTEXTUAL DE VISIBILIDAD O INDICADOR ACTIVO -->
+          <div *ngIf="!isAthleteVisible(athlete)" class="visibility-checklist-card">
+            <div class="checklist-header">
+              <div class="checklist-title">
+                <span>🔒 Perfil Fuera del Radar de Scouts</span>
+              </div>
+              <p class="checklist-subtitle">
+                Los cazatalentos federados no pueden encontrar ni consultar esta ficha en el directorio hasta completar las siguientes condiciones:
+              </p>
+            </div>
+
+            <div class="visibility-checklist-items">
+              <!-- Condición 1: Plan Pro -->
+              <div class="checklist-item" [class.is-completed]="athlete.subscriptionStatus === 'ACTIVE'" [class.is-pending]="athlete.subscriptionStatus !== 'ACTIVE'">
+                <div class="item-left">
+                  <span class="item-icon">{{ athlete.subscriptionStatus === 'ACTIVE' ? '✓' : '⚠️' }}</span>
+                  <span class="item-text">
+                    <strong>Plan Pro:</strong>
+                    {{ athlete.subscriptionStatus === 'ACTIVE' ? 'Suscripción activa para búsqueda y radar.' : 'Plan inactivo — Requiere membresía para aparecer en el directorio.' }}
+                  </span>
+                </div>
+                <button
+                  *ngIf="athlete.subscriptionStatus !== 'ACTIVE'"
+                  class="btn btn-warning-action btn-sm btn-activate-pro-checklist"
+                  (click)="openCheckoutModal(athlete)"
+                  type="button">
+                  ⚡ Activar Plan Pro
+                </button>
+              </div>
+
+              <!-- Condición 2: Documento de Identidad -->
+              <div class="checklist-item" [class.is-completed]="athlete.hasIdentityDocument" [class.is-pending]="!athlete.hasIdentityDocument">
+                <div class="item-left">
+                  <span class="item-icon">{{ athlete.hasIdentityDocument ? '✓' : '⚠️' }}</span>
+                  <span class="item-text">
+                    <strong>Documento Legal (LOPNNA):</strong>
+                    {{ athlete.hasIdentityDocument ? 'Documento de identidad consignado conforme a normativa.' : 'Documento legal pendiente — Obligatorio para certificar la patria potestad.' }}
+                  </span>
+                </div>
+                <button
+                  *ngIf="!athlete.hasIdentityDocument"
+                  class="btn btn-warning-action btn-sm btn-upload-doc-checklist"
+                  (click)="openIdentityModal(athlete)"
+                  type="button">
+                  🪪 Consignar Documento
+                </button>
+              </div>
+
+              <!-- Recomendación Multimedia (Opcional) -->
+              <div class="checklist-item is-recommendation">
+                <div class="item-left">
+                  <span class="item-icon">💡</span>
+                  <span class="item-text">
+                    <strong>Recomendación Multimedia:</strong>
+                    Carga videos y jugadas destacadas para sobresalir en los filtros avanzados de los scouts.
+                  </span>
+                </div>
+                <button
+                  *ngIf="athlete.subscriptionStatus === 'ACTIVE'"
+                  class="btn btn-secondary btn-sm"
+                  (click)="handleVideoUploadAction(athlete)"
+                  type="button">
+                  📹 Cargar Video
+                </button>
+                <button
+                  *ngIf="athlete.subscriptionStatus !== 'ACTIVE'"
+                  class="btn btn-secondary btn-sm btn-video-locked"
+                  (click)="handleVideoUploadAction(athlete)"
+                  type="button"
+                  title="Requiere membresía Pro activa para subir videos">
+                  🔒 Cargar Video (Requiere Pro)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Indicador Positivo para Atletas Visibles -->
+          <div *ngIf="isAthleteVisible(athlete)" class="visibility-status-active">
+            <span class="active-dot">●</span>
+            <span>✓ Ficha activa y visible en el Directorio Nacional de Scouts</span>
+          </div>
+
+          <!-- NIVEL 2: BARRA INFERIOR DE ACCIONES DEDICADA -->
+          <div class="athlete-actions-bar athlete-actions">
+            <button
+              *ngIf="athlete.subscriptionStatus !== 'ACTIVE'"
+              class="btn btn-primary btn-sm btn-action-pro"
+              (click)="openCheckoutModal(athlete)"
+              type="button"
+              title="Activar visibilidad en radar y directorio nacional">
+              ⚡ Activar Plan Pro
+            </button>
+            <button
+              *ngIf="athlete.subscriptionStatus === 'ACTIVE'"
+              class="btn btn-secondary btn-sm btn-action-pro btn-renew"
+              (click)="openCheckoutModal(athlete)"
+              type="button"
+              title="Extender la vigencia del Plan Pro">
+              Renovar Pro
+            </button>
+            <button
+              *ngIf="athlete.subscriptionStatus === 'ACTIVE'"
+              class="btn btn-secondary btn-sm btn-video"
+              (click)="handleVideoUploadAction(athlete)"
+              type="button">
+              📹 Cargar Video
+            </button>
+            <button
+              *ngIf="athlete.subscriptionStatus !== 'ACTIVE'"
+              class="btn btn-secondary btn-sm btn-video btn-video-locked"
+              (click)="handleVideoUploadAction(athlete)"
+              type="button"
+              title="Requiere membresía Pro activa para subir videos">
+              🔒 Cargar Video (Requiere Pro)
+            </button>
+            <button
+              class="btn btn-secondary btn-sm btn-certify"
+              (click)="openCertificationModal(athlete)"
+              type="button"
+              title="Solicitar certificación médica, deportiva o federativa">
+              🏅 Certificar
+            </button>
+            <button
+              class="btn btn-secondary btn-sm btn-doc"
+              (click)="openIdentityModal(athlete)"
+              type="button"
+              title="Consignar o actualizar documento de identidad del menor">
+              🪪 Doc. Identidad
+            </button>
+            <button
+              class="btn btn-secondary btn-sm btn-photo"
+              (click)="openPhotoModal(athlete)"
+              type="button"
+              title="Subir, cambiar o eliminar fotografía de perfil del atleta">
+              📷 Foto Perfil
+            </button>
+            <button
+              class="btn btn-secondary btn-sm btn-download-cv"
+              (click)="downloadCv(athlete)"
+              [disabled]="isDownloadingCv(athlete.id)"
+              type="button"
+              title="Descargar Ficha Técnica Oficial en PDF">
+              <span *ngIf="isDownloadingCv(athlete.id)">⏳ Generando...</span>
+              <span *ngIf="!isDownloadingCv(athlete.id)">📄 Descargar CV</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado Vacío Útil y Orientado a la Acción -->
+      <div *ngIf="athletes.length === 0" class="empty-state-box">
+        <div class="empty-icon">⚽</div>
+        <h4>Aún no has registrado a tu primer atleta</h4>
+        <p>
+          Crea la cédula deportiva digital de tu representado con medidas biométricas, pierna hábil, 
+          club actual y genera su enlace público oficial para compartir con clubes y cazatalentos.
+        </p>
+        <div class="empty-action">
+          <button class="btn btn-primary" (click)="openAthleteModal()">
+            Registrar Atleta Menor de Edad
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarjeta de Estado Legal (Span 4) -->
+    <div class="bento-card col-span-12 md-col-4">
+      <div class="title-with-badge">
+        <span class="shield-badge">🛡️</span>
+        <h3>Protección Legal del Menor</h3>
+      </div>
+      <div class="status-summary">
+        <div class="status-row">
+          <span class="status-label">Estado de Consentimiento:</span>
+          <span class="badge badge-verified">CONFORME</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Protección Aplicada:</span>
+          <span class="status-value">Consentimiento Activo</span>
+        </div>
+        <div class="status-row">
+          <span class="status-label">Patria Potestad:</span>
+          <span class="status-value">Declarada</span>
+        </div>
+      </div>
+      <p class="legal-info">
+        Toda consulta externa de fotos o datos de contacto requiere tu aprobación directa mediante el radar.
+      </p>
+    </div>
+
+    <!-- Tarjeta de Galería / Videos Subidos Recientemente (Span 12) -->
+    <div class="bento-card col-span-12" *ngIf="recentVideos.length > 0">
+      <div class="title-with-badge">
+        <span class="radar-badge">🎬</span>
+        <h3>Videos y Jugadas Procesadas</h3>
+        <span class="badge badge-official">{{ recentVideos.length }} DISPONIBLES</span>
+      </div>
+      <div class="videos-grid">
+        <div *ngFor="let video of recentVideos" class="video-preview-tile">
+          <div class="video-thumb-container">
+            <img *ngIf="video.thumbnailUrl" [src]="video.thumbnailUrl" [alt]="video.title" class="video-tile-img" />
+            <div *ngIf="!video.thumbnailUrl" class="video-tile-empty">🎥</div>
+            <span class="video-tile-status">{{ video.status }}</span>
+          </div>
+          <div class="video-tile-content">
+            <span class="video-tile-cat">{{ video.category }}</span>
+            <h5 class="video-tile-title" [title]="video.title">{{ video.title }}</h5>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarjeta de Radar de Visualizaciones e Interacciones de Scouts (Span 6) -->
+    <div class="bento-card col-span-12 md-col-6">
+      <div class="card-top-bar">
+        <div class="title-with-badge">
+          <span class="radar-badge">📡</span>
+          <h3>Radar de Interacciones de Scouts</h3>
+          <span class="badge badge-official">EN VIVO</span>
+        </div>
+      </div>
+      <p class="radar-desc">
+        Monitoreo en tiempo real del interés de cazatalentos federados y clubes en las fichas de tus representados.
+      </p>
+
+      <!-- Métricas Destacadas del Radar -->
+      <div class="radar-stats-grid">
+        <div class="radar-stat-box">
+          <span class="stat-number">{{ radarMetrics?.totalSearchAppearances || 0 }}</span>
+          <span class="stat-caption">Apariciones en Búsquedas</span>
+        </div>
+        <div class="radar-stat-box">
+          <span class="stat-number">{{ radarMetrics?.totalProfileViews || 0 }}</span>
+          <span class="stat-caption">Perfiles Consultados</span>
+        </div>
+        <div class="radar-stat-box highlight-contact">
+          <span class="stat-number">{{ radarMetrics?.totalContactClicks || 0 }}</span>
+          <span class="stat-caption">Contactos WhatsApp</span>
+        </div>
+      </div>
+
+      <!-- Feed de Actividad Reciente de Scouts -->
+      <div *ngIf="radarMetrics && radarMetrics.recentInteractions && radarMetrics.recentInteractions.length > 0" class="radar-feed-list">
+        <h5 class="feed-title">Últimas Interacciones Registradas:</h5>
+        <div *ngFor="let item of radarMetrics.recentInteractions" class="radar-feed-item">
+          <div class="scout-icon-avatar">🏟️</div>
+          <div class="scout-feed-content">
+            <div class="feed-main-line">
+              <strong class="scout-name">{{ item.scoutName }}</strong>
+              <span class="scout-club-pill">{{ item.scoutClub }}</span>
+            </div>
+            <div class="feed-sub-line">
+              <span class="action-desc">
+                {{ item.activityType === 'WHATSAPP_CONTACT_CLICK' ? 'Inició contacto seguro para' : (item.activityType === 'PROFILE_VIEW' ? 'Consultó la ficha de' : 'Interacción con') }}
+                <strong>{{ item.athleteName }}</strong>
+              </span>
+              <span class="feed-time">{{ item.timestamp | date:'short' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado Vacío -->
+      <div *ngIf="!radarMetrics || !radarMetrics.recentInteractions || radarMetrics.recentInteractions.length === 0" class="radar-empty">
+        <span>Tu radar está activo. En cuanto un cazatalentos certificado busque o consulte la ficha de tu atleta, verás su club y actividad en tiempo real.</span>
+      </div>
+    </div>
+
+    <!-- Tarjeta de Datos de Cuenta (Span 6) -->
+    <div class="bento-card col-span-12 md-col-6">
+      <div class="title-with-badge">
+        <span class="user-badge">👤</span>
+        <h3>Información de tu Perfil de Tutor</h3>
+      </div>
+      <div class="user-details-list">
+        <div class="detail-item">
+          <span class="detail-key">Correo:</span>
+          <span class="detail-val">{{ authService.currentUser()?.email }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-key">Nombre:</span>
+          <span class="detail-val">{{ authService.currentUser()?.fullName }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-key">Teléfono:</span>
+          <span class="detail-val">{{ authService.currentUser()?.phoneNumber || 'No especificado' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-key">Rol del Sistema:</span>
+          <span class="detail-val">{{ authService.currentUser()?.role }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL ACCESIBLE DEL CARGADOR DE VIDEO -->
+  <div *ngIf="showVideoModal" class="modal-backdrop" (click)="closeVideoModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <app-video-uploader
+        [athleteId]="activeAthleteId"
+        [athleteName]="activeAthleteName"
+        (videoUploaded)="handleVideoUploaded($event)"
+        (cancelled)="closeVideoModal()">
+      </app-video-uploader>
+    </div>
+  </div>
+
+  <!-- MODAL SELECTOR RÁPIDO DE ATLETA PARA SUBIDA DE VIDEO -->
+  <div *ngIf="showAthleteSelectorModal" class="modal-backdrop" (click)="closeAthleteSelectorModal()">
+    <div class="modal-container selector-modal" (click)="$event.stopPropagation()">
+      <div class="bento-card">
+        <div class="modal-header-row">
+          <div>
+            <h3 class="selector-title">Seleccionar Atleta</h3>
+            <p class="selector-subtitle">¿A cuál de tus representados deseas cargarle un nuevo clip o jugada?</p>
+          </div>
+          <button class="btn-close-modal" (click)="closeAthleteSelectorModal()" aria-label="Cerrar modal">✕</button>
+        </div>
+
+        <div class="athlete-selector-list">
+          <div *ngFor="let athlete of athletes" class="athlete-select-option" (click)="selectAthleteForVideo(athlete)">
+            <div class="athlete-avatar">
+              <span *ngIf="!athlete.profilePhotoUrl">{{ athlete.firstName.charAt(0) }}{{ athlete.lastName.charAt(0) }}</span>
+              <img *ngIf="athlete.profilePhotoUrl" [src]="athlete.profilePhotoUrl | mediaUrl" [alt]="athlete.fullName" />
+            </div>
+            <div class="athlete-option-info">
+              <span class="option-name">{{ athlete.fullName }}</span>
+              <span class="option-meta">{{ athlete.primaryPosition }} • {{ athlete.age }} años</span>
+            </div>
+            <span *ngIf="athlete.subscriptionStatus === 'ACTIVE'" class="select-badge pro-badge">PRO ACTIVO ➜</span>
+            <span *ngIf="athlete.subscriptionStatus !== 'ACTIVE'" class="select-badge locked-badge">🔒 REQUIERE PRO</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE SOLICITUD DE CERTIFICACIÓN -->
+  <app-request-certification-modal
+    *ngIf="showCertModal"
+    [athleteId]="certAthleteId"
+    [athleteName]="certAthleteName"
+    (closed)="closeCertificationModal()"
+    (created)="onCertificationCreated()">
+  </app-request-certification-modal>
+
+  <!-- MODAL DE CHECKOUT PAGO MÓVIL (PLAN PRO) -->
+  <app-checkout-pago-movil-modal
+    *ngIf="showCheckoutModal && selectedAthleteForCheckout"
+    [athlete]="selectedAthleteForCheckout"
+    (close)="closeCheckoutModal()"
+    (paymentReported)="onPaymentReported($event)">
+  </app-checkout-pago-movil-modal>
+
+  <!-- MODAL DE DOCUMENTO DE IDENTIDAD DEL MENOR -->
+  <div *ngIf="showIdentityModal && selectedAthleteForIdentity" class="modal-backdrop" (click)="closeIdentityModal()">
+    <div class="modal-container identity-modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="badge badge-official">PROTECCIÓN INTEGRAL DEL MENOR</span>
+          <h3 style="margin: 6px 0 2px; color: #f8fafc; font-size: 1.25rem;">Documento de Identidad del Menor</h3>
+          <p style="margin: 0; color: #94a3b8; font-size: 0.85rem;">
+            Atleta: <strong style="color: #38bdf8;">{{ selectedAthleteForIdentity.fullName }}</strong>
+          </p>
+        </div>
+        <button class="btn-close" (click)="closeIdentityModal()" type="button" style="background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer;">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div *ngIf="selectedAthleteForIdentity.hasIdentityDocument" style="background: rgba(16, 185, 129, 0.12); border: 1px solid #10b981; padding: 10px 14px; border-radius: 8px; font-size: 0.82rem; color: #a7f3d0;">
+          ✓ Documento actualmente consignado: <strong>{{ selectedAthleteForIdentity.identityDocumentType }} ({{ selectedAthleteForIdentity.identityDocumentNumber }})</strong>. Puedes subir uno nuevo para actualizarlo.
+        </div>
+
+        <p style="margin: 0; color: #94a3b8; font-size: 0.85rem; line-height: 1.45;">
+          Para respaldar jurídicamente la titularidad y patria potestad conforme a la normativa de protección integral de menores en el deporte, adjunta la partida de nacimiento, documento de identidad o pasaporte del menor.
+        </p>
+
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 0.82rem; font-weight: 600; color: #cbd5e1;">Tipo de Documento</label>
+          <select [(ngModel)]="identityDocType" style="padding: 10px; background: #0b1120; border: 1px solid #334155; border-radius: 8px; color: #f8fafc;">
+            <option value="PARTIDA_NACIMIENTO">Partida de Nacimiento</option>
+            <option value="CEDULA">Cédula de Identidad</option>
+            <option value="PASAPORTE">Pasaporte</option>
+          </select>
+        </div>
+
+        <div class="form-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 0.82rem; font-weight: 600; color: #cbd5e1;">Número o Folio del Documento</label>
+          <input type="text" [(ngModel)]="identityDocNumber" placeholder="Ej: PN-2014-0023 ó V-32111222" style="padding: 10px; background: #0b1120; border: 1px solid #334155; border-radius: 8px; color: #f8fafc;" />
+        </div>
+
+        <div class="form-group file-upload-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 0.82rem; font-weight: 600; color: #cbd5e1;">Comprobante de Identidad (Foto o PDF)</label>
+          
+          <div 
+            class="file-dropzone" 
+            [class.has-file]="!!identityFile"
+            [class.is-dragging]="isDraggingDoc"
+            [class.is-invalid]="!!identityUploadError"
+            (click)="docFileInput.click()"
+            (dragover)="onDocDragOver($event)"
+            (dragleave)="onDocDragLeave($event)"
+            (drop)="onDocDrop($event)">
+            
+            <input
+              #docFileInput
+              type="file"
+              accept=".pdf,.png,.jpg,.jpeg"
+              (change)="onIdentityFileSelected($event)"
+              style="display: none;"
+            />
+
+            <!-- ESTADO VACÍO (SIN ARCHIVO) -->
+            <div *ngIf="!identityFile" class="dropzone-empty">
+              <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              <span class="dropzone-text">Haz clic o arrastra tu documento aquí</span>
+              <span class="dropzone-hint">Formatos: JPG, PNG o PDF (Máximo 5MB)</span>
+            </div>
+
+            <!-- ESTADO CON ARCHIVO SELECCIONADO -->
+            <div *ngIf="identityFile" class="dropzone-file">
+              <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              <div class="file-info">
+                <span class="file-name">{{ identityFile.name }}</span>
+                <span class="file-size">{{ (identityFile.size / 1024 / 1024).toFixed(2) }} MB</span>
+              </div>
+              <button type="button" class="btn-remove-file" (click)="removeIdentityFile($event, docFileInput)" title="Remover archivo">✕</button>
+            </div>
+          </div>
+
+          <div *ngIf="identityUploadError" class="form-error" style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 10px; border-radius: 8px; font-size: 0.82rem; margin-top: 4px;">
+            {{ identityUploadError }}
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" (click)="closeIdentityModal()" [disabled]="isUploadingIdentity" type="button">
+          Cancelar
+        </button>
+        <button class="btn btn-primary btn-sm" (click)="saveIdentityDocument()" [disabled]="!canSaveIdentityDocument" type="button">
+          <span *ngIf="isUploadingIdentity">Guardando documento...</span>
+          <span *ngIf="!isUploadingIdentity">Guardar Documento Legal</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE GESTIÓN DE FOTOGRAFÍA DE PERFIL DEL ATLETA -->
+  <div *ngIf="showPhotoModal && selectedAthleteForPhoto" class="modal-backdrop" (click)="closePhotoModal()">
+    <div class="modal-container photo-modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div>
+          <span class="badge badge-official">SALVAGUARDA DEPORTIVA · LOPNNA ART. 65</span>
+          <h3 style="margin: 6px 0 2px; color: #f8fafc; font-size: 1.25rem;">Fotografía de Perfil del Atleta</h3>
+          <p style="margin: 0; color: #94a3b8; font-size: 0.85rem;">
+            Atleta: <strong style="color: #38bdf8;">{{ selectedAthleteForPhoto.fullName }}</strong>
+          </p>
+        </div>
+        <button class="btn-close" (click)="closePhotoModal()" type="button" style="background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer;">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Previsualización Actual o Nueva Seleccionada -->
+        <div class="photo-preview-wrapper">
+          <div class="photo-preview-avatar">
+            <img *ngIf="photoPreviewUrl" [src]="photoPreviewUrl | mediaUrl" [alt]="selectedAthleteForPhoto.fullName" />
+            <span *ngIf="!photoPreviewUrl">{{ selectedAthleteForPhoto.firstName.charAt(0) }}{{ selectedAthleteForPhoto.lastName.charAt(0) }}</span>
+          </div>
+          <div class="photo-preview-caption">
+            <span *ngIf="photoFile" style="color: #10B981; font-weight: 600;">✓ Nueva imagen lista para guardar</span>
+            <span *ngIf="!photoFile && selectedAthleteForPhoto.profilePhotoUrl" style="color: #38BDF8;">Foto deportiva actual</span>
+            <span *ngIf="!photoFile && !selectedAthleteForPhoto.profilePhotoUrl" style="color: #94A3B8;">Sin fotografía (Avatar con iniciales)</span>
+          </div>
+        </div>
+
+        <!-- Zona de Carga de Archivo (Dropzone) -->
+        <div class="form-group file-upload-group" style="display: flex; flex-direction: column; gap: 6px;">
+          <label style="font-size: 0.82rem; font-weight: 600; color: #cbd5e1;">Seleccionar Fotografía Oficial</label>
+          
+          <div 
+            class="file-dropzone" 
+            [class.has-file]="!!photoFile"
+            [class.is-dragging]="isDraggingPhoto"
+            [class.is-invalid]="!!photoUploadError"
+            (click)="photoFileInput.click()"
+            (dragover)="onPhotoDragOver($event)"
+            (dragleave)="onPhotoDragLeave($event)"
+            (drop)="onPhotoDrop($event)">
+            
+            <input
+              #photoFileInput
+              type="file"
+              accept=".png,.jpg,.jpeg,.webp"
+              (change)="onPhotoFileSelected($event)"
+              style="display: none;"
+            />
+
+            <!-- ESTADO VACÍO (SIN ARCHIVO SELECCIONADO) -->
+            <div *ngIf="!photoFile" class="dropzone-empty">
+              <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+              <span class="dropzone-text">Haz clic o arrastra una fotografía deportiva aquí</span>
+              <span class="dropzone-hint">Formatos: JPG, PNG o WEBP (Máximo 5MB)</span>
+            </div>
+
+            <!-- ESTADO CON ARCHIVO SELECCIONADO -->
+            <div *ngIf="photoFile" class="dropzone-file">
+              <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+              <div class="file-info">
+                <span class="file-name">{{ photoFile.name }}</span>
+                <span class="file-size">{{ (photoFile.size / 1024 / 1024).toFixed(2) }} MB</span>
+              </div>
+              <button type="button" class="btn-remove-file" (click)="removeSelectedPhotoFile($event, photoFileInput)" title="Descartar archivo">✕</button>
+            </div>
+          </div>
+
+          <div *ngIf="photoUploadError" class="form-error" style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 10px; border-radius: 8px; font-size: 0.82rem; margin-top: 4px;">
+            {{ photoUploadError }}
+          </div>
+        </div>
+
+        <!-- Cláusula Legal LOPNNA Art. 65 -->
+        <div class="photo-legal-notice">
+          <span class="legal-icon">🛡️</span>
+          <div>
+            <strong style="color: #38bdf8; display: block; margin-bottom: 2px;">Declaración Jurada (LOPNNA Art. 65 / FIFA):</strong>
+            Al subir esta fotografía, declaras bajo fe de juramento que ostentas la patria potestad o tutela legal del menor y autorizas el uso de su imagen con propósitos de captación formativa deportiva en Talentus Scout.
+          </div>
+        </div>
+
+        <!-- Opción de Eliminar Foto Existente -->
+        <div *ngIf="selectedAthleteForPhoto.profilePhotoUrl && !photoFile" style="margin-top: 4px;">
+          <div *ngIf="!showDeletePhotoConfirm">
+            <button type="button" class="btn-danger-outline" (click)="confirmDeletePhoto()">
+              🗑️ Eliminar Fotografía Actual
+            </button>
+          </div>
+          <div *ngIf="showDeletePhotoConfirm" class="photo-delete-confirm-box">
+            <span style="font-size: 0.82rem; color: #fca5a5; font-weight: 500;">
+              ⚠️ ¿Deseas eliminar la fotografía del atleta? El archivo se borrará físicamente del servidor y se restablecerá el avatar con iniciales.
+            </span>
+            <div class="photo-delete-confirm-actions">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="cancelDeletePhoto()" [disabled]="isDeletingPhoto">
+                Cancelar
+              </button>
+              <button type="button" class="btn-danger-action" (click)="deletePhoto()" [disabled]="isDeletingPhoto">
+                <span *ngIf="isDeletingPhoto">Eliminando...</span>
+                <span *ngIf="!isDeletingPhoto">Sí, Eliminar Definitivamente</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" (click)="closePhotoModal()" [disabled]="isUploadingPhoto || isDeletingPhoto" type="button">
+          Cancelar
+        </button>
+        <button class="btn btn-primary btn-sm" (click)="savePhoto()" [disabled]="!photoFile || isUploadingPhoto" type="button">
+          <span *ngIf="isUploadingPhoto">Guardando Fotografía...</span>
+          <span *ngIf="!isUploadingPhoto">Guardar Fotografía</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-register-athlete-modal
+  *ngIf="showAthleteModal"
+  (athleteCreated)="onAthleteCreated($event)"
+  (closed)="closeAthleteModal()">
+</app-register-athlete-modal>
+

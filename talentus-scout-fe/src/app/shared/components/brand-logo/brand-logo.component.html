@@ -1,0 +1,25 @@
+@if (clickable) {
+  <a routerLink="/" class="brand-logo-link" [class]="customClass" [attr.aria-label]="altText">
+    <img
+      [src]="logoSrc"
+      [alt]="altText"
+      [style.height]="styleHeight"
+      [style.width]="styleWidth"
+      class="brand-logo-img"
+      loading="eager"
+      decoding="async"
+    />
+  </a>
+} @else {
+  <div class="brand-logo-wrapper" [class]="customClass">
+    <img
+      [src]="logoSrc"
+      [alt]="altText"
+      [style.height]="styleHeight"
+      [style.width]="styleWidth"
+      class="brand-logo-img"
+      loading="eager"
+      decoding="async"
+    />
+  </div>
+}

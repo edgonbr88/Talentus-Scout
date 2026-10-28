@@ -1,0 +1,276 @@
+<div class="certifier-container">
+  <div class="certifier-wrapper">
+    <!-- Encabezado Institucional -->
+    <header class="cert-header">
+      <div style="margin-bottom: 14px; text-align: center;">
+        <app-brand-logo variant="imagotipo" theme="color" [height]="60" [clickable]="true"></app-brand-logo>
+      </div>
+      <div class="brand-badge">PORTAL OFICIAL DE CERTIFICACIÓN</div>
+      <p class="brand-subtitle">Respaldo Institucional y Acreditación de Mérito Deportivo Juvenil</p>
+    </header>
+
+    <!-- Estado de Carga -->
+    @if (isLoading) {
+      <div class="loading-box">
+        <div class="spinner"></div>
+        <p>Verificando enlace y cargando credenciales del atleta...</p>
+      </div>
+    }
+
+    <!-- Error o Enlace Inválido -->
+    @if (errorMessage && !tokenData) {
+      <div class="alert-box alert-error">
+        <div class="alert-icon">⚠️</div>
+        <div class="alert-content">
+          <h3>Enlace No Disponible</h3>
+          <p>{{ errorMessage }}</p>
+        </div>
+      </div>
+    }
+
+    <!-- Datos del Atleta y Formulario -->
+    @if (tokenData && !isSuccess) {
+      <!-- Tarjeta del Atleta -->
+      <div class="athlete-card">
+        <div class="athlete-header">
+          <div class="athlete-avatar">
+            {{ tokenData.athleteFullName.charAt(0) }}
+          </div>
+          <div class="athlete-info">
+            <span class="category-badge">{{ tokenData.athleteCategory }}</span>
+            <h2 class="athlete-name">{{ tokenData.athleteFullName }}</h2>
+            <p class="athlete-meta">
+              {{ tokenData.athletePosition || 'Posición en formación' }} • {{ tokenData.athleteClubName || 'Club formativo' }}
+            </p>
+          </div>
+        </div>
+
+        <div class="request-summary">
+          <div class="summary-item">
+            <span class="summary-label">Aval Solicitado</span>
+            <span class="summary-value highlight-gold">{{ tokenData.title }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Tipo de Acreditación</span>
+            <span class="summary-value">{{ tokenData.badgeTypeLabel }}</span>
+          </div>
+          @if (tokenData.targetOrganization) {
+            <div class="summary-item">
+              <span class="summary-label">Entidad Destinataria</span>
+              <span class="summary-value">{{ tokenData.targetOrganization }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Si ya fue completada -->
+      @if (tokenData.alreadyCompleted) {
+        <div class="alert-box alert-success">
+          <div class="alert-icon">✓</div>
+          <div class="alert-content">
+            <h3>Certificación Ya Emitida</h3>
+            <p>Esta solicitud de certificación ya fue completada y validada satisfactoriamente en la ficha del atleta.</p>
+          </div>
+        </div>
+      } @else if (tokenData.expired) {
+        <!-- Si expiró -->
+        <div class="alert-box alert-warning">
+          <div class="alert-icon">⏳</div>
+          <div class="alert-content">
+            <h3>Enlace Expirado</h3>
+            <p>Este enlace de certificación ha alcanzado su límite de vigencia de 14 días. Comuníquese con el representante del atleta para generar uno nuevo.</p>
+          </div>
+        </div>
+      } @else {
+        <!-- Formulario de Certificación -->
+        <form [formGroup]="certForm" (ngSubmit)="onSubmit()" class="cert-form">
+          <div class="form-section-title">
+            <span>1</span> Datos del Profesional o Certificador
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="certifierFullName" class="form-label">Nombre y Apellido *</label>
+              <input
+                id="certifierFullName"
+                type="text"
+                formControlName="certifierFullName"
+                class="form-input"
+                placeholder="Ej. Dr. Rafael Silva / Prof. Carlos Rivas"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="certifierLicenseId" class="form-label">
+                {{ isMedical() ? 'Matrícula o Colegio Médico *' : 'Cargo o Credencial Oficial *' }}
+              </label>
+              <input
+                id="certifierLicenseId"
+                type="text"
+                formControlName="certifierLicenseId"
+                class="form-input"
+                placeholder="{{ isMedical() ? 'Ej. Col. Médico 48291 / MPPS 10293' : 'Ej. Director Deportivo / Entrenador Principal' }}"
+              />
+            </div>
+          </div>
+
+          <!-- Sección Específica si es Médica -->
+          @if (isMedical()) {
+            <div class="form-section-title">
+              <span>2</span> Medidas Antropométricas Oficiales
+            </div>
+            <div class="form-grid-4">
+              <div class="form-group">
+                <label for="heightCm" class="form-label">Estatura (cm)</label>
+                <input
+                  id="heightCm"
+                  type="number"
+                  step="0.5"
+                  formControlName="heightCm"
+                  class="form-input"
+                  placeholder="Ej. 176.5"
+                />
+              </div>
+              <div class="form-group">
+                <label for="weightKg" class="form-label">Peso (kg)</label>
+                <input
+                  id="weightKg"
+                  type="number"
+                  step="0.1"
+                  formControlName="weightKg"
+                  class="form-input"
+                  placeholder="Ej. 68.4"
+                />
+              </div>
+              <div class="form-group">
+                <label for="bodyFatPercent" class="form-label">% Grasa Corporal</label>
+                <input
+                  id="bodyFatPercent"
+                  type="number"
+                  step="0.1"
+                  formControlName="bodyFatPercent"
+                  class="form-input"
+                  placeholder="Ej. 11.2"
+                />
+              </div>
+              <div class="form-group">
+                <label for="muscleMassKg" class="form-label">Masa Muscular (kg)</label>
+                <input
+                  id="muscleMassKg"
+                  type="number"
+                  step="0.1"
+                  formControlName="muscleMassKg"
+                  class="form-input"
+                  placeholder="Ej. 34.0"
+                />
+              </div>
+            </div>
+          }
+
+          <!-- Sección si es Logro Deportivo -->
+          @if (isSportAchievement()) {
+            <div class="form-section-title">
+              <span>2</span> Detalles del Logro o Distinción Deportiva
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="tournamentName" class="form-label">Torneo, Liga o Campeonato</label>
+                <input
+                  id="tournamentName"
+                  type="text"
+                  formControlName="tournamentName"
+                  class="form-input"
+                  placeholder="Ej. Liga Distrital Sub-15 / Torneo Apertura"
+                />
+              </div>
+              <div class="form-group">
+                <label for="achievementTitle" class="form-label">Distinción Avalada</label>
+                <input
+                  id="achievementTitle"
+                  type="text"
+                  formControlName="achievementTitle"
+                  class="form-input"
+                  placeholder="Ej. Campeón / Máximo Goleador / Portero Menos Batido"
+                />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="goalsScored" class="form-label">Goles Anotados (si aplica)</label>
+              <input
+                id="goalsScored"
+                type="number"
+                formControlName="goalsScored"
+                class="form-input"
+                placeholder="Ej. 18"
+              />
+            </div>
+          }
+
+          <!-- Observaciones -->
+          <div class="form-group">
+            <label for="certifierNotes" class="form-label">Observaciones o Comentarios Profesionales</label>
+            <textarea
+              id="certifierNotes"
+              formControlName="certifierNotes"
+              class="form-input form-textarea"
+              rows="3"
+              placeholder="Detalles adicionales sobre la evaluación o contexto del aval deportivo..."
+            ></textarea>
+          </div>
+
+          <!-- Declaración de Fe de Juramento -->
+          <div class="oath-card">
+            <label class="oath-label">
+              <input type="checkbox" formControlName="acceptDeclaration" class="oath-checkbox" />
+              <span class="oath-text">
+                Declaro bajo fe de juramento y en ejercicio de mi profesión o cargo que los datos suministrados son fidedignos, exactos y corresponden al atleta indicado.
+              </span>
+            </label>
+          </div>
+
+          <!-- Error al enviar -->
+          @if (submitError) {
+            <div class="alert-box alert-error">
+              <div class="alert-icon">⚠️</div>
+              <div class="alert-content">
+                <p>{{ submitError }}</p>
+              </div>
+            </div>
+          }
+
+          <button
+            type="submit"
+            class="btn-submit"
+            [disabled]="certForm.invalid || isSubmitting"
+          >
+            @if (isSubmitting) {
+              <span>Procesando y sellando certificación...</span>
+            } @else {
+              <span>Firmar y Emitir Certificación Oficial →</span>
+            }
+          </button>
+        </form>
+      }
+    }
+
+    <!-- Estado de Éxito / Celebración -->
+    @if (isSuccess) {
+      <div class="success-card">
+        <div class="seal-gold-wrapper">
+          <div class="seal-icon">🏆</div>
+          <span class="seal-text">AVALADO Y SELLADO</span>
+        </div>
+        <h2>¡Certificación Oficial Registrada!</h2>
+        <p class="success-desc">
+          La certificación ha sido incorporada de forma inmediata a la cédula deportiva oficial de
+          <strong>{{ tokenData?.athleteFullName }}</strong>. Los reclutadores y scouts autorizados podrán visualizar este dato como avalado.
+        </p>
+        <div class="success-actions">
+          <a [routerLink]="['/athletes', tokenData?.athleteId]" class="btn-view-profile">
+            Ver Ficha Pública del Atleta
+          </a>
+        </div>
+      </div>
+    }
+  </div>
+</div>

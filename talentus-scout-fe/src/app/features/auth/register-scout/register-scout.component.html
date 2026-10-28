@@ -1,0 +1,430 @@
+<div class="auth-wrapper">
+  <div class="auth-card register-scout-card">
+    <!-- Encabezado Institucional -->
+    <div class="auth-header">
+      <div style="margin-bottom: 20px; text-align: center;">
+        <app-brand-logo variant="imagotipo" theme="dark" [height]="95" [clickable]="true"></app-brand-logo>
+      </div>
+      <div class="header-badge-row">
+        <span class="badge badge-scout">ACREDITACIÓN OFICIAL DE SCOUTS</span>
+        <span class="badge badge-safeguard">PROTECCIÓN LOPNNA & FIFA</span>
+      </div>
+      <h1 class="auth-title">Solicitud de Acceso para Veedores y Clubes</h1>
+      <p class="auth-subtitle">
+        Canal exclusivo para directores deportivos, ojeadores federados y agencias profesionales.
+      </p>
+    </div>
+
+    <!-- Banner Informativo de Salvaguarda y Auditoría Legal -->
+    <div class="safeguard-banner" role="region" aria-label="Aviso institucional de salvaguarda">
+      <div class="banner-icon-col">
+        <span class="shield-icon" aria-hidden="true">🛡️</span>
+      </div>
+      <div class="banner-text-col">
+        <h2 class="banner-heading">Protocolo de Acceso Responsable al Talento Juvenil</h2>
+        <p class="banner-copy">
+          En estricto apego al Art. 65 de la LOPNNA y los estándares de salvaguarda deportiva de la FIFA,
+          ningún veedor tendrá acceso al Directorio Nacional de Atletas hasta que su identidad y filiación con un club u
+          organización sean auditadas formalmente por nuestro equipo.
+        </p>
+      </div>
+    </div>
+
+    <!-- Alertas de Conflicto (409) o Error General -->
+    @if (conflictEmail) {
+      <div class="alert alert-warning" role="alert">
+        <span class="alert-icon" aria-hidden="true">✉️</span>
+        <div class="alert-content">
+          <strong>El correo {{ conflictEmail }} ya está registrado en la plataforma.</strong>
+          <p>
+            Si ya solicitaste acreditación o posees una cuenta, puedes
+            <a routerLink="/login" class="alert-link">iniciar sesión aquí</a> o consultar el estado de tu cuenta.
+          </p>
+        </div>
+      </div>
+    } @else if (errorMessage) {
+      <div class="alert alert-danger" role="alert">
+        <span class="alert-icon" aria-hidden="true">⚠️</span>
+        <div class="alert-content">
+          <span>{{ errorMessage }}</span>
+        </div>
+      </div>
+    }
+
+    <!-- Formulario Reactivo de Solicitud -->
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="scout-form" novalidate>
+      <!-- Nombre Completo -->
+      <div class="form-group">
+        <label for="fullName" class="form-label">Nombre y apellido completo</label>
+        <input
+          id="fullName"
+          type="text"
+          formControlName="fullName"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('fullName')"
+          placeholder="Ej: Roberto Da Silva"
+          autocomplete="name"
+        />
+        @if (isFieldInvalid('fullName')) {
+          <div class="form-error" role="alert">
+            <span>El nombre completo es obligatorio (máximo 150 caracteres).</span>
+          </div>
+        }
+      </div>
+
+      <!-- Correo Electrónico Institucional o Profesional -->
+      <div class="form-group">
+        <label for="email" class="form-label">Correo electrónico profesional o corporativo</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('email')"
+          placeholder="scout@clubdeportivo.com"
+          autocomplete="email"
+        />
+        @if (isFieldInvalid('email')) {
+          <div class="form-error" role="alert">
+            <span>Ingresa una dirección de correo electrónico válida.</span>
+          </div>
+        }
+      </div>
+
+      <!-- Teléfono Internacional -->
+      <div class="form-group">
+        <label for="phoneNumber" class="form-label">Teléfono de contacto directo (Formato internacional E.164)</label>
+        <input
+          id="phoneNumber"
+          type="tel"
+          formControlName="phoneNumber"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('phoneNumber')"
+          placeholder="+584121234567"
+          autocomplete="tel"
+        />
+        <span class="input-hint">Incluye el prefijo de país. Ej: +58 para Venezuela, +57 para Colombia, +34 para España.</span>
+        @if (isFieldInvalid('phoneNumber')) {
+          <div class="form-error" role="alert">
+            <span>El formato debe comenzar con '+' seguido del código de país y número (ej: +584121234567).</span>
+          </div>
+        }
+      </div>
+
+      <!-- Fila Doble: Selector de Organización y Rol Deportivo -->
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label for="organizationSelect" class="form-label">Club, academia o afiliación deportiva</label>
+          <select
+            id="organizationSelect"
+            formControlName="organizationSelect"
+            class="form-control form-select"
+            [class.is-invalid]="isFieldInvalid('organizationSelect')"
+          >
+            <option value="" disabled selected>Selecciona tu club u organización oficial...</option>
+            <option value="INDEPENDENT">Agente Independiente / Sin afiliación</option>
+            @if (verifiedClubs.length > 0) {
+              <optgroup label="Clubes y Academias Verificadas">
+                @for (club of verifiedClubs; track club.id) {
+                  <option [value]="club.id">
+                    {{ club.name }} ({{ club.city }}, {{ club.state }})
+                  </option>
+                }
+              </optgroup>
+            }
+            <option value="OTHER">Otro (indicar club o academia)...</option>
+          </select>
+          @if (isFieldInvalid('organizationSelect')) {
+            <div class="form-error" role="alert">
+              <span>Debes seleccionar tu organización deportiva, indicar que eres independiente o registrar un club.</span>
+            </div>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="scoutRole" class="form-label">Cargo o función deportiva</label>
+          <select
+            id="scoutRole"
+            formControlName="scoutRole"
+            (change)="onRoleChange($event)"
+            class="form-control form-select"
+            [class.is-invalid]="isFieldInvalid('scoutRole')"
+          >
+            <option value="" disabled selected>Selecciona tu rol oficial...</option>
+            @for (role of scoutRoles; track role) {
+              <option [value]="role">{{ role }}</option>
+            }
+          </select>
+          @if (isFieldInvalid('scoutRole')) {
+            <div class="form-error" role="alert">
+              <span>Debes seleccionar tu rol o función deportiva.</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Cuadrícula Expandible de Organización Personalizada cuando se selecciona "Otro" -->
+      @if (isOtherOrganizationSelected) {
+        <div class="custom-org-card" role="region" aria-label="Datos de la organización deportiva no verificada">
+          <div class="custom-org-header">
+            <span class="custom-org-icon" aria-hidden="true">🏟️</span>
+            <div>
+              <h3 class="custom-org-title">Registro de Organización o Club Formativo</h3>
+              <p class="custom-org-subtitle">
+                Indica los datos de la academia para darla de alta en el sistema e iniciar su homologación deportiva.
+              </p>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group col-span-2">
+              <label for="customClubName" class="form-label">Nombre oficial del Club o Academia *</label>
+              <input
+                id="customClubName"
+                type="text"
+                formControlName="customClubName"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('customClubName')"
+                placeholder="Ej. Escuela de Fútbol San Cristóbal"
+              />
+              @if (isFieldInvalid('customClubName')) {
+                <div class="form-error" role="alert">
+                  <span>El nombre del club es obligatorio (máximo 150 caracteres).</span>
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="customClubCity" class="form-label">Ciudad *</label>
+              <input
+                id="customClubCity"
+                type="text"
+                formControlName="customClubCity"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('customClubCity')"
+                placeholder="Ej. San Cristóbal"
+              />
+              @if (isFieldInvalid('customClubCity')) {
+                <div class="form-error" role="alert">
+                  <span>La ciudad es obligatoria (máximo 100 caracteres).</span>
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="customClubState" class="form-label">Estado / Región *</label>
+              <input
+                id="customClubState"
+                type="text"
+                formControlName="customClubState"
+                class="form-control"
+                [class.is-invalid]="isFieldInvalid('customClubState')"
+                placeholder="Ej. Táchira"
+              />
+              @if (isFieldInvalid('customClubState')) {
+                <div class="form-error" role="alert">
+                  <span>El estado o región es obligatorio (máximo 100 caracteres).</span>
+                </div>
+              }
+            </div>
+
+            <div class="form-group col-span-2">
+              <label for="customClubCountry" class="form-label">País de sede *</label>
+              <select
+                id="customClubCountry"
+                formControlName="customClubCountry"
+                class="form-control form-select"
+                [class.is-invalid]="isFieldInvalid('customClubCountry')"
+              >
+                @for (country of authorizedCountries; track country) {
+                  <option [value]="country">{{ country }}</option>
+                }
+              </select>
+              @if (isFieldInvalid('customClubCountry')) {
+                <div class="form-error" role="alert">
+                  <span>Selecciona el país de la organización.</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Rol Personalizado Si Selecciona "Otro" -->
+      @if (showCustomRoleInput) {
+        <div class="form-group">
+          <label for="customScoutRole" class="form-label">Especifica tu cargo deportivo</label>
+          <input
+            id="customScoutRole"
+            type="text"
+            formControlName="customScoutRole"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('customScoutRole')"
+            placeholder="Ej: Ojeador Juvenil Sub-17 / Veedor Independiente"
+          />
+          @if (isFieldInvalid('customScoutRole')) {
+            <div class="form-error" role="alert">
+              <span>Por favor especifica tu rol en la organización.</span>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Enlace a LinkedIn o Perfil Profesional (Opcional) -->
+      <div class="form-group">
+        <label for="linkedinUrl" class="form-label">
+          Perfil profesional de LinkedIn o web institucional 
+          <span class="label-optional">(Opcional)</span>
+        </label>
+        <input
+          id="linkedinUrl"
+          type="url"
+          formControlName="linkedinUrl"
+          class="form-control"
+          placeholder="https://linkedin.com/in/tu-perfil"
+        />
+        <span class="input-hint">Facilita y agiliza la auditoría de tu trayectoria deportiva.</span>
+      </div>
+
+      <!-- Contraseña -->
+      <div class="form-group">
+        <label for="password" class="form-label">Contraseña de acceso seguro</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('password')"
+          placeholder="Mínimo 8 caracteres"
+          autocomplete="new-password"
+        />
+        @if (isFieldInvalid('password')) {
+          <div class="form-error" role="alert">
+            <span>La contraseña debe contener al menos 8 caracteres.</span>
+          </div>
+        }
+      </div>
+
+      <!-- Carga y Consignación de Credencial Deportiva (Dropzone) -->
+      <div class="form-group credential-upload-section">
+        <label class="form-label">
+          Documento probatorio o credencial deportiva oficial
+          <span class="label-required">*</span>
+        </label>
+        <p class="credential-desc">
+          Adjunta carnet del club/federación, carta de acreditación institucional o documento de identidad con acreditación deportiva.
+        </p>
+
+        <div
+          class="dropzone-box"
+          [class.drag-over]="isDragging"
+          [class.has-file]="!!selectedFile"
+          [class.has-error]="!!fileError"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onFileDrop($event)"
+          (click)="fileInput.click()"
+          tabindex="0"
+          role="button"
+          (keydown.enter)="fileInput.click()"
+          (keydown.space)="fileInput.click()"
+        >
+          <input
+            #fileInput
+            type="file"
+            accept=".pdf,.png,.jpg,.jpeg"
+            (change)="onFileSelected($event)"
+            style="display: none"
+          />
+
+          @if (!selectedFile) {
+            <div class="dropzone-empty">
+              <div class="dropzone-icon-circle">
+                <svg class="dropzone-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" y1="3" x2="12" y2="15" />
+                </svg>
+              </div>
+              <span class="dropzone-title">Haz clic o arrastra tu credencial aquí</span>
+              <span class="dropzone-subtitle">Archivos PDF, PNG o JPG (Máximo 10 MB)</span>
+            </div>
+          } @else {
+            <div class="dropzone-file-preview">
+              <div class="file-icon-wrapper">
+                <span class="file-type-icon">📄</span>
+              </div>
+              <div class="file-meta">
+                <span class="file-name">{{ selectedFile.name }}</span>
+                <span class="file-size">{{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB</span>
+              </div>
+              <button
+                type="button"
+                class="btn-remove-file"
+                (click)="removeFile($event)"
+                title="Remover archivo"
+                aria-label="Remover archivo seleccionado"
+              >
+                ✕
+              </button>
+            </div>
+          }
+        </div>
+
+        @if (fileError) {
+          <div class="form-error dropzone-error" role="alert">
+            <span>{{ fileError }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Declaración Jurada y Aceptación de Términos -->
+      <div class="form-group checkbox-group">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            formControlName="acceptLegalNotice"
+            class="checkbox-input"
+          />
+          <span class="checkbox-text">
+            Declaro bajo fe de juramento que represento legítimamente a la organización deportiva declarada,
+            que los documentos adjuntos son fidedignos y acepto que el acceso a datos juveniles está sujeto a auditoría previa
+            conforme a la LOPNNA y las directrices FIFA.
+          </span>
+        </label>
+        @if (isFieldInvalid('acceptLegalNotice')) {
+          <div class="form-error" role="alert">
+            <span>Debes aceptar los términos y el protocolo de auditoría deportiva para continuar.</span>
+          </div>
+        }
+      </div>
+
+      <!-- Botón de Envío -->
+      <button
+        type="submit"
+        class="btn btn-primary btn-submit"
+        [disabled]="registerForm.invalid || !selectedFile || isLoading"
+      >
+        @if (isLoading) {
+          <span class="loading-spinner"></span>
+          <span>Consignando postulación...</span>
+        } @else {
+          <span>Solicitar Acreditación de Scout Oficial</span>
+        }
+      </button>
+    </form>
+
+    <!-- Enlaces de Navegación del Pie -->
+    <div class="scout-footer">
+      <p class="footer-note">
+        ¿Ya posees una cuenta aprobada?
+        <a routerLink="/login" class="footer-link">Iniciar sesión</a>
+      </p>
+      <div class="footer-divider"></div>
+      <p class="footer-note secondary">
+        ¿Eres representante o padre de un joven talento?
+        <a routerLink="/register-tutor" class="footer-link">Crear cuenta de Representante Legal</a>
+      </p>
+    </div>
+  </div>
+</div>

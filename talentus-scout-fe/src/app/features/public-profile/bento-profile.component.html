@@ -1,0 +1,334 @@
+<div class="bento-page-wrapper">
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p class="loading-text">Cargando ficha oficial del atleta...</p>
+    </div>
+  } @else if (errorMessage()) {
+    <div class="error-container">
+      <div class="error-card">
+        <svg class="error-shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        <h2 class="error-title">Ficha no disponible</h2>
+        <p class="error-desc">{{ errorMessage() }}</p>
+        <a routerLink="/" class="btn-back-home">Volver al Radar Principal</a>
+      </div>
+    </div>
+  } @else {
+    @if (athlete(); as a) {
+      <!-- Contenedor Principal del Perfil Público Bento -->
+      <main class="bento-container">
+      <!-- Barra Superior de Identidad Institucional -->
+      <header class="profile-header-bar">
+        <div class="brand-tag">
+          <app-brand-logo variant="isotipo" theme="color" [height]="18" [clickable]="false"></app-brand-logo>
+          <span class="brand-text">Talentus Scout — Ficha de Rendimiento Juvenil</span>
+        </div>
+        <div class="action-buttons-top">
+          <button (click)="copyProfileLink()" class="btn-share-icon" title="Copiar enlace">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <span>Copiar Enlace</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Grilla Bento Grid Deportiva -->
+      <div class="bento-grid">
+        <!-- TARJETA 1: HERO & IDENTIDAD DEPORTIVA -->
+        <section class="bento-card card-hero">
+          <div class="card-hero-body">
+            <div class="avatar-wrapper">
+              @if (a.profilePhotoUrl) {
+                <img [src]="a.profilePhotoUrl | mediaUrl" [alt]="a.fullName" class="athlete-avatar" />
+              } @else {
+                <div class="athlete-avatar-placeholder">
+                  <span>{{ a.firstName.charAt(0) }}{{ a.lastName.charAt(0) }}</span>
+                </div>
+              }
+              @if (birthYear()) {
+                <span class="category-badge">Cat. {{ birthYear() }}</span>
+              }
+            </div>
+
+            <div class="athlete-headline">
+              <h1 class="athlete-name">{{ a.fullName }}</h1>
+
+              <div class="positions-row">
+                <span class="pill-primary-position">{{ a.primaryPosition }}</span>
+                @if (a.secondaryPosition) {
+                  <span class="pill-secondary-position">{{ a.secondaryPosition }}</span>
+                }
+              </div>
+
+              <div class="specs-grid">
+                <div class="spec-item">
+                  <span class="spec-label">Edad</span>
+                  <span class="spec-value">{{ a.age }} años</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Pie Hábil</span>
+                  <span class="spec-value">{{ a.preferredFoot }}</span>
+                </div>
+                <div class="spec-item">
+                  <span class="spec-label">Nacionalidad</span>
+                  <span class="spec-value">{{ a.nationality }}</span>
+                </div>
+              </div>
+
+              @if (a.club) {
+                <div class="club-affiliation-banner">
+                  @if (a.club.logoUrl) {
+                    <img [src]="a.club.logoUrl" [alt]="a.club.name" class="club-logo-mini" />
+                  } @else {
+                    <div class="club-icon-fallback">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
+                        <path d="M2 12h20"></path>
+                      </svg>
+                    </div>
+                  }
+                  <div class="club-details">
+                    <span class="club-name">{{ a.club.name }}</span>
+                    @if (a.club.city || a.club.state) {
+                      <span class="club-location">{{ a.club.city }}{{ a.club.city && a.club.state ? ', ' : '' }}{{ a.club.state }}</span>
+                    }
+                  </div>
+                </div>
+              }
+
+              @if (a.bio) {
+                <p class="athlete-bio">"{{ a.bio }}"</p>
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- TARJETA 2: BIOTIPO Y ANTROPOMETRÍA -->
+        <section class="bento-card card-biometrics">
+          <div class="card-header-clean">
+            <h2 class="card-title">Biotipo y Antropometría</h2>
+            @if (a.metrics?.medicalCertified) {
+              <span class="card-indicator medical" [title]="a.metrics?.medicalCertifierInfo || 'Medidas certificadas por profesional de salud'">
+                ✓ Certificación Médica
+              </span>
+            } @else {
+              <span class="card-indicator">Ficha Física</span>
+            }
+          </div>
+
+          <div class="biometrics-values">
+            <div class="metric-box">
+              <span class="metric-number">{{ a.metrics?.heightCm ? a.metrics?.heightCm + ' cm' : '—' }}</span>
+              <span class="metric-title">Estatura</span>
+            </div>
+            <div class="metric-box">
+              <span class="metric-number">{{ a.metrics?.weightKg ? a.metrics?.weightKg + ' kg' : '—' }}</span>
+              <span class="metric-title">Peso</span>
+            </div>
+          </div>
+
+          @if (a.metrics?.medicalCertified) {
+            <div class="medical-cert-banner">
+              <div class="med-cert-header">
+                <span class="med-cert-icon">🩺</span>
+                <strong class="med-cert-title">Estatura y Peso Certificados Médicamente</strong>
+              </div>
+              <p class="med-cert-details">{{ a.metrics?.medicalCertifierInfo || 'Avalado por facultativo médico matriculado' }}</p>
+            </div>
+          }
+
+          <div class="passports-block">
+            <span class="passports-label">Pasaportes y Movilidad:</span>
+            <div class="passports-content">
+              @if (formattedPassports()) {
+                <span class="passport-chip">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                  </svg>
+                  {{ formattedPassports() }}
+                </span>
+              } @else {
+                <span class="passport-chip muted">Únicamente nacionalidad de origen</span>
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- TARJETA 3: REPRODUCTOR DE VIDEO HLS (JUGADAS DESTACADAS) -->
+        <section class="bento-card card-video">
+          <div class="card-header-clean">
+            <h2 class="card-title">Video de Rendimiento</h2>
+            @if (activeVideo()) {
+              <span class="card-indicator live">{{ activeVideo()?.category }}</span>
+            }
+          </div>
+
+          @if (activeVideo(); as vid) {
+            <div class="video-display-area">
+              <app-video-player
+                [playbackUrl]="vid.playbackUrl || ''"
+                [thumbnailUrl]="vid.thumbnailUrl"
+                [title]="vid.title"
+              ></app-video-player>
+            </div>
+
+            @if (a.videos && a.videos.length > 1) {
+              <div class="video-playlist-bar">
+                <span class="playlist-label">Otras Jugadas:</span>
+                <div class="playlist-items">
+                  @for (v of a.videos; track v.id) {
+                    <button
+                      type="button"
+                      class="playlist-btn"
+                      [class.active]="v.id === vid.id"
+                      (click)="selectVideo(v)"
+                    >
+                      {{ v.title }} ({{ v.category }})
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+          } @else {
+            <div class="no-video-placeholder">
+              <svg class="placeholder-cam-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+              </svg>
+              <h3 class="placeholder-heading">Video en preparación</h3>
+              <p class="placeholder-subtext">El representante legal está preparando las jugadas y registros audiovisuales de este atleta.</p>
+            </div>
+          }
+        </section>
+
+        <!-- TARJETA 4: INSIGNIAS DE CONFIANZA Y CERTIFICACIÓN -->
+        <section class="bento-card card-badges">
+          <div class="card-header-clean">
+            <h2 class="card-title">Insignias de Confianza</h2>
+            <span class="card-indicator gold">Validado</span>
+          </div>
+
+          <div class="badges-list">
+            @if (a.badges && a.badges.length > 0) {
+              @for (b of a.badges; track b.title) {
+                <div class="badge-item" [class.badge-trophy]="b.type === 'SPORT_ACHIEVEMENT'" [class.badge-medical]="b.type === 'MEDICAL_ANTHRO'">
+                  <div class="badge-seal-icon" [class.trophy-icon]="b.type === 'SPORT_ACHIEVEMENT'" [class.medical-icon]="b.type === 'MEDICAL_ANTHRO'">
+                    @if (b.type === 'SPORT_ACHIEVEMENT') {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+                        <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+                        <path d="M4 22h16"></path>
+                        <path d="M10 14.66V17c0 .55-.45 1-1 1H7v2h10v-2h-2c-.55 0-1-.45-1-1v-2.34"></path>
+                        <path d="M6 4h12v7a6 6 0 0 1-12 0V4z"></path>
+                      </svg>
+                    } @else if (b.type === 'MEDICAL_ANTHRO') {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                      </svg>
+                    } @else {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="8" r="7"></circle>
+                        <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                      </svg>
+                    }
+                  </div>
+                  <div class="badge-meta">
+                    <span class="badge-name">{{ b.title }}</span>
+                    @if (b.organizationName) {
+                      <span class="badge-org">{{ b.organizationName }}</span>
+                    }
+                  </div>
+                  <div class="badge-check-gold" [class.badge-check-blue]="b.type === 'MEDICAL_ANTHRO'" title="Verificado">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </div>
+                </div>
+              }
+            } @else {
+              <div class="badge-empty-state">
+                <p>Perfil en proceso de certificación oficial por asociación deportiva.</p>
+              </div>
+            }
+          </div>
+        </section>
+      </div>
+
+      <!-- BARRA DE ACCIÓN FLOTANTE (COMPARTIR POR WHATSAPP) -->
+      <aside class="floating-share-dock">
+        <div class="share-dock-inner">
+          <div class="share-context">
+            <span class="share-hint">¿Deseas enviar esta ficha a un scout o club?</span>
+          </div>
+          <div class="share-actions">
+            @if (isScout()) {
+              <button (click)="contactTutor()" class="btn-whatsapp-action" [disabled]="isContacting()" title="Contactar al representante legal vía WhatsApp con mensaje preformateado">
+                <svg class="whatsapp-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12.031 2C6.495 2 2 6.495 2 12.031c0 1.905.534 3.684 1.458 5.204L2 22l4.908-1.428A9.972 9.972 0 0 0 12.031 22c5.536 0 10.031-4.495 10.031-10.031S17.567 2 12.031 2zm0 18.281c-1.636 0-3.155-.472-4.444-1.286l-.32-.202-3.18.925.938-3.1-.208-.33a8.232 8.232 0 0 1-1.31-4.257c0-4.57 3.717-8.281 8.281-8.281s8.281 3.711 8.281 8.281-3.711 8.281-8.281 8.281zm4.72-6.195c-.258-.13-1.528-.755-1.765-.841-.237-.086-.409-.13-.58.13-.173.258-.667.841-.818.992-.15.15-.301.173-.559.043-.258-.13-1.089-.401-2.073-1.278-.767-.683-1.285-1.527-1.436-1.785-.15-.258-.016-.398.113-.526.117-.116.258-.301.387-.452.13-.15.172-.258.258-.43.086-.172.043-.323-.021-.452-.065-.13-.58-1.398-.796-1.914-.209-.502-.423-.434-.58-.442l-.495-.008c-.172 0-.452.065-.688.323-.237.258-.903.882-.903 2.15s.925 2.495 1.054 2.667c.13.172 1.82 2.779 4.409 3.896.616.266 1.097.425 1.472.544.619.197 1.183.169 1.628.103.496-.074 1.528-.624 1.743-1.226.215-.602.215-1.118.15-1.226-.064-.107-.236-.172-.494-.301z"/>
+                </svg>
+                <span>{{ isContacting() ? 'Conectando...' : 'Contactar Representante' }}</span>
+              </button>
+            } @else {
+              <button (click)="shareOnWhatsApp()" class="btn-whatsapp-action">
+                <svg class="whatsapp-icon" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12.031 2C6.495 2 2 6.495 2 12.031c0 1.905.534 3.684 1.458 5.204L2 22l4.908-1.428A9.972 9.972 0 0 0 12.031 22c5.536 0 10.031-4.495 10.031-10.031S17.567 2 12.031 2zm0 18.281c-1.636 0-3.155-.472-4.444-1.286l-.32-.202-3.18.925.938-3.1-.208-.33a8.232 8.232 0 0 1-1.31-4.257c0-4.57 3.717-8.281 8.281-8.281s8.281 3.711 8.281 8.281-3.711 8.281-8.281 8.281zm4.72-6.195c-.258-.13-1.528-.755-1.765-.841-.237-.086-.409-.13-.58.13-.173.258-.667.841-.818.992-.15.15-.301.173-.559.043-.258-.13-1.089-.401-2.073-1.278-.767-.683-1.285-1.527-1.436-1.785-.15-.258-.016-.398.113-.526.117-.116.258-.301.387-.452.13-.15.172-.258.258-.43.086-.172.043-.323-.021-.452-.065-.13-.58-1.398-.796-1.914-.209-.502-.423-.434-.58-.442l-.495-.008c-.172 0-.452.065-.688.323-.237.258-.903.882-.903 2.15s.925 2.495 1.054 2.667c.13.172 1.82 2.779 4.409 3.896.616.266 1.097.425 1.472.544.619.197 1.183.169 1.628.103.496-.074 1.528-.624 1.743-1.226.215-.602.215-1.118.15-1.226-.064-.107-.236-.172-.494-.301z"/>
+                </svg>
+                <span>Compartir por WhatsApp</span>
+              </button>
+            }
+            <button (click)="downloadCvPdf()" class="btn-pdf-dock" [disabled]="isDownloadingCv()" title="Descargar Ficha Técnica Oficial en PDF para visorías y pruebas">
+              <svg class="pdf-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="12" y1="18" x2="12" y2="12"></line>
+                <polyline points="9 15 12 18 15 15"></polyline>
+              </svg>
+              <span>{{ isDownloadingCv() ? 'Generando...' : 'Ficha Técnica (PDF)' }}</span>
+            </button>
+            <button (click)="copyProfileLink()" class="btn-copy-dock">
+              Copiar Enlace
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Modal informativo para usuarios no autenticados -->
+      @if (showAuthPrompt()) {
+        <div class="modal-backdrop-blur" (click)="closeAuthPrompt()">
+          <div class="auth-prompt-card" (click)="$event.stopPropagation()">
+            <div class="prompt-icon-badge">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+            </div>
+            <h3 class="prompt-title">Acceso a Ficha Oficial Deportiva</h3>
+            <p class="prompt-description">
+              La descarga del CV Deportivo en PDF con código QR y certificación oficial está reservada para el representante legal del atleta, scouts y clubes acreditados bajo la normativa de salvaguarda y protección de menores.
+            </p>
+            <div class="prompt-actions">
+              <a routerLink="/login" class="btn-prompt-primary">Iniciar Sesión</a>
+              <button (click)="closeAuthPrompt()" class="btn-prompt-secondary">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Notificación flotante de enlace copiado -->
+      @if (copiedNotification()) {
+        <div class="toast-notification">
+          <span>Enlace copiado al portapapeles</span>
+        </div>
+      }
+    </main>
+    }
+  }
+</div>

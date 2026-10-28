@@ -1,0 +1,74 @@
+<div class="modal-backdrop" (click)="closeModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div>
+        <h2 class="modal-title">
+          <span>⚙️</span>
+          <span>Configurar Client IDs Oficiales</span>
+        </h2>
+        <p class="modal-subtitle">
+          Para conectar directamente con las APIs de Google y Microsoft en localhost
+        </p>
+      </div>
+      <button type="button" class="btn-close" (click)="closeModal()" aria-label="Cerrar">✕</button>
+    </div>
+
+    <div class="notice-box">
+      <strong>ℹ️ Requisito de URIs de Redirección en tus Consolas:</strong>
+      Asegúrate de haber configurado en Google Cloud y Azure Portal:<br/>
+      • Orígenes autorizados: <code>http://localhost</code>, <code>http://localhost:80</code><br/>
+      • URI de redirección: <code>http://localhost/auth/login</code>
+    </div>
+
+    <form [formGroup]="configForm" (ngSubmit)="saveConfig()">
+      @if (targetProvider === 'google' || targetProvider === 'all') {
+        <div class="form-group">
+          <label class="form-label" for="googleClientId">
+            <span>Google Client ID</span>
+            <span style="font-size: 11px; color: #38bdf8;">Google Cloud Console</span>
+          </label>
+          <input
+            id="googleClientId"
+            type="text"
+            class="form-control"
+            formControlName="googleClientId"
+            placeholder="ej. 123456789-abc.apps.googleusercontent.com"
+            autocomplete="off"
+          />
+          <div class="form-hint">
+            Obtenido en APIs & Servicios &gt; Credenciales &gt; ID de cliente OAuth 2.0 (Aplicación web).
+          </div>
+        </div>
+      }
+
+      @if (targetProvider === 'microsoft' || targetProvider === 'all') {
+        <div class="form-group">
+          <label class="form-label" for="microsoftClientId">
+            <span>Microsoft Application (Client) ID</span>
+            <span style="font-size: 11px; color: #38bdf8;">Azure Portal / Entra ID</span>
+          </label>
+          <input
+            id="microsoftClientId"
+            type="text"
+            class="form-control"
+            formControlName="microsoftClientId"
+            placeholder="ej. xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (GUID)"
+            autocomplete="off"
+          />
+          <div class="form-hint">
+            Obtenido en Microsoft Entra ID &gt; Registros de aplicaciones &gt; Información general.
+          </div>
+        </div>
+      }
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary">
+          Guardar y Continuar
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

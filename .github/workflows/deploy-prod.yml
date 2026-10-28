@@ -1,0 +1,145 @@
+name: Deploy Services to Production (Cloud Run)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'talentus-scout-be/**'
+      - 'talentus-scout-fe/**'
+      - '.github/workflows/deploy-prod.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROJECT_ID: project-3f3415b6-8b35-4d04-be4
+  REGION: southamerica-east1
+  WIF_PROVIDER: projects/994142432241/locations/global/workloadIdentityPools/github-pool/providers/github-provider
+  WIF_SERVICE_ACCOUNT: github-actions-sa@project-3f3415b6-8b35-4d04-be4.iam.gserviceaccount.com
+  REGISTRY_HOST: southamerica-east1-docker.pkg.dev
+
+jobs:
+  detect-changes:
+    name: Detect Changed Components
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Check for file changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'talentus-scout-be/**'
+            frontend:
+              - 'talentus-scout-fe/**'
+
+  deploy-backend:
+    name: Build & Deploy Backend (Spring Boot 3)
+    needs: detect-changes
+    if: github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'maven'
+
+      - name: Build JAR with Maven
+        working-directory: talentus-scout-be
+        run: |
+          chmod +x mvnw
+          ./mvnw clean package -DskipTests
+
+      - name: Authenticate to Google Cloud via Workload Identity Federation
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.REGISTRY_HOST }} --quiet
+
+      - name: Build and Push Backend Image
+        working-directory: talentus-scout-be
+        run: |
+          IMAGE_TAG="${{ env.REGISTRY_HOST }}/${{ env.PROJECT_ID }}/talentus-containers/backend"
+          docker build -f Dockerfile.prod -t "${IMAGE_TAG}:${{ github.sha }}" -t "${IMAGE_TAG}:latest" .
+          docker push "${IMAGE_TAG}:${{ github.sha }}"
+          docker push "${IMAGE_TAG}:latest"
+
+      - name: Deploy to Cloud Run
+        run: |
+          IMAGE_TAG="${{ env.REGISTRY_HOST }}/${{ env.PROJECT_ID }}/talentus-containers/backend:${{ github.sha }}"
+          gcloud run deploy talentus-backend-prod \
+            --image="${IMAGE_TAG}" \
+            --region="${{ env.REGION }}" \
+            --platform=managed
+
+  deploy-frontend:
+    name: Build & Deploy Frontend (Angular 18+ SSR)
+    needs: detect-changes
+    if: github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: 'talentus-scout-fe/package-lock.json'
+
+      - name: Install dependencies & Build Angular SSR Production Bundle
+        working-directory: talentus-scout-fe
+        run: |
+          npm ci --prefer-offline
+          npm run build -- --configuration=production
+
+      - name: Authenticate to Google Cloud via Workload Identity Federation
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.WIF_PROVIDER }}
+          service_account: ${{ env.WIF_SERVICE_ACCOUNT }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker ${{ env.REGISTRY_HOST }} --quiet
+
+      - name: Build and Push Frontend Image
+        working-directory: talentus-scout-fe
+        run: |
+          IMAGE_TAG="${{ env.REGISTRY_HOST }}/${{ env.PROJECT_ID }}/talentus-containers/frontend"
+          docker build -f Dockerfile.prod -t "${IMAGE_TAG}:${{ github.sha }}" -t "${IMAGE_TAG}:latest" .
+          docker push "${IMAGE_TAG}:${{ github.sha }}"
+          docker push "${IMAGE_TAG}:latest"
+
+      - name: Deploy to Cloud Run
+        run: |
+          IMAGE_TAG="${{ env.REGISTRY_HOST }}/${{ env.PROJECT_ID }}/talentus-containers/frontend:${{ github.sha }}"
+          gcloud run deploy talentus-frontend-prod \
+            --image="${IMAGE_TAG}" \
+            --region="${{ env.REGION }}" \
+            --platform=managed

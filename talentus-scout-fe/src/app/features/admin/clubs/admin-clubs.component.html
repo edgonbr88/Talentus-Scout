@@ -1,0 +1,504 @@
+<div class="admin-page container">
+  <!-- ENCABEZADO DE COMANDO ADMINISTRATIVO -->
+  <header class="admin-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-admin">PANEL ADMINISTRATIVO</span>
+        <span class="badge badge-verified">DIRECTORIO INSTITUCIONAL</span>
+      </div>
+      <h1 class="admin-title">Mantenedor de Clubes y Organizaciones</h1>
+      <p class="admin-subtitle">
+        Gestiona, audita y valida las academias, clubes formativos y universidades del fútbol juvenil venezolano. Promueve organizaciones oficiales y administra la integridad del ecosistema deportivo.
+      </p>
+    </div>
+
+    <div class="header-action">
+      <a routerLink="/admin/scouts" class="btn btn-secondary btn-sm">Auditoría Scouts</a>
+      <a routerLink="/admin/verificacion-legal" class="btn btn-secondary btn-sm">Patria Potestad</a>
+      <a routerLink="/admin/pagos" class="btn btn-secondary btn-sm">Auditoría Pagos</a>
+      <button (click)="openCreateModal()" class="btn btn-primary btn-sm" type="button">
+        <span class="btn-icon">＋</span> Registrar Club Oficial
+      </button>
+    </div>
+  </header>
+
+  <!-- BANNER BENTO DE MÉTRICAS OPERATIVAS -->
+  <section class="bento-metrics">
+    <div class="metric-card metric-primary">
+      <span class="metric-label">Total Organizaciones</span>
+      <div class="metric-value-row">
+        <span class="metric-number">{{ stats().totalClubs }}</span>
+        <span class="metric-indicator indicator-active">Directorio Activo</span>
+      </div>
+      <p class="metric-desc">Clubes, escuelas formativas y academias registradas.</p>
+    </div>
+
+    <div class="metric-card metric-success">
+      <span class="metric-label">Verificados Oficiales</span>
+      <div class="metric-value-row">
+        <span class="metric-number">{{ stats().verifiedClubs }}</span>
+        <span class="metric-badge-verified">Verificados FVF/FIFA</span>
+      </div>
+      <p class="metric-desc">Instituciones formalmente acreditadas en Talentus Scout.</p>
+    </div>
+
+    <div class="metric-card metric-warning">
+      <span class="metric-label">Pendientes de Auditoría</span>
+      <div class="metric-value-row">
+        <span class="metric-number">{{ stats().pendingClubs }}</span>
+        <span class="metric-badge-pending" [class.badge-alert]="stats().pendingClubs > 0">
+          {{ stats().pendingClubs > 0 ? 'Por Revisar' : 'Sin Pendientes' }}
+        </span>
+      </div>
+      <p class="metric-desc">Clubes añadidos por la comunidad mediante la opción "Otro".</p>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-label">Atletas Vinculados</span>
+      <div class="metric-value-row">
+        <span class="metric-highlight">{{ stats().totalAffiliatedAthletes }}</span>
+      </div>
+      <p class="metric-desc">Jóvenes talentos afiliados institucionalmente a un club.</p>
+    </div>
+  </section>
+
+  <!-- TOAST / FEEDBACK EN VIVO -->
+  @if (feedback()) {
+    <div class="feedback-banner" [ngClass]="'feedback-' + feedback()?.type">
+      <span class="feedback-icon">{{ feedback()?.type === 'success' ? '✓' : '⚠' }}</span>
+      <span class="feedback-text">{{ feedback()?.text }}</span>
+      <button (click)="feedback.set(null)" class="feedback-close" type="button">✕</button>
+    </div>
+  }
+
+  <!-- BARRA DE HERRAMIENTAS: BÚSQUEDA Y FILTROS -->
+  <section class="toolbar-section">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        (input)="onSearchChange()"
+        placeholder="Buscar por nombre de club, ciudad o código federativo..."
+        class="search-input"
+        id="club-search-input"
+      />
+      @if (searchQuery) {
+        <button (click)="searchQuery = ''; onSearchChange()" class="clear-search-btn" type="button">✕</button>
+      }
+    </div>
+
+    <div class="filter-pills">
+      <button
+        type="button"
+        class="filter-pill"
+        [class.active]="currentFilter() === 'ALL'"
+        (click)="setFilter('ALL')"
+      >
+        Todos ({{ stats().totalClubs }})
+      </button>
+      <button
+        type="button"
+        class="filter-pill pill-verified"
+        [class.active]="currentFilter() === 'VERIFIED'"
+        (click)="setFilter('VERIFIED')"
+      >
+        Oficiales ({{ stats().verifiedClubs }})
+      </button>
+      <button
+        type="button"
+        class="filter-pill pill-pending"
+        [class.active]="currentFilter() === 'PENDING_VERIFICATION'"
+        (click)="setFilter('PENDING_VERIFICATION')"
+      >
+        Pendientes ({{ stats().pendingClubs }})
+      </button>
+      <button (click)="loadClubs(currentPage)" [disabled]="isLoading()" class="btn btn-secondary btn-sm refresh-btn" type="button">
+        @if (isLoading()) {
+          <span class="spinner-small"></span>
+        } @else {
+          ↻
+        }
+        Refrescar
+      </button>
+    </div>
+  </section>
+
+  <!-- TABLA DE CLUBES BENTO -->
+  <section class="table-container">
+    @if (isLoading() && clubs().length === 0) {
+      <div class="loading-state">
+        <span class="spinner-large"></span>
+        <p>Cargando directorio de clubes...</p>
+      </div>
+    } @else if (clubs().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">🏟️</div>
+        <h3>No se encontraron clubes u organizaciones</h3>
+        <p>No existen registros que coincidan con los criterios de búsqueda o filtro aplicados.</p>
+        <button (click)="openCreateModal()" class="btn btn-primary btn-sm" type="button">
+          Registrar nuevo club
+        </button>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="clubs-table">
+          <thead>
+            <tr>
+              <th>Club / Organización</th>
+              <th>Sede</th>
+              <th class="text-center">Atletas</th>
+              <th class="text-center">Scouts</th>
+              <th class="text-center">Estado Oficial</th>
+              <th class="text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (club of clubs(); track club.id) {
+              <tr [class.row-pending]="!club.verifiedOfficial">
+                <!-- Columna Club y Logo -->
+                <td>
+                  <div class="club-cell">
+                    <div class="club-avatar">
+                      @if (club.logoUrl) {
+                        <img [src]="club.logoUrl" [alt]="club.name" class="club-logo-img" />
+                      } @else {
+                        <div class="club-monogram">{{ getInitials(club.name) }}</div>
+                      }
+                    </div>
+                    <div class="club-info">
+                      <div class="club-name-row">
+                        <span class="club-name">{{ club.name }}</span>
+                        @if (club.verifiedOfficial) {
+                          <span class="badge-mini-verified" title="Club Verificado Oficial">✓ Oficial</span>
+                        } @else {
+                          <span class="badge-mini-pending" title="Pendiente de Verificación Oficial">Comunitario</span>
+                        }
+                      </div>
+                      @if (club.federationCode) {
+                        <span class="club-fed-code">Código: {{ club.federationCode }}</span>
+                      }
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Sede -->
+                <td>
+                  <div class="location-cell">
+                    <span class="location-city">{{ club.city }}, {{ club.state }}</span>
+                    <span class="location-country">{{ club.country }}</span>
+                  </div>
+                </td>
+
+                <!-- Conteo Atletas -->
+                <td class="text-center">
+                  <span class="count-pill athlete-count" [class.count-zero]="club.athletesCount === 0">
+                    {{ club.athletesCount }}
+                  </span>
+                </td>
+
+                <!-- Conteo Scouts -->
+                <td class="text-center">
+                  <span class="count-pill scout-count" [class.count-zero]="club.scoutsCount === 0">
+                    {{ club.scoutsCount }}
+                  </span>
+                </td>
+
+                <!-- Switch Interactivo de Verificación -->
+                <td class="text-center">
+                  <label class="switch-container" [title]="club.verifiedOfficial ? 'Hacer clic para marcar como no verificado' : 'Hacer clic para verificar oficialmente'">
+                    <input
+                      type="checkbox"
+                      [checked]="club.verifiedOfficial"
+                      [disabled]="isProcessing() && processingId() === club.id"
+                      (change)="toggleVerification(club)"
+                    />
+                    <span class="switch-slider"></span>
+                  </label>
+                  <div class="switch-status-label">
+                    {{ club.verifiedOfficial ? 'Oficial' : 'Pendiente' }}
+                  </div>
+                </td>
+
+                <!-- Acciones -->
+                <td class="text-right">
+                  <div class="actions-group">
+                    <button
+                      type="button"
+                      class="btn-action btn-edit"
+                      (click)="openEditModal(club)"
+                      title="Editar club o actualizar escudo"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      type="button"
+                      class="btn-action btn-delete"
+                      (click)="openDeleteModal(club)"
+                      title="Eliminar club con política de integridad"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- PAGINACIÓN -->
+      @if (totalPages() > 1) {
+        <div class="pagination-bar">
+          <span class="pagination-info">
+            Mostrando página {{ currentPage + 1 }} de {{ totalPages() }} ({{ totalElements() }} organizaciones)
+          </span>
+          <div class="pagination-actions">
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              [disabled]="currentPage === 0 || isLoading()"
+              (click)="loadClubs(currentPage - 1)"
+            >
+              Anterior
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              [disabled]="currentPage >= totalPages() - 1 || isLoading()"
+              (click)="loadClubs(currentPage + 1)"
+            >
+              Siguiente
+            </button>
+          </div>
+        </div>
+      }
+    }
+  </section>
+
+  <!-- MODAL CREAR / EDITAR CLUB -->
+  @if (isEditModalOpen()) {
+    <div class="modal-backdrop" (click)="closeEditModal()">
+      <div class="modal-dialog" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge badge-admin">{{ editingClub() ? 'MODIFICACIÓN' : 'NUEVO REGISTRO' }}</span>
+            <h2 class="modal-title">{{ editingClub() ? 'Editar Organización' : 'Registrar Club u Organización Oficial' }}</h2>
+          </div>
+          <button (click)="closeEditModal()" class="modal-close-btn" type="button">✕</button>
+        </header>
+
+        <div class="modal-body">
+          @if (formError()) {
+            <div class="modal-error-banner">
+              ⚠ {{ formError() }}
+            </div>
+          }
+
+          <form (ngSubmit)="saveClub()" class="club-form">
+            <div class="form-group">
+              <label for="form-name" class="form-label">Nombre de la Organización *</label>
+              <input
+                type="text"
+                id="form-name"
+                [(ngModel)]="formName"
+                name="name"
+                class="form-control"
+                placeholder="Ej. Academia Puerto Cabello, Caracas FC, Universidad Central..."
+                required
+              />
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="form-fed-code" class="form-label">Código Federativo (Opcional)</label>
+                <input
+                  type="text"
+                  id="form-fed-code"
+                  [(ngModel)]="formFederationCode"
+                  name="federationCode"
+                  class="form-control"
+                  placeholder="Ej. FVF-2045, FIFA-VE-09"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="form-country" class="form-label">País *</label>
+                <input
+                  type="text"
+                  id="form-country"
+                  [(ngModel)]="formCountry"
+                  name="country"
+                  class="form-control"
+                  placeholder="Venezuela"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="form-city" class="form-label">Ciudad *</label>
+                <input
+                  type="text"
+                  id="form-city"
+                  [(ngModel)]="formCity"
+                  name="city"
+                  class="form-control"
+                  placeholder="Ej. Valencia, Barquisimeto, Caracas..."
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="form-state" class="form-label">Estado / Región *</label>
+                <input
+                  type="text"
+                  id="form-state"
+                  [(ngModel)]="formState"
+                  name="state"
+                  class="form-control"
+                  placeholder="Ej. Carabobo, Lara, Miranda..."
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- ESCUDO / LOGO: SUBIDA DE ARCHIVO Y PREVIEW -->
+            <div class="form-group">
+              <label class="form-label">Escudo o Emblema Institucional</label>
+              <div class="logo-upload-box">
+                <div class="logo-preview-box">
+                  @if (logoPreview()) {
+                    <img [src]="logoPreview()" alt="Escudo preview" class="preview-img" />
+                  } @else {
+                    <div class="preview-placeholder">Sin escudo</div>
+                  }
+                </div>
+                <div class="logo-upload-controls">
+                  <input
+                    type="file"
+                    id="logo-file-input"
+                    (change)="onLogoFileSelected($event)"
+                    accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                    class="file-input-hidden"
+                  />
+                  <label for="logo-file-input" class="btn btn-secondary btn-sm upload-file-btn">
+                    📁 Seleccionar archivo (PNG, JPG, SVG, WEBP)
+                  </label>
+                  <p class="file-hint">Máximo 5MB. Se almacenará en disco de alta disponibilidad.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="form-logo-url" class="form-label">O ingresar URL externa de Escudo</label>
+              <input
+                type="text"
+                id="form-logo-url"
+                [(ngModel)]="formLogoUrl"
+                name="logoUrl"
+                class="form-control"
+                placeholder="https://ejemplo.com/escudo.png"
+              />
+            </div>
+
+            <div class="form-group switch-group">
+              <label class="switch-container">
+                <input
+                  type="checkbox"
+                  [(ngModel)]="formVerifiedOfficial"
+                  name="verifiedOfficial"
+                />
+                <span class="switch-slider"></span>
+              </label>
+              <div class="switch-text-col">
+                <span class="switch-title">Acreditar como Club Verificado Oficial</span>
+                <span class="switch-sub">Habilitará el distintivo oficial verde y prioridad en el directorio de talentos.</span>
+              </div>
+            </div>
+
+            <footer class="modal-footer">
+              <button (click)="closeEditModal()" class="btn btn-secondary" type="button" [disabled]="isProcessing()">
+                Cancelar
+              </button>
+              <button class="btn btn-primary" type="submit" [disabled]="isProcessing()">
+                @if (isProcessing()) {
+                  <span class="spinner-small"></span> Guardando...
+                } @else {
+                  {{ editingClub() ? 'Actualizar Club' : 'Guardar y Publicar' }}
+                }
+              </button>
+            </footer>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- MODAL CONFIRMACIÓN DE ELIMINACIÓN CON ADVERTENCIA DE INTEGRIDAD -->
+  @if (isDeleteModalOpen() && clubToDelete()) {
+    <div class="modal-backdrop" (click)="closeDeleteModal()">
+      <div class="modal-dialog modal-dialog-warning" (click)="$event.stopPropagation()">
+        <header class="modal-header">
+          <div class="modal-title-group">
+            <span class="badge badge-danger">POLÍTICA DE INTEGRIDAD Y SALVAGUARDA</span>
+            <h2 class="modal-title">¿Eliminar Organización '{{ clubToDelete()?.name }}'?</h2>
+          </div>
+          <button (click)="closeDeleteModal()" class="modal-close-btn" type="button">✕</button>
+        </header>
+
+        <div class="modal-body">
+          <div class="warning-callout">
+            <span class="warning-icon">⚠</span>
+            <div class="warning-content">
+              <strong>Atención: Esta acción es irreversible.</strong>
+              <p>El sistema ejecutará automáticamente las siguientes medidas de integridad deportiva:</p>
+            </div>
+          </div>
+
+          <div class="impact-cards">
+            <!-- Impacto Atletas -->
+            <div class="impact-card">
+              <div class="impact-header">
+                <span class="impact-title">⚽ Atletas Afiliados ({{ clubToDelete()?.athletesCount }})</span>
+                <span class="impact-status status-safe">Protegidos</span>
+              </div>
+              <p class="impact-desc">
+                Los <strong>{{ clubToDelete()?.athletesCount }} atletas</strong> vinculados serán desvinculados de forma segura, pasando a estado <em>"Independiente / Sin afiliación"</em>. Mantendrán su perfil público, cédula deportiva y acceso a la plataforma intactos.
+              </p>
+            </div>
+
+            <!-- Impacto Scouts -->
+            <div class="impact-card card-alert">
+              <div class="impact-header">
+                <span class="impact-title">🔍 Scouts y Reclutadores ({{ clubToDelete()?.scoutsCount }})</span>
+                <span class="impact-status status-revoked">Subsanación Requerida</span>
+              </div>
+              <p class="impact-desc">
+                Los <strong>{{ clubToDelete()?.scoutsCount }} scouts</strong> registrados bajo esta organización serán revocados a estado de <em>Subsanación Requerida</em>. Se bloqueará su acceso al Directorio de Talentos y se les enviará una notificación por correo electrónico solicitando nueva credencial deportiva.
+              </p>
+            </div>
+          </div>
+
+          <p class="confirmation-prompt">
+            ¿Confirmas que deseas dar de baja definitivamente a <strong>{{ clubToDelete()?.name }}</strong>?
+          </p>
+        </div>
+
+        <footer class="modal-footer">
+          <button (click)="closeDeleteModal()" class="btn btn-secondary" type="button" [disabled]="isProcessing()">
+            Cancelar
+          </button>
+          <button (click)="confirmDelete()" class="btn btn-danger" type="button" [disabled]="isProcessing()">
+            @if (isProcessing()) {
+              <span class="spinner-small"></span> Ejecutando baja...
+            } @else {
+              Confirmar Baja Definitiva
+            }
+          </button>
+        </footer>
+      </div>
+    </div>
+  }
+</div>

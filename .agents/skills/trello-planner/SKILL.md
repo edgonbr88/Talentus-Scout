@@ -45,7 +45,16 @@ For each card in `in development`:
    * **Frontend:** Angular 18+ components (standalone), routing, services, SSR considerations, responsive styles.
    * **Security/Legal:** LOPNNA Art. 65 safeguards, WhatsApp contact links, scout access guards.
 
-### 3. Generate Implementation Plan
+### 3. Clarification of Doubts & Ambiguities (Pre-Planning Gate)
+Before writing or finalizing the implementation plan:
+* Carefully assess if the card scope, business logic, technical architecture, or legal constraints have any uncertainties, ambiguities, or missing specifications.
+* If any technical question (e.g. database schema details, API contract designs, auth flows) or business question (e.g. LOPNNA compliance rules, user journey nuances, edge cases) arises:
+  * **Ask the user immediately to clarify** before proceeding with the plan.
+  * Formulate concise, specific questions or propose clear options to help the user decide.
+  * Do not make assumptions or guess on critical decisions. Wait for user input to guarantee the highest quality plan.
+* Only once all questions and ambiguities are resolved (or if the card and specifications are already completely clear and unambiguous), proceed to step 4.
+
+### 4. Generate Implementation Plan
 Write a new markdown file in the `plans/` directory:
 * **File Path Format:** `plans/<TASK-ID>-plan-<slug>.md`
   *(Example: `plans/TS-01-plan-configuracion-repositorios-neon.md`)*
@@ -77,15 +86,17 @@ Write a new markdown file in the `plans/` directory:
 
 ## 4. Backend: Spring Boot 3 (Java 21)
 - Paquete: `com.talentus.scout...`
+- Directiva de Modelado: Usar Project Lombok (`@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsConstructor`, `@Builder`, `@Builder.Default`) en todas las entidades, DTOs y modelos para evitar boilerplate de constructores y getters/setters.
 - Clases a crear o modificar:
-  - Entidad JPA
+  - Entidad JPA (con anotaciones Lombok y validaciones/constraints)
   - Repositorio Spring Data
-  - DTOs (Request / Response)
-  - Servicio / Lógica de negocio
+  - DTOs (Request / Response con Lombok y Jakarta Validation)
+  - Servicio / Lógica de negocio (instanciación vía `.builder()`)
   - Controller REST con anotaciones de seguridad (`@PreAuthorize`)
 
 ## 5. Frontend: Angular 18+ (Standalone & SSR)
 - Directiva de Diseño: Seguir [fe-desing.md](file:///home/edgar/Talentus%20Scout/fe-desing.md) / `frontend-design` (paleta intencional, tipografía, Bento Grid, cero clichés de IA).
+- Separación Obligatoria de Plantillas: Todo componente debe estructurarse con archivos `.ts` y `.html` independientes usando `templateUrl: './<component>.component.html'`. Prohibido el uso de templates inline.
 - Módulos / Componentes:
   - Archivo `.ts`, `.html`, `.css`
   - Tokens visuales propuestos (paleta, tipografía, concepto de layout)
@@ -107,5 +118,5 @@ Write a new markdown file in the `plans/` directory:
 - [ ] Criterios específicos de la tarjeta verificados.
 ```
 
-### 4. Notification to the User
+### 5. Notification to the User
 Report that the plan has been generated with a direct clickable file link and a brief summary of the architectural decisions made.

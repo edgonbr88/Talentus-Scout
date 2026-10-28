@@ -2,6 +2,12 @@
 .env
 .env.local
 *.env
+*.key
+*.pem
+*credentials*.json
+*sa-key*.json
+gcp-key.json
+docs/_keys_and_pass.txt
 
 # Datos persistentes locales de Docker
 postgresql/data/
@@ -28,3 +34,4 @@ logs/
 
 # Archivos de soporte de pruebas / scratch
 scratch/
+.neon

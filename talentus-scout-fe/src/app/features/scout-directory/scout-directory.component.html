@@ -1,0 +1,325 @@
+<div class="directory-layout">
+  <!-- Cabecera de Mando del Radar -->
+  <header class="directory-header">
+    <div class="container header-container">
+      <div class="header-titles">
+        <div class="header-tag">
+          <span class="pulse-indicator"></span>
+          <span>RADAR PROFESIONAL DE SCOUTING</span>
+        </div>
+        <h1 class="header-title">Directorio Oficial de Talentos</h1>
+        <p class="header-desc">
+          Exploración táctica y técnica de futbolistas juveniles acreditados. Filtra por categoría federada, posición y
+          disponibilidad audiovisual.
+        </p>
+      </div>
+
+      <div class="radar-counter-card">
+        <span class="counter-label">Talentos en Radar</span>
+        <span class="counter-value">{{ totalElements() }}</span>
+        <span class="counter-sub">Perfiles activos verificados</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="container directory-content">
+    <!-- Barra de Filtros Rápidos por Categoría (Chips) -->
+    <section class="chips-section" aria-label="Filtro rápido por categoría">
+      <div class="chips-container">
+        @for (chip of categoryChips; track chip.label) {
+        <button type="button" class="chip-button" [class.active]="selectedBirthYear() === chip.birthYear"
+          (click)="selectCategory(chip.birthYear)">
+          <span class="chip-label">{{ chip.label }}</span>
+          <span class="chip-desc">{{ chip.description }}</span>
+        </button>
+        }
+      </div>
+
+      <div class="filter-actions-toggle">
+        <button type="button" class="btn-toggle-filters" [class.active]="showAdvancedFilters()"
+          (click)="toggleAdvancedFilters()">
+          <span class="icon">⚙️</span>
+          <span>Filtros tácticos</span>
+          <span class="chevron">{{ showAdvancedFilters() ? '▲' : '▼' }}</span>
+        </button>
+
+        @if (selectedBirthYear() !== null || selectedBirthYearFrom() !== null || selectedBirthYearTo() !== null || selectedPosition() || selectedFoot() || filterOnlyWithVideo() ||
+        filterOnlyEuropeanPassport() || selectedResidenceCountry()) {
+        <button type="button" class="btn-reset" (click)="resetFilters()">
+          Reiniciar filtros
+        </button>
+        }
+      </div>
+    </section>
+
+    <!-- Panel de Filtros Avanzados (Desplegable) -->
+    @if (showAdvancedFilters()) {
+    <section class="advanced-filters-panel" aria-label="Filtros avanzados">
+      <div class="filters-grid">
+        <div class="filter-group">
+          <label for="posFilter" class="filter-label">Posición táctica</label>
+          <select id="posFilter" class="filter-select" [(ngModel)]="selectedPosition" (change)="onFilterChange()">
+            @for (pos of positionOptions; track pos.value) {
+            <option [value]="pos.value">{{ pos.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="footFilter" class="filter-label">Perfil / Pierna hábil</label>
+          <select id="footFilter" class="filter-select" [(ngModel)]="selectedFoot" (change)="onFilterChange()">
+            @for (foot of footOptions; track foot.value) {
+            <option [value]="foot.value">{{ foot.label }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="yearFromFilter" class="filter-label">Año Desde</label>
+          <select id="yearFromFilter" class="filter-select" [ngModel]="selectedBirthYearFrom()" (ngModelChange)="onYearFromChange($event)">
+            <option [ngValue]="null">Cualquier año</option>
+            @for (year of availableBirthYears(); track year) {
+            <option [ngValue]="year">{{ year }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="yearToFilter" class="filter-label">Año Hasta</label>
+          <select id="yearToFilter" class="filter-select" [ngModel]="selectedBirthYearTo()" (ngModelChange)="onYearToChange($event)">
+            <option [ngValue]="null">Cualquier año</option>
+            @for (year of availableBirthYears(); track year) {
+            <option [ngValue]="year">{{ year }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="countryFilter" class="filter-label">País de residencia</label>
+          <select id="countryFilter" class="filter-select" [(ngModel)]="selectedResidenceCountry" (change)="onFilterChange()">
+            <option value="">Todos los países</option>
+            @for (c of countryOptions; track c) {
+            <option [value]="c">{{ c }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="filter-group filter-toggles">
+          <span class="filter-label">Filtros de proyección</span>
+          <div class="toggles-wrapper">
+            <button type="button" class="pill-toggle" [class.checked]="filterOnlyWithVideo()"
+              (click)="toggleVideoFilter()">
+              <span class="pill-dot"></span>
+              <span>Solo con Video</span>
+            </button>
+
+            <button type="button" class="pill-toggle" [class.checked]="filterOnlyEuropeanPassport()"
+              (click)="togglePassportFilter()">
+              <span class="pill-dot"></span>
+              <span>Pasaporte UE / Internacional</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+    }
+
+    <!-- Feedback de Carga / Error -->
+    @if (isLoading()) {
+    <div class="loading-state">
+      <div class="radar-spinner"></div>
+      <p class="loading-text">Sincronizando radar de talentos...</p>
+    </div>
+    } @else if (hasError()) {
+    <div class="error-state">
+      <div class="state-icon">⚠️</div>
+      <h3>No se pudo cargar el directorio</h3>
+      <p>Ocurrió una inconsistencia al consultar los atletas. Por favor intenta recargar la vista.</p>
+      <button class="btn btn-primary" (click)="fetchAthletes(0)">Reintentar</button>
+    </div>
+    } @else if (athletes().length === 0) {
+    <!-- Estado Vacío Intencional y Deportivo -->
+    <div class="empty-state">
+      <div class="empty-crest">⚽</div>
+      <h3 class="empty-title">Sin talentos en este radio</h3>
+      <p class="empty-desc">
+        No se encontraron perfiles públicos que coincidan con los filtros tácticos seleccionados. Intenta ampliar la
+        categoría de edad o desactivar filtros de pasaporte.
+      </p>
+      <button class="btn btn-secondary" (click)="resetFilters()">Ver todos los atletas</button>
+    </div>
+    } @else {
+    <!-- Cuadrícula Bento de Tarjetas de Atletas -->
+    <div class="athletes-bento-grid">
+      @for (athlete of athletes(); track athlete.id) {
+      <article class="athlete-bento-card">
+        <!-- Cabecera de la Tarjeta con Badges -->
+        <div class="card-topbar">
+          <span class="position-badge" [ngClass]="getPositionBadgeClass(athlete.primaryPosition)">
+            {{ athlete.primaryPosition }}
+          </span>
+          <span class="category-chip">{{ athlete.category }}</span>
+        </div>
+
+        <!-- Identidad del Atleta -->
+        <div class="card-profile">
+          <div class="athlete-avatar-wrapper">
+            @if (athlete.profilePhotoUrl) {
+            <img [src]="athlete.profilePhotoUrl | mediaUrl" [alt]="athlete.firstName + ' ' + athlete.lastName"
+              class="athlete-photo" />
+            } @else {
+            <div class="athlete-photo-fallback">
+              <span>{{ athlete.firstName.charAt(0) }}{{ athlete.lastName.charAt(0) }}</span>
+            </div>
+            }
+
+            @if (athlete.hasVideo) {
+            <span class="video-indicator" title="Video de evaluación listo">▶</span>
+            }
+          </div>
+
+          <div class="athlete-info">
+            <h2 class="athlete-name">
+              <a [routerLink]="['/atleta', athlete.slug]" class="athlete-link">
+                {{ athlete.firstName }} {{ athlete.lastName }}
+              </a>
+            </h2>
+            <div class="athlete-club">
+              <span class="club-icon">🏟️</span>
+              <span class="club-name">{{ athlete.clubName || 'Club Independiente' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Matriz de Datos Tácticos -->
+        <div class="card-metrics">
+          <div class="metric-item">
+            <span class="metric-label">Nacimiento</span>
+            <span class="metric-value">{{ athlete.birthYear }}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Pierna</span>
+            <span class="metric-value">{{ athlete.preferredFoot }}</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-label">Insignias</span>
+            <span class="metric-value text-accent">{{ athlete.verifiedBadgesCount }}</span>
+          </div>
+        </div>
+
+        <!-- Tags adicionales (Procedencia / Pasaporte / Biometría Certificada) -->
+        <div class="card-tags">
+          <span class="tag-badge country-tag" [title]="'País de residencia legal del atleta: ' + (athlete.residenceCountry || 'Venezuela')">
+            📍 {{ athlete.residenceCountry || 'Venezuela' }}
+          </span>
+          @if (athlete.medicalCertifiedMetrics) {
+          <span class="tag-badge medical-verified-tag" title="Estatura y peso certificados por facultativo de salud">
+            🩺 Biometría Certificada
+          </span>
+          }
+          @if (athlete.hasEuropeanPassport) {
+          <span class="tag-badge passport-tag" title="Posee pasaporte secundario o comunitario">
+            🇪🇺 {{ athlete.secondaryPassports }}
+          </span>
+          }
+          @if (athlete.secondaryPosition) {
+          <span class="tag-badge pos-secondary-tag">
+            Alt: {{ athlete.secondaryPosition }}
+          </span>
+          }
+        </div>
+
+        <!-- Botones de Acción -->
+        <div class="card-actions">
+          @if (athlete.hasVideo && athlete.featuredVideoPlaybackUrl) {
+          <button type="button" class="btn-quick-play" (click)="openVideoModal(athlete)"
+            title="Reproducir video destacado sin salir del directorio">
+            <span class="play-icon">▶</span>
+            <span>Ver Jugadas</span>
+          </button>
+          }
+
+          <button type="button" class="btn-contact-whatsapp" (click)="contactTutor(athlete, $event)"
+            [disabled]="contactingAthleteId() === athlete.id"
+            title="Contactar al representante legal vía WhatsApp con mensaje preformateado">
+            <svg class="whatsapp-btn-icon" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12.031 2C6.495 2 2 6.495 2 12.031c0 1.905.534 3.684 1.458 5.204L2 22l4.908-1.428A9.972 9.972 0 0 0 12.031 22c5.536 0 10.031-4.495 10.031-10.031S17.567 2 12.031 2zm0 18.281c-1.636 0-3.155-.472-4.444-1.286l-.32-.202-3.18.925.938-3.1-.208-.33a8.232 8.232 0 0 1-1.31-4.257c0-4.57 3.717-8.281 8.281-8.281s8.281 3.711 8.281 8.281-3.711 8.281-8.281 8.281zm4.72-6.195c-.258-.13-1.528-.755-1.765-.841-.237-.086-.409-.13-.58.13-.173.258-.667.841-.818.992-.15.15-.301.173-.559.043-.258-.13-1.089-.401-2.073-1.278-.767-.683-1.285-1.527-1.436-1.785-.15-.258-.016-.398.113-.526.117-.116.258-.301.387-.452.13-.15.172-.258.258-.43.086-.172.043-.323-.021-.452-.065-.13-.58-1.398-.796-1.914-.209-.502-.423-.434-.58-.442l-.495-.008c-.172 0-.452.065-.688.323-.237.258-.903.882-.903 2.15s.925 2.495 1.054 2.667c.13.172 1.82 2.779 4.409 3.896.616.266 1.097.425 1.472.544.619.197 1.183.169 1.628.103.496-.074 1.528-.624 1.743-1.226.215-.602.215-1.118.15-1.226-.064-.107-.236-.172-.494-.301z" />
+            </svg>
+            <span>{{ contactingAthleteId() === athlete.id ? 'Conectando...' : 'Contactar Tutor' }}</span>
+          </button>
+
+          <a [routerLink]="['/atleta', athlete.slug]" class="btn-full-profile">
+            Ficha Completa
+          </a>
+        </div>
+      </article>
+      }
+    </div>
+
+    <!-- Barra de Paginación Reactiva -->
+    @if (totalPages() > 1) {
+    <nav class="pagination-bar" aria-label="Paginación de atletas">
+      <button type="button" class="page-nav-btn" [disabled]="currentPage() === 0" (click)="goToPage(currentPage() - 1)">
+        ← Anterior
+      </button>
+
+      <span class="pagination-info">
+        Página {{ currentPage() + 1 }} de {{ totalPages() }}
+      </span>
+
+      <button type="button" class="page-nav-btn" [disabled]="currentPage() >= totalPages() - 1"
+        (click)="goToPage(currentPage() + 1)">
+        Siguiente →
+      </button>
+    </nav>
+    }
+    }
+  </div>
+
+  <!-- Modal Interactivo de Reproducción Rápida de Video -->
+  @if (activeVideoModal()) {
+  <div class="modal-backdrop" (click)="closeVideoModal()" role="dialog" aria-modal="true">
+    <div class="quick-video-dialog" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div class="modal-title-box">
+          <span class="modal-tag">REPRODUCCIÓN RÁPIDA DE SCOUTING</span>
+          <h3 class="modal-athlete-name">
+            {{ activeVideoModal()?.firstName }} {{ activeVideoModal()?.lastName }}
+          </h3>
+          <span class="modal-video-title">
+            {{ activeVideoModal()?.featuredVideoTitle || 'Compilado Destacado' }} • {{ activeVideoModal()?.clubName }}
+          </span>
+        </div>
+
+        <button type="button" class="modal-close-btn" (click)="closeVideoModal()" aria-label="Cerrar modal de video">
+          ✕
+        </button>
+      </header>
+
+      <div class="modal-video-body">
+        <app-video-player [playbackUrl]="activeVideoModal()!.featuredVideoPlaybackUrl!"
+          [thumbnailUrl]="activeVideoModal()?.featuredVideoThumbnailUrl"
+          [title]="activeVideoModal()?.featuredVideoTitle"></app-video-player>
+      </div>
+
+      <footer class="modal-footer">
+        <button type="button" class="btn-contact-whatsapp btn-sm" (click)="contactTutor(activeVideoModal()!)"
+          [disabled]="contactingAthleteId() === activeVideoModal()?.id"
+          title="Contactar al representante legal vía WhatsApp con mensaje preformateado">
+          <svg class="whatsapp-btn-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12.031 2C6.495 2 2 6.495 2 12.031c0 1.905.534 3.684 1.458 5.204L2 22l4.908-1.428A9.972 9.972 0 0 0 12.031 22c5.536 0 10.031-4.495 10.031-10.031S17.567 2 12.031 2zm0 18.281c-1.636 0-3.155-.472-4.444-1.286l-.32-.202-3.18.925.938-3.1-.208-.33a8.232 8.232 0 0 1-1.31-4.257c0-4.57 3.717-8.281 8.281-8.281s8.281 3.711 8.281 8.281-3.711 8.281-8.281 8.281zm4.72-6.195c-.258-.13-1.528-.755-1.765-.841-.237-.086-.409-.13-.58.13-.173.258-.667.841-.818.992-.15.15-.301.173-.559.043-.258-.13-1.089-.401-2.073-1.278-.767-.683-1.285-1.527-1.436-1.785-.15-.258-.016-.398.113-.526.117-.116.258-.301.387-.452.13-.15.172-.258.258-.43.086-.172.043-.323-.021-.452-.065-.13-.58-1.398-.796-1.914-.209-.502-.423-.434-.58-.442l-.495-.008c-.172 0-.452.065-.688.323-.237.258-.903.882-.903 2.15s.925 2.495 1.054 2.667c.13.172 1.82 2.779 4.409 3.896.616.266 1.097.425 1.472.544.619.197 1.183.169 1.628.103.496-.074 1.528-.624 1.743-1.226.215-.602.215-1.118.15-1.226-.064-.107-.236-.172-.494-.301z" />
+          </svg>
+          <span>{{ contactingAthleteId() === activeVideoModal()?.id ? 'Conectando...' : 'Contactar Tutor' }}</span>
+        </button>
+
+        <a [routerLink]="['/atleta', activeVideoModal()?.slug]" class="btn btn-secondary btn-sm"
+          (click)="closeVideoModal()">
+          Ver ficha y trayectoria completa →
+        </a>
+      </footer>
+    </div>
+  </div>
+  }
+</div>

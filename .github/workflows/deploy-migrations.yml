@@ -1,0 +1,31 @@
+name: Deploy Database Migrations to Neon
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'talentus-scout-migrations/**'
+  workflow_dispatch:
+
+jobs:
+  migrate:
+    name: Run dbmate migrations on Neon
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dbmate
+        run: |
+          sudo curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64
+          sudo chmod +x /usr/local/bin/dbmate
+          dbmate --version
+
+      - name: Run migrations
+        env:
+          DATABASE_URL: ${{ secrets.NEON_DIRECT_DATABASE_URL }}
+        run: |
+          cd talentus-scout-migrations
+          dbmate up

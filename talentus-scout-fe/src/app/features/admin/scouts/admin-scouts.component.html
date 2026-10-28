@@ -1,0 +1,221 @@
+<div class="admin-page container">
+  <!-- ENCABEZADO DE COMANDO ADMINISTRATIVO -->
+  <header class="admin-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-admin">PANEL ADMINISTRATIVO</span>
+        <span class="badge badge-verified">SALVAGUARDA Y PROTECCIÓN DE MENORES</span>
+      </div>
+      <h1 class="admin-title">Auditoría y Acreditación de Scouts</h1>
+      <p class="admin-subtitle">
+        Verifica la autenticidad de credenciales consignadas por reclutadores y directores de clubes antes de habilitar su acceso al radar privado de talentos juveniles.
+      </p>
+    </div>
+
+    <div class="header-action">
+      <a routerLink="/admin/verificacion-legal" class="btn btn-secondary btn-sm" style="margin-right: 8px;">
+        Patria Potestad
+      </a>
+      <a routerLink="/admin/pagos" class="btn btn-secondary btn-sm" style="margin-right: 8px;">
+        Auditoría de Pagos
+      </a>
+      <a routerLink="/admin/clubes" class="btn btn-secondary btn-sm" style="margin-right: 8px;">
+        Clubes y Academias
+      </a>
+      <button (click)="loadPendingScouts()" [disabled]="isLoading()" class="btn btn-primary btn-sm" type="button">
+        <span *ngIf="isLoading()" class="spinner-small"></span>
+        Actualizar cola
+      </button>
+    </div>
+  </header>
+
+  <!-- BANNER BENTO DE MÉTRICAS OPERATIVAS -->
+  <section class="bento-metrics">
+    <div class="metric-card metric-primary">
+      <span class="metric-label">Solicitudes Pendientes</span>
+      <div class="metric-value-row">
+        <span class="metric-number">{{ totalPending() }}</span>
+        <span class="metric-indicator" [class.indicator-active]="totalPending() > 0">
+          {{ totalPending() > 0 ? 'Requiere Atención' : 'Al Día' }}
+        </span>
+      </div>
+      <p class="metric-desc">Reclutadores esperando dictamen documental.</p>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-label">SLA de Respuesta</span>
+      <div class="metric-value-row">
+        <span class="metric-highlight">&lt; 24 Horas</span>
+      </div>
+      <p class="metric-desc">Compromiso de verificación para agilizar oportunidades deportivas.</p>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-label">Estándar de Seguridad</span>
+      <div class="metric-value-row">
+        <span class="metric-highlight">FIFA & FVF Compliance</span>
+      </div>
+      <p class="metric-desc">Solo reclutadores con acreditación institucional o federativa comprobada.</p>
+    </div>
+  </section>
+
+  <!-- FEEDBACK TOAST / NOTIFICACIONES -->
+  <div *ngIf="feedback()" class="feedback-toast" [class.toast-error]="feedback()?.type === 'error'">
+    <span class="feedback-text">{{ feedback()?.text }}</span>
+    <button (click)="feedback.set(null)" class="toast-close" type="button" aria-label="Cerrar notificación">✕</button>
+  </div>
+
+  <!-- ESTADO DE CARGA -->
+  <div *ngIf="isLoading()" class="loading-state">
+    <div class="athletic-spinner"></div>
+    <p>Cargando expedientes de reclutadores pendientes...</p>
+  </div>
+
+  <!-- ESTADO VACÍO (BANDEJA AL DÍA) -->
+  <div *ngIf="!isLoading() && pendingScouts().length === 0" class="empty-state-card">
+    <div class="empty-icon-shield">✓</div>
+    <h2>Bandeja de Acreditación al Día</h2>
+    <p>
+      No hay solicitudes pendientes de auditoría en este momento. Todas las credenciales han sido procesadas conforme a la normativa de protección de menores.
+    </p>
+    <button (click)="loadPendingScouts()" class="btn btn-secondary btn-sm" type="button">
+      Verificar Nuevamente
+    </button>
+  </div>
+
+  <!-- COLA DE AUDITORÍA: LISTADO BENTO DE RECLUTADORES -->
+  <section *ngIf="!isLoading() && pendingScouts().length > 0" class="scouts-queue">
+    <div class="queue-header">
+      <h2 class="queue-title">Expedientes por Auditar ({{ pendingScouts().length }})</h2>
+      <span class="queue-note">Aprobación en 1 clic o rechazo con notificación justificada</span>
+    </div>
+
+    <div class="scouts-grid">
+      @for (scout of pendingScouts(); track scout.scoutProfileId) {
+        <article class="scout-card">
+          <!-- Cabecera de la Tarjeta del Scout -->
+          <div class="card-head">
+            <div class="user-meta">
+              <span class="organization-badge">{{ scout.organizationName }}</span>
+              <h3 class="scout-name">{{ scout.fullName }}</h3>
+              <span class="scout-role">{{ scout.scoutRole }}</span>
+            </div>
+            <div class="status-pill status-pending">
+              PENDIENTE
+            </div>
+          </div>
+
+          <!-- Datos de Contacto y Perfil -->
+          <div class="card-body">
+            <div class="info-row">
+              <span class="info-label">Correo:</span>
+              <span class="info-value font-mono">{{ scout.email }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Teléfono:</span>
+              <span class="info-value font-mono">{{ scout.phoneNumber }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Postulación:</span>
+              <span class="info-value">{{ scout.createdAt | date:'d/MM/yyyy, h:mm a' }}</span>
+            </div>
+            <div *ngIf="scout.linkedinUrl" class="info-row">
+              <span class="info-label">LinkedIn:</span>
+              <a [href]="scout.linkedinUrl" target="_blank" rel="noopener noreferrer" class="info-link">
+                Ver perfil profesional ↗
+              </a>
+            </div>
+
+            <!-- Botón de Inspección de Credencial -->
+            <div class="document-section">
+              <button (click)="viewDocument(scout.credentialsDocumentUrl)" class="btn-document" type="button">
+                <svg class="doc-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                <span>Inspeccionar Credencial Consignada</span>
+                <span class="doc-arrow">↗</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Acciones de Decisión Administrativa -->
+          <div class="card-actions">
+            <button 
+              (click)="approveScout(scout)" 
+              [disabled]="isProcessing() && processingId() === scout.scoutProfileId"
+              class="btn btn-approve" 
+              type="button"
+            >
+              <span *ngIf="isProcessing() && processingId() === scout.scoutProfileId" class="spinner-small"></span>
+              <span>Aprobar Acreditación</span>
+            </button>
+
+            <button 
+              (click)="openRejectModal(scout)" 
+              [disabled]="isProcessing()"
+              class="btn btn-reject" 
+              type="button"
+            >
+              Rechazar...
+            </button>
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+
+  <!-- MODAL DE RECHAZO MOTIVADO -->
+  <div *ngIf="isRejectModalOpen()" class="modal-backdrop" (click)="closeRejectModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3 class="modal-title">Rechazar Solicitud de Acreditación</h3>
+        <button (click)="closeRejectModal()" class="modal-close" type="button">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="target-summary" *ngIf="scoutToReject()">
+          <span class="target-name">{{ scoutToReject()?.fullName }}</span>
+          <span class="target-org">{{ scoutToReject()?.organizationName }} ({{ scoutToReject()?.scoutRole }})</span>
+        </div>
+
+        <p class="modal-instruction">
+          Indica el motivo por el cual no procede la verificación. El reclutador podrá ver esta justificación al ingresar a su cuenta y corregir la documentación consignada.
+        </p>
+
+        <div class="form-group">
+          <label for="rejectionReasonInput" class="form-label">Motivo del Rechazo <span class="required">*</span></label>
+          <textarea
+            id="rejectionReasonInput"
+            [(ngModel)]="rejectionReasonInput"
+            class="form-textarea"
+            rows="4"
+            placeholder="Ejemplo: El carnet profesional consignado está vencido o ilegible; favor adjuntar documento oficial actualizado o carta membretada del club."
+          ></textarea>
+        </div>
+
+        <div *ngIf="rejectionError()" class="rejection-alert">
+          {{ rejectionError() }}
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button (click)="closeRejectModal()" class="btn btn-secondary" type="button" [disabled]="isProcessing()">
+          Cancelar
+        </button>
+        <button 
+          (click)="confirmReject()" 
+          class="btn btn-danger-action" 
+          type="button"
+          [disabled]="isProcessing()"
+        >
+          <span *ngIf="isProcessing()" class="spinner-small"></span>
+          Confirmar Rechazo
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

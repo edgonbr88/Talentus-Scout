@@ -1,0 +1,74 @@
+<div class="verify-pending-container">
+  <div class="verify-card">
+    <!-- Badge Superior -->
+    <div class="badge-wrapper">
+      <span class="shield-badge">
+        <svg class="shield-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+        Protección Integral del Menor y Salvaguarda Legal
+      </span>
+    </div>
+
+    <!-- Icono Principal Animado -->
+    <div class="icon-circle">
+      <svg class="mail-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+        <polyline points="22,6 12,13 2,6" />
+      </svg>
+    </div>
+
+    <h1 class="title">Verifica tu Correo Electrónico</h1>
+    
+    <p class="subtitle">
+      Hemos enviado un enlace de activación oficial a:
+    </p>
+    
+    <div class="email-pill">
+      <span class="email-text">{{ email() || 'tu correo electrónico' }}</span>
+    </div>
+
+    <p class="explanation">
+      Para proteger la identidad de los atletas menores de edad y prevenir usurpaciones de tutela legal, es indispensable confirmar la validez de tu cuenta antes de acceder al panel de control.
+    </p>
+
+    <!-- Mensajes de Estado de Reenvío -->
+    <div *ngIf="resendSuccess()" class="alert-success">
+      <svg viewBox="0 0 20 20" fill="currentColor" class="alert-icon">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+      </svg>
+      Nuevo correo de verificación enviado. Revisa también tu carpeta de spam.
+    </div>
+
+    <div *ngIf="resendError()" class="alert-error">
+      {{ resendError() }}
+    </div>
+
+    <!-- Acciones -->
+    <div class="actions">
+      <button 
+        type="button" 
+        class="btn-resend" 
+        [disabled]="isResending() || cooldown() > 0" 
+        (click)="resendEmail()"
+      >
+        <span *ngIf="!isResending() && cooldown() === 0">Reenviar Correo de Verificación</span>
+        <span *ngIf="isResending()">Enviando enlace...</span>
+        <span *ngIf="cooldown() > 0">Reenviar disponible en {{ cooldown() }}s</span>
+      </button>
+
+      <a routerLink="/login" class="btn-back">
+        Volver a Iniciar Sesión
+      </a>
+    </div>
+
+    <!-- Nota de Seguridad -->
+    <div class="legal-footnote">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="lock-icon">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+      </svg>
+      <span>Tu documento de identidad adjunto está resguardado bajo estrictos protocolos de confidencialidad.</span>
+    </div>
+  </div>
+</div>

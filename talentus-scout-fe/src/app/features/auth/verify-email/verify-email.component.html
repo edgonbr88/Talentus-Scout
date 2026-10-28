@@ -1,0 +1,49 @@
+<div class="verify-page-container">
+  <div class="verify-card">
+    <!-- Estado 1: Procesando Verificación -->
+    <div *ngIf="isLoading()" class="status-box">
+      <div class="spinner-radar"></div>
+      <h2 class="title">Verificando tu Cuenta Oficial</h2>
+      <p class="subtitle">Validando token criptográfico y credenciales de tutor legal...</p>
+    </div>
+
+    <!-- Estado 2: Verificación Exitosa -->
+    <div *ngIf="isSuccess()" class="status-box">
+      <div class="success-icon-wrap">
+        <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+      </div>
+      <h2 class="title success-title">¡Cuenta Activada con Éxito!</h2>
+      <p class="subtitle">
+        Tu correo ha sido confirmado y tu expediente de protección legal del menor está activo.
+      </p>
+      <button (click)="goToDashboard()" class="btn-primary">
+        Ir a mi Panel Ahora
+      </button>
+    </div>
+
+    <!-- Estado 3: Error de Token -->
+    <div *ngIf="errorMessage()" class="status-box">
+      <div class="error-icon-wrap">
+        <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="8" x2="12" y2="12" />
+          <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+      </div>
+      <h2 class="title error-title">Enlace no Válido o Expirado</h2>
+      <p class="subtitle">
+        {{ errorMessage() }}
+      </p>
+      <div class="actions">
+        <a routerLink="/auth/verify-email-pending" class="btn-primary">
+          Solicitar Nuevo Enlace
+        </a>
+        <a routerLink="/login" class="btn-secondary">
+          Volver a Iniciar Sesión
+        </a>
+      </div>
+    </div>
+  </div>
+</div>

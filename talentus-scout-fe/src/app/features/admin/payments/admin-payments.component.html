@@ -1,0 +1,946 @@
+<div class="admin-page container">
+  <!-- ENCABEZADO DE COMANDO ADMINISTRATIVO -->
+  <header class="admin-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-admin">PANEL ADMINISTRATIVO</span>
+        <span class="badge badge-verified">MONETIZACIÓN Y CONCILIACIÓN</span>
+      </div>
+      <h1 class="admin-title">Auditoría de Pagos y Suscripciones Pro</h1>
+      <p class="admin-subtitle">
+        Supervisa los ingresos de la plataforma, concilia transferencias de Pago Móvil y audita las activaciones automáticas de Binance Pay.
+      </p>
+    </div>
+
+    <div class="header-action">
+      <a routerLink="/admin/verificacion-legal" class="btn btn-secondary btn-sm mr-2">
+        Patria Potestad
+      </a>
+      <a routerLink="/admin/scouts" class="btn btn-secondary btn-sm mr-2">
+        Verificación de Scouts
+      </a>
+      <a routerLink="/admin/clubes" class="btn btn-secondary btn-sm mr-2">
+        Clubes y Academias
+      </a>
+      <button (click)="loadSummary(); loadPendingPayments();" [disabled]="isLoading()" class="btn btn-primary btn-sm" type="button">
+        <span *ngIf="isLoading()" class="spinner-small"></span>
+        Actualizar Datos
+      </button>
+    </div>
+  </header>
+
+  <!-- BANNER BENTO DE KPIs Y RECAUDACIÓN -->
+  <section class="bento-metrics">
+    <div class="metric-card metric-primary">
+      <span class="metric-label">Recaudación Total (USD)</span>
+      <div class="metric-value-row">
+        <span class="metric-number">${{ (summary()?.totalRevenueUsd || 0) | number:'1.2-2' }}</span>
+        <span class="metric-indicator indicator-crypto">
+          🟡 {{ summary()?.binancePayApprovedCount || 0 }} en Binance Pay
+        </span>
+      </div>
+      <p class="metric-desc">Ingresos consolidados por planes Pro (Mensual y Anual).</p>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-label">Recaudación en Bolívares (VES)</span>
+      <div class="metric-value-row">
+        <span class="metric-number">{{ (summary()?.totalRevenueVes || 0) | number:'1.2-2' }} Bs.</span>
+        <span class="metric-indicator indicator-pm">
+          🇻🇪 {{ summary()?.pagoMovilApprovedCount || 0 }} en Pago Móvil
+        </span>
+      </div>
+      <p class="metric-desc">Volumen procesado y conciliado en la banca nacional.</p>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-label">Cola de Conciliación</span>
+      <div class="metric-value-row">
+        <span class="metric-number">{{ totalPending() }}</span>
+        <span class="metric-indicator" [class.indicator-active]="totalPending() > 0">
+          {{ totalPending() > 0 ? 'Requiere Revisión' : 'Al Día' }}
+        </span>
+      </div>
+      <p class="metric-desc">Pagos manuales esperando aprobación administrativa.</p>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-label">Transacciones Totales</span>
+      <div class="metric-value-row">
+        <span class="metric-highlight">
+          {{ (summary()?.approvedCount || 0) }} Aprobadas
+        </span>
+        <span class="metric-sub" *ngIf="(summary()?.rejectedCount || 0) > 0">
+          · {{ summary()?.rejectedCount }} Rechazadas
+        </span>
+      </div>
+      <p class="metric-desc">Histórico completo de órdenes procesadas en la plataforma.</p>
+    </div>
+  </section>
+
+  <!-- FEEDBACK TOAST / NOTIFICACIONES -->
+  <div *ngIf="feedback()" class="feedback-toast" [class.toast-error]="feedback()?.type === 'error'">
+    <span class="feedback-text">{{ feedback()?.text }}</span>
+    <button (click)="feedback.set(null)" class="toast-close" type="button" aria-label="Cerrar notificación">✕</button>
+  </div>
+
+  <!-- NAVEGACIÓN POR PESTAÑAS (TABS BENTO) -->
+  <div class="admin-tabs-nav">
+    <button
+      type="button"
+      class="admin-tab-btn"
+      [class.active]="activeTab() === 'PENDING'"
+      (click)="setTab('PENDING')"
+    >
+      <span>⏳ Cola de Pendientes</span>
+      <span class="tab-count-badge" [class.badge-alert]="totalPending() > 0">{{ totalPending() }}</span>
+    </button>
+    <button
+      type="button"
+      class="admin-tab-btn"
+      [class.active]="activeTab() === 'HISTORY'"
+      (click)="setTab('HISTORY')"
+    >
+      <span>📜 Historial General de Auditoría</span>
+      <span class="tab-count-badge">{{ totalHistoryElements() }}</span>
+    </button>
+    <button
+      type="button"
+      class="admin-tab-btn"
+      [class.active]="activeTab() === 'COUPONS'"
+      (click)="setTab('COUPONS')"
+    >
+      <span>🏷️ Códigos & Afiliados</span>
+      <span class="tab-count-badge">{{ codesTotalElements() }}</span>
+    </button>
+    <button
+      type="button"
+      class="admin-tab-btn"
+      [class.active]="activeTab() === 'GATEWAY_SETTINGS'"
+      (click)="setTab('GATEWAY_SETTINGS')"
+    >
+      <span>⚙️ Cuentas de Cobro</span>
+      <span class="tab-count-badge badge-active" *ngIf="gatewaySettings()">
+        {{ (gatewaySettings()?.pagoMovilEnabled && gatewaySettings()?.binanceManualEnabled) ? '2 Activas' : ((gatewaySettings()?.pagoMovilEnabled || gatewaySettings()?.binanceManualEnabled) ? '1 Activa' : 'Pausadas') }}
+      </span>
+    </button>
+  </div>
+
+  <!-- PESTAÑA 1: COLA DE TRANSACCIONES PENDIENTES -->
+  <section *ngIf="activeTab() === 'PENDING'" class="payments-section">
+    <!-- ESTADO DE CARGA -->
+    <div *ngIf="isLoading()" class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando transacciones de pago pendientes...</p>
+    </div>
+
+    <!-- ESTADO VACÍO -->
+    <div *ngIf="!isLoading() && pendingPayments().length === 0" class="empty-state">
+      <div class="empty-icon">✓</div>
+      <h3>No hay pagos pendientes de conciliar</h3>
+      <p>Todas las transacciones de Pago Móvil y Binance Pay han sido auditadas.</p>
+      <button (click)="loadPendingPayments()" class="btn btn-secondary btn-sm mt-3">Refrescar cola</button>
+    </div>
+
+    <!-- LISTA DE TRANSACCIONES PENDIENTES -->
+    <div *ngIf="!isLoading() && pendingPayments().length > 0" class="payments-grid">
+      <div *ngFor="let tx of pendingPayments()" class="payment-card">
+        <div class="payment-card-header">
+          <div class="header-left">
+            <span class="badge badge-reference">REF: #{{ tx.referenceNumber || tx.gatewayOrderId }}</span>
+            <span class="badge" [class.badge-binance]="tx.method === 'BINANCE_PAY'" [class.badge-pagomovil]="tx.method === 'PAGO_MOVIL'">
+              {{ tx.method === 'BINANCE_PAY' ? '🟡 Binance' : '🇻🇪 Pago Móvil' }}
+            </span>
+            <span class="payment-date">{{ tx.paymentDate }}</span>
+          </div>
+          <div class="header-right">
+            <span class="badge badge-plan">{{ tx.planName }}</span>
+          </div>
+        </div>
+
+        <div class="payment-card-body">
+          <div class="info-group">
+            <span class="info-label">Atleta a Activar:</span>
+            <strong class="info-value athlete-name">{{ tx.athleteName }}</strong>
+          </div>
+
+          <div class="info-group">
+            <span class="info-label">Tutor Representante:</span>
+            <span class="info-value">{{ tx.tutorName || 'Tutor' }}</span>
+            <span class="info-sub">{{ tx.tutorEmail }} · {{ tx.tutorPhone || 'Sin teléfono' }}</span>
+          </div>
+
+          <div class="amounts-box">
+            <div class="amount-col">
+              <span class="amount-lbl">Monto en Divisa</span>
+              <strong class="amount-usd">${{ tx.amountUsd | number:'1.2-2' }} USD</strong>
+            </div>
+            <div class="amount-divider" *ngIf="tx.amountVes"></div>
+            <div class="amount-col" *ngIf="tx.amountVes">
+              <span class="amount-lbl">Monto en Bolívares (BCV {{ tx.bcvExchangeRate | number:'1.2-2' }})</span>
+              <strong class="amount-ves">{{ tx.amountVes | number:'1.2-2' }} Bs.</strong>
+            </div>
+          </div>
+
+          <div class="bank-details-row" *ngIf="tx.originBank">
+            <div class="bank-item">
+              <span class="bank-lbl">Banco Emisor:</span>
+              <span class="bank-val">{{ tx.originBank }}</span>
+            </div>
+            <div class="bank-item" *ngIf="tx.originPhone">
+              <span class="bank-lbl">Teléfono Origen:</span>
+              <span class="bank-val">{{ tx.originPhone }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="payment-card-actions">
+          <button
+            (click)="openRejectModal(tx)"
+            [disabled]="isProcessing() && processingId() === tx.id"
+            class="btn btn-outline-danger btn-sm"
+            type="button"
+          >
+            Rechazar
+          </button>
+          <button
+            (click)="approvePayment(tx)"
+            [disabled]="isProcessing() && processingId() === tx.id"
+            class="btn btn-primary btn-sm"
+            type="button"
+          >
+            <span *ngIf="isProcessing() && processingId() === tx.id" class="spinner-small mr-1"></span>
+            Aprobar y Activar Plan Pro
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PESTAÑA 2: HISTORIAL GENERAL DE AUDITORÍA -->
+  <section *ngIf="activeTab() === 'HISTORY'" class="history-section">
+    <!-- BARRA DE FILTROS -->
+    <div class="history-filters-bar">
+      <div class="filter-group">
+        <label for="filterMethod">Método de Pago:</label>
+        <select
+          id="filterMethod"
+          class="filter-select"
+          [(ngModel)]="filterMethod"
+          (change)="onFilterChange()"
+        >
+          <option value="ALL">Todos los Métodos</option>
+          <option value="PAGO_MOVIL">Pago Móvil (Bs)</option>
+          <option value="BINANCE_PAY">Binance Pay (USDT)</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filterStatus">Estado:</label>
+        <select
+          id="filterStatus"
+          class="filter-select"
+          [(ngModel)]="filterStatus"
+          (change)="onFilterChange()"
+        >
+          <option value="ALL">Todos los Estados</option>
+          <option value="APPROVED">Aprobados</option>
+          <option value="PENDING_AUDIT">Pendientes de Conciliación</option>
+          <option value="REJECTED">Rechazados</option>
+        </select>
+      </div>
+
+      <button (click)="loadHistory(currentPage())" class="btn btn-secondary btn-sm" type="button">
+        Refrescar Historial
+      </button>
+    </div>
+
+    <!-- ESTADO DE CARGA HISTORIAL -->
+    <div *ngIf="isLoadingHistory()" class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando registros contables...</p>
+    </div>
+
+    <!-- TABLA DE HISTORIAL -->
+    <div *ngIf="!isLoadingHistory()" class="table-container">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Método</th>
+            <th>Referencia / TradeNo</th>
+            <th>Atleta</th>
+            <th>Plan</th>
+            <th>Monto</th>
+            <th>Estado</th>
+            <th>Tutor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of historyPayments()">
+            <td class="cell-date">{{ item.createdAt | date:'short' }}</td>
+            <td>
+              <span class="chip-method" [class.chip-binance]="item.method === 'BINANCE_PAY'">
+                {{ item.method === 'BINANCE_PAY' ? '🟡 Binance Pay' : '🇻🇪 Pago Móvil' }}
+              </span>
+            </td>
+            <td class="cell-code">
+              <code>{{ item.referenceNumber || item.gatewayOrderId || 'N/A' }}</code>
+            </td>
+            <td class="cell-athlete">
+              <strong>{{ item.athleteName }}</strong>
+            </td>
+            <td>
+              <span class="badge badge-plan-table">{{ item.planName }}</span>
+            </td>
+            <td class="cell-amount">
+              <div><strong>${{ item.amountUsd | number:'1.2-2' }} USD</strong></div>
+              <small *ngIf="item.amountVes" class="text-muted">{{ item.amountVes | number:'1.2-2' }} Bs.</small>
+            </td>
+            <td>
+              <span
+                class="badge-status"
+                [class.status-approved]="item.status === 'APPROVED'"
+                [class.status-pending]="item.status === 'PENDING_AUDIT'"
+                [class.status-rejected]="item.status === 'REJECTED'"
+              >
+                {{ item.status === 'APPROVED' ? '✓ Aprobado' : (item.status === 'PENDING_AUDIT' ? '⏳ Pendiente' : '✕ Rechazado') }}
+              </span>
+            </td>
+            <td class="cell-tutor">
+              <div>{{ item.tutorName || 'Tutor' }}</div>
+              <small class="text-muted">{{ item.tutorEmail }}</small>
+            </td>
+          </tr>
+
+          <tr *ngIf="historyPayments().length === 0">
+            <td colspan="8" class="empty-table-cell">
+              No se encontraron registros con los filtros seleccionados.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- PAGINADOR -->
+      <div class="pagination-footer" *ngIf="totalPages() > 1">
+        <button
+          [disabled]="currentPage() === 0"
+          (click)="loadHistory(currentPage() - 1)"
+          class="btn btn-secondary btn-sm"
+          type="button"
+        >
+          ← Anterior
+        </button>
+        <span class="page-indicator">
+          Página {{ currentPage() + 1 }} de {{ totalPages() }} ({{ totalHistoryElements() }} registros)
+        </span>
+        <button
+          [disabled]="currentPage() >= totalPages() - 1"
+          (click)="loadHistory(currentPage() + 1)"
+          class="btn btn-secondary btn-sm"
+          type="button"
+        >
+          Siguiente →
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PESTAÑA 3: GESTIÓN DE CÓDIGOS DE DESCUENTO Y CONVENIOS -->
+  <section *ngIf="activeTab() === 'COUPONS'" class="coupons-section">
+    <!-- BARRA SUPERIOR DE ACCIONES -->
+    <div class="coupons-header-bar">
+      <div class="coupons-info">
+        <h2 class="section-title">Códigos Promocionales y Convenios Institucionales</h2>
+        <p class="section-desc">
+          Crea convenios con clubes, becas al 100% y cupones promocionales con límite de canje y vigencia.
+        </p>
+      </div>
+      <div class="coupons-actions">
+        <button (click)="loadDiscountCodes(codesCurrentPage())" class="btn btn-secondary btn-sm mr-2" type="button" [disabled]="isLoadingCodes()">
+          Refrescar
+        </button>
+        <button (click)="openCreateCouponModal()" class="btn btn-primary btn-sm" type="button">
+          + Crear Código de Descuento
+        </button>
+      </div>
+    </div>
+
+    <!-- ESTADO DE CARGA -->
+    <div *ngIf="isLoadingCodes()" class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando catálogo de códigos y convenios...</p>
+    </div>
+
+    <!-- ESTADO VACÍO -->
+    <div *ngIf="!isLoadingCodes() && discountCodes().length === 0" class="empty-state">
+      <div class="empty-icon">🏷️</div>
+      <h3>No hay códigos de descuento registrados</h3>
+      <p>Comienza creando convenios con academias aliadas o promociones para tutores y atletas.</p>
+      <button (click)="openCreateCouponModal()" class="btn btn-primary btn-sm mt-3">Crear Primer Código</button>
+    </div>
+
+    <!-- TABLA DE CÓDIGOS -->
+    <div *ngIf="!isLoadingCodes() && discountCodes().length > 0" class="table-container">
+      <table class="history-table coupons-table">
+        <thead>
+          <tr>
+            <th>Código Promocional</th>
+            <th>Organización / Convenio</th>
+            <th>Beneficio / Descuento</th>
+            <th>Plan Aplicable</th>
+            <th>Usos / Límite</th>
+            <th>Vigencia</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of discountCodes()">
+            <td class="cell-code">
+              <div class="code-copy-wrapper">
+                <code class="promo-code-pill">{{ item.code }}</code>
+                <button
+                  type="button"
+                  (click)="copyCodeToClipboard(item.code)"
+                  class="btn-copy-mini"
+                  [title]="copiedCode() === item.code ? '¡Copiado!' : 'Copiar código'"
+                >
+                  {{ copiedCode() === item.code ? '✓' : '📋' }}
+                </button>
+              </div>
+              <small *ngIf="item.description" class="text-muted d-block mt-1">{{ item.description }}</small>
+            </td>
+            <td>
+              <span class="badge-org" [class.org-partner]="item.organizationName">
+                {{ item.organizationName ? '🤝 ' + item.organizationName : '🌐 General' }}
+              </span>
+            </td>
+            <td>
+              <span
+                class="badge-discount"
+                [class.discount-100]="item.discountType === 'PERCENTAGE' && item.discountValue === 100"
+                [class.discount-fixed]="item.discountType === 'FIXED_AMOUNT'"
+              >
+                <ng-container *ngIf="item.discountType === 'PERCENTAGE' && item.discountValue === 100">
+                  ⚡ 100% BECA TOTAL
+                </ng-container>
+                <ng-container *ngIf="item.discountType === 'PERCENTAGE' && item.discountValue < 100">
+                  {{ item.discountValue }}% OFF
+                </ng-container>
+                <ng-container *ngIf="item.discountType === 'FIXED_AMOUNT'">
+                  ${{ item.discountValue | number:'1.2-2' }} USD OFF
+                </ng-container>
+              </span>
+            </td>
+            <td>
+              <span class="badge badge-plan-table">
+                {{ item.applicablePlanName || (item.applicablePlanId ? item.applicablePlanId : 'Todos los Planes') }}
+              </span>
+            </td>
+            <td class="cell-uses">
+              <div class="uses-counter">
+                <strong>{{ item.currentUses }}</strong>
+                <span class="text-muted"> / {{ item.maxUses != null ? item.maxUses : '∞' }}</span>
+              </div>
+              <span *ngIf="item.oneUsePerAthlete" class="badge-sub-info">1 por atleta</span>
+            </td>
+            <td class="cell-date">
+              <span *ngIf="item.expiresAt">{{ item.expiresAt | date:'mediumDate' }}</span>
+              <span *ngIf="!item.expiresAt" class="text-muted">Sin Expiración</span>
+            </td>
+            <td>
+              <button
+                type="button"
+                (click)="toggleCodeStatus(item)"
+                class="status-toggle-btn"
+                [class.toggle-active]="item.isActive"
+                [title]="item.isActive ? 'Clic para pausar cupón' : 'Clic para activar cupón'"
+              >
+                <span class="status-dot"></span>
+                {{ item.isActive ? 'Activo' : 'Pausado' }}
+              </button>
+            </td>
+            <td class="cell-actions">
+              <button (click)="openEditCouponModal(item)" class="btn-action-icon" type="button" title="Editar cupón">
+                ✏️
+              </button>
+              <button (click)="deleteCode(item)" class="btn-action-icon btn-action-delete" type="button" title="Eliminar cupón">
+                🗑️
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- PAGINADOR DE CUPONES -->
+      <div class="pagination-footer" *ngIf="codesTotalPages() > 1">
+        <button
+          [disabled]="codesCurrentPage() === 0"
+          (click)="loadDiscountCodes(codesCurrentPage() - 1)"
+          class="btn btn-secondary btn-sm"
+          type="button"
+        >
+          ← Anterior
+        </button>
+        <span class="page-indicator">
+          Página {{ codesCurrentPage() + 1 }} de {{ codesTotalPages() }} ({{ codesTotalElements() }} cupones)
+        </span>
+        <button
+          [disabled]="codesCurrentPage() >= codesTotalPages() - 1"
+          (click)="loadDiscountCodes(codesCurrentPage() + 1)"
+          class="btn btn-secondary btn-sm"
+          type="button"
+        >
+          Siguiente →
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PESTAÑA 4: CONFIGURACIÓN DE CUENTAS DE COBRO (TS-58) -->
+  <section *ngIf="activeTab() === 'GATEWAY_SETTINGS'" class="payments-section gateway-settings-section">
+    <div class="section-title-bar">
+      <div>
+        <h2 class="sub-title">Mantenedor de Cuentas de Cobro y Pasarelas</h2>
+        <p class="section-desc">
+          Gestiona los canales bancarios y billeteras institucionales. Las modificaciones se reflejan en tiempo real en el checkout de los tutores sin reiniciar el backend.
+        </p>
+      </div>
+
+      <div class="actions-group">
+        <button
+          type="button"
+          (click)="loadGatewaySettings()"
+          [disabled]="isLoadingGateway()"
+          class="btn btn-secondary btn-sm"
+        >
+          <span *ngIf="isLoadingGateway()" class="spinner-small mr-1"></span>
+          ↻ Recargar Datos
+        </button>
+
+        <button
+          type="button"
+          (click)="saveGatewaySettings()"
+          [disabled]="isSavingGateway() || isLoadingGateway()"
+          class="btn btn-primary btn-sm"
+        >
+          <span *ngIf="isSavingGateway()" class="spinner-small mr-1"></span>
+          💾 Guardar Configuración
+        </button>
+      </div>
+    </div>
+
+    <!-- ESTADO DE CARGA -->
+    <div *ngIf="isLoadingGateway()" class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando parámetros de pasarelas y cuentas de cobro...</p>
+    </div>
+
+    <div *ngIf="!isLoadingGateway()" class="gateway-bento-grid">
+      <!-- BLOQUE 1: PAGO MÓVIL (BANCA NACIONAL) -->
+      <article class="bento-config-card pm-card">
+        <div class="config-card-header">
+          <div class="card-title-group">
+            <span class="badge badge-pm">🇻🇪 BOLÍVARES (VES)</span>
+            <h3 class="config-title">Pago Móvil Interbancario</h3>
+          </div>
+          <div class="switch-toggle-wrap">
+            <label class="switch-toggle" [attr.aria-label]="pmEnabledInput ? 'Desactivar Pago Móvil' : 'Activar Pago Móvil'">
+              <input type="checkbox" [(ngModel)]="pmEnabledInput" />
+              <span class="slider"></span>
+            </label>
+            <span class="toggle-status-text" [class.status-active]="pmEnabledInput">
+              {{ pmEnabledInput ? 'Activo en Checkout' : 'Pausado' }}
+            </span>
+          </div>
+        </div>
+
+        <p class="config-desc">
+          Parámetros bancarios oficiales para recepción y conciliación de transferencias móviles en Venezuela.
+        </p>
+
+        <div class="config-form-grid">
+          <div class="form-group">
+            <label for="pmBank" class="input-label">Banco Receptor <span class="required">*</span></label>
+            <input
+              id="pmBank"
+              type="text"
+              [(ngModel)]="pmBankInput"
+              class="input-control"
+              placeholder="Ej: Banco Nacional de Crédito (BNC)"
+              [disabled]="!pmEnabledInput"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="pmPhone" class="input-label">Teléfono Receptor <span class="required">*</span></label>
+            <input
+              id="pmPhone"
+              type="text"
+              [(ngModel)]="pmPhoneInput"
+              class="input-control"
+              placeholder="Ej: 04141234567"
+              [disabled]="!pmEnabledInput"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="pmIdNumber" class="input-label">C.I. / RIF del Titular <span class="required">*</span></label>
+            <input
+              id="pmIdNumber"
+              type="text"
+              [(ngModel)]="pmIdNumberInput"
+              class="input-control"
+              placeholder="Ej: J-50123456-7"
+              [disabled]="!pmEnabledInput"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="pmHolder" class="input-label">Nombre del Titular <span class="required">*</span></label>
+            <input
+              id="pmHolder"
+              type="text"
+              [(ngModel)]="pmAccountHolderInput"
+              class="input-control"
+              placeholder="Ej: Talentus Scout C.A."
+              [disabled]="!pmEnabledInput"
+            />
+          </div>
+        </div>
+
+        <div class="config-card-footer">
+          <span class="status-indicator-dot" [class.dot-online]="pmEnabledInput"></span>
+          <span class="footer-note">
+            {{ pmEnabledInput ? 'Visible para los representantes al seleccionar suscripción en bolívares.' : 'Oculto o inhabilitado en el modal de checkout para los tutores.' }}
+          </span>
+        </div>
+      </article>
+
+      <!-- BLOQUE 2: BINANCE (MANUAL & QR CODE) -->
+      <article class="bento-config-card binance-card">
+        <div class="config-card-header">
+          <div class="card-title-group">
+            <span class="badge badge-crypto">🟡 CRIPTOACTIVOS (USDT)</span>
+            <h3 class="config-title">Binance Pay & Wallet USDT</h3>
+          </div>
+          <div class="switch-toggle-wrap">
+            <label class="switch-toggle" [attr.aria-label]="binanceEnabledInput ? 'Desactivar Binance' : 'Activar Binance'">
+              <input type="checkbox" [(ngModel)]="binanceEnabledInput" />
+              <span class="slider"></span>
+            </label>
+            <span class="toggle-status-text" [class.status-active]="binanceEnabledInput">
+              {{ binanceEnabledInput ? 'Activo en Checkout' : 'Pausado' }}
+            </span>
+          </div>
+        </div>
+
+        <p class="config-desc">
+          Billetera institucional USDT, Pay ID y código QR para recepción de transferencias en red Binance.
+        </p>
+
+        <div class="config-form-grid">
+          <div class="form-group">
+            <label for="binancePayId" class="input-label">Binance Pay ID</label>
+            <input
+              id="binancePayId"
+              type="text"
+              [(ngModel)]="binancePayIdInput"
+              class="input-control"
+              placeholder="Ej: 283918273"
+              [disabled]="!binanceEnabledInput"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="binanceNetwork" class="input-label">Red de Transferencia</label>
+            <input
+              id="binanceNetwork"
+              type="text"
+              [(ngModel)]="binanceNetworkInput"
+              class="input-control"
+              placeholder="Ej: USDT (TRC-20 / BEP-20)"
+              [disabled]="!binanceEnabledInput"
+            />
+          </div>
+
+          <div class="form-group col-span-2">
+            <label for="binanceWallet" class="input-label">Dirección de Wallet USDT</label>
+            <input
+              id="binanceWallet"
+              type="text"
+              [(ngModel)]="binanceWalletInput"
+              class="input-control font-mono"
+              placeholder="Ej: TLsV5289FjK93kdJ8193jd93kd9"
+              [disabled]="!binanceEnabledInput"
+            />
+          </div>
+        </div>
+
+        <!-- DROPZONE / SUBIDA DE CÓDIGO QR -->
+        <div class="qr-management-box">
+          <div class="qr-preview-pane">
+            <img
+              [src]="qrPreviewUrl() || binanceQrImageUrlDisplay()"
+              alt="Código QR de Binance"
+              class="qr-img-preview"
+            />
+            <span class="qr-preview-tag" *ngIf="qrPreviewUrl()">Vista Previa (Sin Guardar)</span>
+            <span class="qr-preview-tag tag-current" *ngIf="!qrPreviewUrl()">QR Publicado</span>
+          </div>
+
+          <div class="qr-upload-pane">
+            <h4 class="qr-pane-title">Actualizar Código QR de Cobro</h4>
+            <p class="qr-pane-desc">
+              Sube una imagen cuadrada de alta legibilidad (PNG, JPG o WEBP, máx 5MB). Al subirla, se actualizará instantáneamente en el modal de Binance de los tutores.
+            </p>
+
+            <div class="qr-actions-row">
+              <label class="btn btn-secondary btn-sm file-picker-label">
+                <span>📁 Seleccionar Imagen</span>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  (change)="onQrFileSelected($event)"
+                  class="sr-only"
+                />
+              </label>
+
+              <button
+                *ngIf="selectedQrFile"
+                type="button"
+                (click)="uploadSelectedQr()"
+                [disabled]="isUploadingQr()"
+                class="btn btn-primary btn-sm"
+              >
+                <span *ngIf="isUploadingQr()" class="spinner-small mr-1"></span>
+                ⬆ Subir Código QR
+              </button>
+
+              <button
+                *ngIf="selectedQrFile"
+                type="button"
+                (click)="cancelSelectedQr()"
+                [disabled]="isUploadingQr()"
+                class="btn btn-secondary btn-sm"
+              >
+                ✕ Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="config-card-footer">
+          <span class="status-indicator-dot" [class.dot-online]="binanceEnabledInput"></span>
+          <span class="footer-note">
+            {{ binanceEnabledInput ? 'Cobros por Binance y código QR disponibles para representantes y scouts.' : 'Opción Binance oculta o deshabilitada en el checkout.' }}
+          </span>
+        </div>
+      </article>
+    </div>
+
+    <!-- NOTA DE AUDITORÍA Y TRAZABILIDAD -->
+    <div class="gateway-audit-bar" *ngIf="gatewaySettings()?.updatedAt">
+      <span class="audit-icon">ℹ️</span>
+      <span class="audit-text">
+        Última actualización de cuentas de recaudación:
+        <strong>{{ gatewaySettings()?.updatedAt | date:'dd/MM/yyyy, hh:mm a' }}</strong>.
+        Los cambios tienen efecto inmediato para todas las sesiones activas de usuarios.
+      </span>
+    </div>
+  </section>
+
+  <!-- MODAL DE RECHAZO MOTIVADO -->
+  <div *ngIf="isRejectModalOpen()" class="modal-backdrop" (click)="closeRejectModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Rechazar Transacción de Pago</h3>
+        <button (click)="closeRejectModal()" class="btn-close" type="button" aria-label="Cerrar modal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-desc">
+          Indica el motivo por el cual esta transacción no pudo ser conciliada en la cuenta bancaria. Esta explicación será enviada por correo al tutor legal.
+        </p>
+
+        <div *ngIf="paymentToReject() as tx" class="tx-summary-mini">
+          <div><strong>Atleta:</strong> {{ tx.athleteName }}</div>
+          <div><strong>Referencia:</strong> #{{ tx.referenceNumber || tx.gatewayOrderId }}</div>
+          <div><strong>Monto:</strong> {{ tx.amountVes ? (tx.amountVes | number:'1.2-2') + ' Bs.' : '$' + tx.amountUsd + ' USD' }}</div>
+        </div>
+
+        <div class="form-group mt-3">
+          <label for="rejectionReason" class="input-label">Motivo de Rechazo <span class="required">*</span></label>
+          <textarea
+            id="rejectionReason"
+            [(ngModel)]="rejectionReasonInput"
+            class="input-control textarea-control"
+            rows="3"
+            placeholder="Ej: Número de referencia no encontrado en el extracto de cuenta bancaria o monto incompleto."
+          ></textarea>
+        </div>
+
+        <div *ngIf="rejectionError()" class="error-alert mt-2">
+          {{ rejectionError() }}
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button (click)="closeRejectModal()" [disabled]="isProcessing()" class="btn btn-secondary" type="button">
+          Cancelar
+        </button>
+        <button (click)="confirmReject()" [disabled]="isProcessing()" class="btn btn-danger" type="button">
+          <span *ngIf="isProcessing()" class="spinner-small mr-1"></span>
+          Confirmar Rechazo
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CREAR / EDITAR CÓDIGO DE DESCUENTO -->
+  <div *ngIf="isCouponModalOpen()" class="modal-backdrop" (click)="closeCouponModal()">
+    <div class="modal-card modal-lg" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="badge badge-admin">CONVENIOS Y PROMOCIONES</span>
+          <h3>{{ editingCouponId() ? 'Editar Código de Descuento' : 'Nuevo Código o Convenio Institucional' }}</h3>
+        </div>
+        <button (click)="closeCouponModal()" class="btn-close" type="button" aria-label="Cerrar modal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-desc">
+          Configura cupones promocionales con límite de canje o convenios con academias que otorgan descuentos o becas completas del 100%.
+        </p>
+
+        <div class="form-grid">
+          <!-- CÓDIGO Y TIPO -->
+          <div class="form-group">
+            <label for="couponCode" class="input-label">Código Promocional <span class="required">*</span></label>
+            <input
+              id="couponCode"
+              type="text"
+              [(ngModel)]="couponCodeInput"
+              [disabled]="!!editingCouponId()"
+              class="input-control text-uppercase font-mono"
+              placeholder="Ej: TALENTUS100, CARACASFC"
+              maxlength="30"
+            />
+            <span class="input-help">Solo letras y números, sin espacios.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="couponType" class="input-label">Tipo de Descuento <span class="required">*</span></label>
+            <select id="couponType" [(ngModel)]="couponTypeInput" class="input-control">
+              <option value="PERCENTAGE">Porcentaje (%)</option>
+              <option value="FIXED_AMOUNT">Monto Fijo ($ USD)</option>
+            </select>
+            <span class="input-help">{{ couponTypeInput === 'PERCENTAGE' ? 'Aplica porcentaje sobre el costo del plan' : 'Resta monto fijo en dólares' }}</span>
+          </div>
+
+          <!-- VALOR Y PLAN APLICABLE -->
+          <div class="form-group">
+            <label for="couponValue" class="input-label">
+              Valor del Descuento {{ couponTypeInput === 'PERCENTAGE' ? '(%)' : '($ USD)' }} <span class="required">*</span>
+            </label>
+            <input
+              id="couponValue"
+              type="number"
+              [(ngModel)]="couponValueInput"
+              class="input-control"
+              min="0.01"
+              [max]="couponTypeInput === 'PERCENTAGE' ? 100 : 9999"
+              step="1"
+            />
+            <span class="input-help" *ngIf="couponTypeInput === 'PERCENTAGE' && couponValueInput === 100">
+              ⚡ <strong>100%</strong> activará la membresía Pro de inmediato sin pasarela de pago.
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="applicablePlan" class="input-label">Plan Aplicable</label>
+            <select id="applicablePlan" [(ngModel)]="couponPlanRestrictionInput" class="input-control">
+              <option value="">Todos los Planes Pro (Mensual y Anual)</option>
+              <option value="PRO_MONTHLY">Exclusivo Plan Pro Mensual</option>
+              <option value="PRO_ANNUAL">Exclusivo Plan Pro Anual</option>
+            </select>
+          </div>
+
+          <!-- DESCRIPCIÓN Y ORGANIZACIÓN -->
+          <div class="form-group col-span-2">
+            <label for="couponDesc" class="input-label">Descripción / Justificación</label>
+            <input
+              id="couponDesc"
+              type="text"
+              [(ngModel)]="couponDescriptionInput"
+              class="input-control"
+              placeholder="Ej: Beca total por convenio institucional con Academia Puerto Cabello 2026"
+            />
+          </div>
+
+          <div class="form-group col-span-2" *ngIf="clubs().length > 0">
+            <label for="couponClub" class="input-label">Club / Academia Deportiva Aliada (Opcional)</label>
+            <select id="couponClub" [(ngModel)]="couponOrganizationIdInput" class="input-control">
+              <option value="">Sin Organización Asignada (Público / Campaña Abierta)</option>
+              <option *ngFor="let club of clubs()" [value]="club.id">{{ club.name }}</option>
+            </select>
+            <span class="input-help">Asigna el convenio al club para trazabilidad institucional.</span>
+          </div>
+
+          <!-- LÍMITES Y FECHAS -->
+          <div class="form-group">
+            <label for="couponMaxUses" class="input-label">Límite Total de Canjes</label>
+            <input
+              id="couponMaxUses"
+              type="number"
+              [(ngModel)]="couponMaxUsesInput"
+              class="input-control"
+              placeholder="Ilimitado si está vacío"
+              min="1"
+            />
+            <span class="input-help">Cantidad máxima de veces que puede canjearse.</span>
+          </div>
+
+          <div class="form-group flex-center-start">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="couponOneUsePerAthleteInput" />
+              <span>Restringir a 1 uso por atleta</span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label for="startsAt" class="input-label">Fecha de Inicio (Opcional)</label>
+            <input id="startsAt" type="date" [(ngModel)]="couponStartsAtInput" class="input-control" />
+          </div>
+
+          <div class="form-group">
+            <label for="expiresAt" class="input-label">Fecha de Expiración (Opcional)</label>
+            <input id="expiresAt" type="date" [(ngModel)]="couponExpiresAtInput" class="input-control" />
+          </div>
+
+          <div class="form-group col-span-2">
+            <label class="checkbox-label">
+              <input type="checkbox" [(ngModel)]="couponIsActiveInput" />
+              <span>Cupón Activo (Permitir canjes en checkout)</span>
+            </label>
+          </div>
+        </div>
+
+        <div *ngIf="couponFormError()" class="error-alert mt-3">
+          {{ couponFormError() }}
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button (click)="closeCouponModal()" [disabled]="isSavingCoupon()" class="btn btn-secondary" type="button">
+          Cancelar
+        </button>
+        <button (click)="saveCoupon()" [disabled]="isSavingCoupon()" class="btn btn-primary" type="button">
+          <span *ngIf="isSavingCoupon()" class="spinner-small mr-1"></span>
+          {{ editingCouponId() ? 'Guardar Cambios' : 'Crear Código' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

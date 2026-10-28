@@ -221,7 +221,8 @@ a:hover {
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
-.badge-lopnna {
+.badge-lopnna,
+.badge-legal-protection {
   background-color: rgba(99, 102, 241, 0.12);
   color: #818CF8;
   border: 1px solid rgba(99, 102, 241, 0.3);

@@ -33,13 +33,14 @@ graph TD
     ConsultDesign["Consultar skill frontend-design (fe-desing.md)"]
     ExecChecklist["2. Ejecutar Checklist paso a paso (Código + Migraciones + Tests)"]
     VerifyCompile["3. Validar Compilación, Pruebas y Diseño UI"]
-    UpdatePlan["4. Marcar Checkboxes [x] en el archivo de plan"]
-    MoveCard["5. Mover Tarjeta a 'in testing' con Comentario en Trello"]
+    GenTestDoc["4. Generar Plan de Pruebas en test/<TS-ID>-test-plan-*.md"]
+    UpdatePlan["5. Marcar Checkboxes [x] en el archivo de plan"]
+    MoveCard["6. Mover Tarjeta a 'in testing' con Comentario en Trello"]
 
     ReadPlan --> CheckFrontend
     CheckFrontend -->|"Sí"| ConsultDesign --> ExecChecklist
     CheckFrontend -->|"No"| ExecChecklist
-    ExecChecklist --> VerifyCompile --> UpdatePlan --> MoveCard
+    ExecChecklist --> VerifyCompile --> GenTestDoc --> UpdatePlan --> MoveCard
 ```
 
 ---
@@ -57,6 +58,12 @@ graph TD
 ### 2. Execute Code Implementation
 * **Backend (Spring Boot 3 / Java 21):**
   * Follow layered architecture: Entity -> Repository -> Service -> Controller.
+  * **Uso Obligatorio de Lombok:** En todas las entidades JPA (`com.talentus.scout.domain.entity`), DTOs (`com.talentus.scout.web.dto`) y modelos de servicio, aplicar Lombok para eliminar código repetitivo:
+    * `@Getter`, `@Setter` a nivel de clase para accesores y mutadores automáticos.
+    * `@NoArgsConstructor` (indispensable para JPA/Jackson) y `@AllArgsConstructor`.
+    * `@Builder` para habilitar el patrón Builder idiomático.
+    * `@Builder.Default` en campos que declaran valores por defecto (ej. `gender = "MALE"`, `isPublic = true`, `status = VideoStatus.PENDING_UPLOAD`).
+    * **Prohibición de constructores manuales extensos:** No codificar constructores manuales con listas largas de parámetros; instanciar objetos en servicios, controladores y pruebas usando el Builder (`Entity.builder()...build()`).
   * Use proper Jakarta validation (`@NotBlank`, `@NotNull`, `@Pattern`, `@Positive`).
   * Flyway migrations must be placed in `src/main/resources/db/migration/V...__name.sql`.
 * **Frontend (Angular 18+ Standalone & UI Design):**
@@ -79,6 +86,7 @@ graph TD
     * Mensajes de error claros que expliquen el problema y cómo solucionarlo sin ambigüedad.
   * **Calidad Técnica Frontend:**
     * Componentes Standalone modulares (`src/app/...`).
+    * **Separación Obligatoria de Plantillas HTML y TypeScript:** Todo componente de Angular **DEBE** separar su plantilla HTML en un archivo independiente (`.component.html`) y referenciarlo mediante `templateUrl: './<component>.component.html'`. Queda estrictamente prohibido el uso de plantillas inline (`template: \`...\``) dentro del archivo `.component.ts`.
     * Tipado estricto en interfaces TypeScript alineadas a los DTOs de backend.
     * Respeto a accesibilidad (`prefers-reduced-motion`, foco visible por teclado, contraste AA/AAA).
     * Control de especificidad CSS para evitar colisiones entre clases.
@@ -93,22 +101,39 @@ Before marking any task as complete:
    * Verificar responsive en viewport móvil y desktop.
 5. **Fix Any Lint/Compilation Errors:** Never proceed to testing status if the build is failing.
 
-### 4. Update the Plan Checklist
+### 4. Document Test Plan in `test/` Folder
+El agente implementador **DEBE** generar obligatoriamente un documento de Plan de Pruebas dentro de la carpeta `test/` en la raíz del proyecto antes de mover la tarjeta a `in testing`:
+`test/<TS-ID>-test-plan-<slug-tarea>.md` (ejemplo: `test/TS-07-test-plan-pipeline-video-streaming.md`).
+
+**Estructura obligatoria del Plan de Pruebas:**
+1. **Identificación:** ID de tarea, Título, Enlace a tarjeta en Trello, Sprint y fecha.
+2. **Alcance de Pruebas:** Módulos, entidades, servicios, controladores REST o componentes UI impactados.
+3. **Pruebas Automatizadas Ejecutadas:**
+   * Backend: Clases de test ejecutadas (`*Test.java`), comandos (`./mvnw test`), aserciones clave y resultado (PASS/FAIL).
+   * Frontend: Tests Jasmine/Karma (`npm test`) si aplica.
+4. **Guía de Pruebas Manuales / Verificación Paso a Paso:**
+   * Comandos `cURL` reproducibles con headers de autenticación (`Bearer <TOKEN>`), payloads JSON de ejemplo y códigos HTTP esperados (200, 201, 400, 403, etc.).
+   * Flujos de interacción visual en UI (Angular) paso a paso.
+5. **Matriz de Criterios de Aceptación (DoD):** Checkboxes de los criterios especificados en el plan técnico original marcados como verificados.
+6. **Casos Borde y Validaciones Críticas:** Restricciones de seguridad (JWT, roles), reglas legales (LOPNNA Art. 65) y manejo de errores.
+
+### 5. Update the Plan Checklist
 Edit the corresponding `plans/<TS-ID>-plan-*.md` file:
 * Mark each completed step with `[x]`.
 * Add any technical notes or deviations in the plan notes section.
 
-### 5. Transition Card in Trello to `in testing`
+### 6. Transition Card in Trello to `in testing`
 Run the automated helper script:
 ```bash
-python3 .agents/skills/trello-implementer/scripts/move_to_testing.py <CARD_ID> "Implementación completada con éxito. Compilación y tests en verde."
+python3 .agents/skills/trello-implementer/scripts/move_to_testing.py <CARD_ID> "Implementación completada con éxito. Plan de pruebas generado en test/<TS-ID>-test-plan.md. Compilación y tests en verde."
 ```
 Or execute via HTTP `PUT` to `https://api.trello.com/1/cards/{card_id}` with `idList=6abbbe54690c92aab5836b30`.
 
-### 6. Final Report to the User
+### 7. Final Report to the User
 Report:
 * Files created and modified with clickable markdown links.
 * Test execution results.
+* Clickable link to the generated test plan in `test/<TS-ID>-test-plan-*.md`.
 * Frontend design token choices and UI components implemented (if applicable).
 * Confirmation of the Trello card status change to `in testing`.
 

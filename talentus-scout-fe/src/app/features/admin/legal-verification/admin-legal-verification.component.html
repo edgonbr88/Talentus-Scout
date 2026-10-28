@@ -1,0 +1,363 @@
+<div class="admin-page container">
+  <!-- ENCABEZADO DE COMANDO ADMINISTRATIVO -->
+  <header class="admin-header">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-admin">PANEL ADMINISTRATIVO</span>
+        <span class="badge badge-verified">SALVAGUARDA LOPNNA & FIFA</span>
+      </div>
+      <h1 class="admin-title">Auditoría de Patria Potestad y Representación Legal</h1>
+      <p class="admin-subtitle">
+        Coteja en paralelo la documentación de identidad del tutor frente a la partida de nacimiento del menor para certificar la potestad jurídica antes de permitir su visibilidad pública y ante scouts.
+      </p>
+    </div>
+
+    <div class="header-action">
+      <a routerLink="/admin/scouts" class="btn btn-secondary btn-sm mr-2">
+        Auditoría Scouts
+      </a>
+      <a routerLink="/admin/pagos" class="btn btn-secondary btn-sm mr-2">
+        Auditoría Pagos
+      </a>
+      <a routerLink="/admin/clubes" class="btn btn-secondary btn-sm mr-2">
+        Clubes y Academias
+      </a>
+      <button (click)="loadData()" [disabled]="isLoading()" class="btn btn-primary btn-sm" type="button">
+        <span *ngIf="isLoading()" class="spinner-small"></span>
+        Actualizar cola
+      </button>
+    </div>
+  </header>
+
+  <!-- MENSAJES DE ALERTA -->
+  <div *ngIf="successMessage()" class="alert alert-success">
+    <span>🛡️ {{ successMessage() }}</span>
+  </div>
+  <div *ngIf="errorMessage()" class="alert alert-danger">
+    <span>⚠️ {{ errorMessage() }}</span>
+  </div>
+
+  <!-- BANNER BENTO DE MÉTRICAS OPERATIVAS -->
+  <section class="bento-metrics">
+    <div class="metric-card metric-primary">
+      <span class="metric-label">Auditorías Pendientes</span>
+      <div class="metric-value-row">
+        <span class="metric-number">{{ metrics().pendingCount }}</span>
+        <span class="metric-indicator indicator-pending">En cola de cotejo</span>
+      </div>
+      <p class="metric-desc">Atletas con documentación consignada pendientes de resolución legal.</p>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-label">Patria Potestad Aprobada</span>
+      <div class="metric-value-row">
+        <span class="metric-number">{{ metrics().approvedCount }}</span>
+        <span class="metric-indicator indicator-verified">✓ Habilitados</span>
+      </div>
+      <p class="metric-desc">Expedientes con salvaguarda y titularidad verificada oficialmente.</p>
+    </div>
+
+    <div class="metric-card">
+      <span class="metric-label">Documentación Observada</span>
+      <div class="metric-value-row">
+        <span class="metric-number">{{ metrics().rejectedCount }}</span>
+        <span class="metric-indicator indicator-rejected">⚠️ Requiere corrección</span>
+      </div>
+      <p class="metric-desc">Solicitudes devueltas al tutor por inconsistencias o legibilidad.</p>
+    </div>
+  </section>
+
+  <!-- BARRA DE BÚSQUEDA Y CONTROL -->
+  <div class="table-controls">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        [ngModel]="searchTerm()"
+        (ngModelChange)="searchTerm.set($event)"
+        placeholder="Buscar por nombre del menor, tutor, correo o número de documento..."
+        class="search-input"
+      />
+    </div>
+    <span class="records-count">
+      Mostrando {{ filteredItems.length }} de {{ totalElements() }} registros
+    </span>
+  </div>
+
+  <!-- TABLA PRINCIPAL DE SOLICITUDES -->
+  <section class="table-container">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Atleta (Menor)</th>
+          <th>Tutor / Representante</th>
+          <th>Documentación Consignada</th>
+          <th>Fecha de Envío</th>
+          <th>Estado</th>
+          <th class="text-right">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of filteredItems" class="table-row">
+          <td>
+            <div class="athlete-cell">
+              <div class="avatar-initials">
+                {{ item.athleteFirstName ? item.athleteFirstName.charAt(0) : '' }}{{ item.athleteLastName ? item.athleteLastName.charAt(0) : '' }}
+              </div>
+              <div class="athlete-meta">
+                <span class="athlete-name">{{ item.athleteFullName }}</span>
+                <span class="athlete-sub">{{ item.athleteAge }} años · {{ item.primaryPosition }} · {{ item.nationality }}</span>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div class="tutor-meta">
+              <span class="tutor-name">{{ item.tutorFullName || 'Representante No Identificado' }}</span>
+              <span class="tutor-sub">{{ item.tutorEmail }}</span>
+              <span *ngIf="item.tutorPhoneNumber" class="tutor-phone">{{ item.tutorPhoneNumber }}</span>
+            </div>
+          </td>
+          <td>
+            <div class="docs-summary">
+              <span class="doc-badge" title="Documento del Menor">
+                👶 {{ item.athleteDocType || 'PARTIDA' }}: {{ item.athleteDocNumber || 'S/N' }}
+              </span>
+              <span class="doc-badge" title="Documento del Tutor">
+                👤 {{ item.tutorDocType || 'ID' }}: {{ item.tutorDocNumber || 'S/N' }}
+              </span>
+            </div>
+          </td>
+          <td>
+            <span class="date-text">{{ item.submittedAt | date:'dd/MM/yyyy HH:mm' }}</span>
+          </td>
+          <td>
+            <span class="status-badge badge-pending">PENDIENTE DE REVISIÓN</span>
+          </td>
+          <td class="text-right">
+            <button (click)="openInspectionModal(item)" class="btn btn-primary btn-sm">
+              Auditar Documentos
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="!isLoading() && filteredItems.length === 0">
+          <td colspan="6" class="empty-state">
+            <div class="empty-icon">🛡️</div>
+            <h3>No hay solicitudes pendientes</h3>
+            <p>Todas las documentaciones de patria potestad se encuentran auditadas o no coinciden con la búsqueda.</p>
+          </td>
+        </tr>
+
+        <tr *ngIf="isLoading()">
+          <td colspan="6" class="loading-state">
+            <span class="spinner"></span>
+            <p>Cargando solicitudes de verificación legal...</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- MODAL SPLIT-VIEW DE INSPECCIÓN COMPARATIVA LADO A LADO -->
+  <div *ngIf="isModalOpen() && selectedItem()" class="modal-backdrop">
+    <div class="modal-dialog split-modal">
+      <header class="modal-header">
+        <div class="modal-header-info">
+          <div class="modal-badges">
+            <span class="badge badge-admin">EXPEDIENTE LOPNNA</span>
+            <span class="badge badge-verified">COTEJO DE FILIACIÓN</span>
+          </div>
+          <h2 class="modal-title">
+            Inspección de Patria Potestad: {{ selectedItem()?.athleteFullName }}
+          </h2>
+        </div>
+        <button (click)="closeInspectionModal()" class="btn-close" aria-label="Cerrar modal">✕</button>
+      </header>
+
+      <div class="modal-body split-body">
+        <!-- PANEL IZQUIERDO: DOCUMENTO DEL TUTOR -->
+        <div class="split-column tutor-column">
+          <div class="column-header">
+            <div>
+              <h3 class="column-title">1. Representante Legal (Tutor)</h3>
+              <p class="column-desc">Titular de la cuenta responsable del menor.</p>
+            </div>
+            <div class="zoom-controls">
+              <button (click)="zoomTutor(-0.2)" class="btn-icon" title="Reducir zoom">-</button>
+              <span class="zoom-level">{{ tutorZoom() * 100 | number:'1.0-0' }}%</span>
+              <button (click)="zoomTutor(0.2)" class="btn-icon" title="Aumentar zoom">+</button>
+            </div>
+          </div>
+
+          <div class="person-card">
+            <div class="info-row">
+              <span class="info-label">Nombre Completo:</span>
+              <span class="info-value bold">{{ selectedItem()?.tutorFullName }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Documento:</span>
+              <span class="info-value">{{ selectedItem()?.tutorDocType }}: {{ selectedItem()?.tutorDocNumber || 'No especificado' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Correo Electrónico:</span>
+              <span class="info-value">{{ selectedItem()?.tutorEmail }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Teléfono:</span>
+              <span class="info-value">{{ selectedItem()?.tutorPhoneNumber || 'Sin teléfono' }}</span>
+            </div>
+          </div>
+
+          <!-- VISOR DE DOCUMENTO DEL TUTOR -->
+          <div class="viewer-container">
+            <div class="viewer-toolbar">
+              <span class="viewer-tag">Documento de Identidad del Tutor</span>
+              <a *ngIf="selectedItem()?.tutorDocFileUrl" [href]="selectedItem()?.tutorDocFileUrl" target="_blank" rel="noopener noreferrer" class="link-external">
+                Abrir en pestaña nueva ↗
+              </a>
+            </div>
+
+            <div class="viewer-viewport">
+              <ng-container *ngIf="selectedItem()?.tutorDocFileUrl; else noTutorDoc">
+                <iframe
+                  *ngIf="isPdf(selectedItem()?.tutorDocFileUrl)"
+                  [src]="getSafeUrl(selectedItem()?.tutorDocFileUrl)"
+                  class="doc-frame"
+                  title="Documento Tutor">
+                </iframe>
+                <img
+                  *ngIf="!isPdf(selectedItem()?.tutorDocFileUrl)"
+                  [src]="selectedItem()?.tutorDocFileUrl"
+                  alt="Documento del Tutor"
+                  class="doc-img"
+                  [style.transform]="'scale(' + tutorZoom() + ')'"
+                />
+              </ng-container>
+              <ng-template #noTutorDoc>
+                <div class="no-doc-alert">
+                  ⚠️ El tutor aún no ha consignado copia digital de su documento en tutor_legal_consents.
+                </div>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANEL DERECHO: DOCUMENTO DEL ATLETA (MENOR DE EDAD) -->
+        <div class="split-column athlete-column">
+          <div class="column-header">
+            <div>
+              <h3 class="column-title">2. Menor de Edad (Atleta)</h3>
+              <p class="column-desc">Partida de Nacimiento o Documento de Identidad.</p>
+            </div>
+            <div class="zoom-controls">
+              <button (click)="zoomAthlete(-0.2)" class="btn-icon" title="Reducir zoom">-</button>
+              <span class="zoom-level">{{ athleteZoom() * 100 | number:'1.0-0' }}%</span>
+              <button (click)="zoomAthlete(0.2)" class="btn-icon" title="Aumentar zoom">+</button>
+            </div>
+          </div>
+
+          <div class="person-card">
+            <div class="info-row">
+              <span class="info-label">Nombre del Atleta:</span>
+              <span class="info-value bold">{{ selectedItem()?.athleteFullName }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Fecha de Nacimiento:</span>
+              <span class="info-value">{{ selectedItem()?.birthDate | date:'dd/MM/yyyy' }} ({{ selectedItem()?.athleteAge }} años)</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Documento Presentado:</span>
+              <span class="info-value">{{ selectedItem()?.athleteDocType }}: {{ selectedItem()?.athleteDocNumber || 'No especificado' }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">Nacionalidad y Posición:</span>
+              <span class="info-value">{{ selectedItem()?.nationality }} · {{ selectedItem()?.primaryPosition }}</span>
+            </div>
+          </div>
+
+          <!-- VISOR DE DOCUMENTO DEL ATLETA -->
+          <div class="viewer-container">
+            <div class="viewer-toolbar">
+              <span class="viewer-tag">Partida de Nacimiento / Cédula del Menor</span>
+              <a *ngIf="selectedItem()?.athleteDocFileUrl" [href]="selectedItem()?.athleteDocFileUrl" target="_blank" rel="noopener noreferrer" class="link-external">
+                Abrir en pestaña nueva ↗
+              </a>
+            </div>
+
+            <div class="viewer-viewport">
+              <ng-container *ngIf="selectedItem()?.athleteDocFileUrl; else noAthleteDoc">
+                <iframe
+                  *ngIf="isPdf(selectedItem()?.athleteDocFileUrl)"
+                  [src]="getSafeUrl(selectedItem()?.athleteDocFileUrl)"
+                  class="doc-frame"
+                  title="Documento Atleta">
+                </iframe>
+                <img
+                  *ngIf="!isPdf(selectedItem()?.athleteDocFileUrl)"
+                  [src]="selectedItem()?.athleteDocFileUrl"
+                  alt="Documento del Atleta"
+                  class="doc-img"
+                  [style.transform]="'scale(' + athleteZoom() + ')'"
+                />
+              </ng-container>
+              <ng-template #noAthleteDoc>
+                <div class="no-doc-alert">
+                  ⚠️ No se ha encontrado archivo adjunto para el atleta.
+                </div>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FORMULARIO DE OBSERVACIÓN / RECHAZO (COLAPSIBLE) -->
+      <div *ngIf="showRejectForm()" class="rejection-box">
+        <div class="rejection-box-header">
+          <span class="rejection-icon">⚠️</span>
+          <div>
+            <h4 class="rejection-title">Registrar Observación / Motivo de Rechazo</h4>
+            <p class="rejection-desc">
+              Este motivo se enviará automáticamente al representante por correo electrónico y se mostrará en su panel para que vuelva a subir el documento corregido.
+            </p>
+          </div>
+        </div>
+        <textarea
+          [(ngModel)]="rejectionNotes"
+          rows="3"
+          class="rejection-textarea"
+          placeholder="Ejemplo: La copia de la partida de nacimiento es borrosa y no permite validar el nombre de los progenitores. Por favor adjunta un escaneo nítido."
+        ></textarea>
+        <div class="rejection-actions">
+          <button (click)="toggleRejectForm()" class="btn btn-secondary btn-sm" [disabled]="isProcessingReview()">
+            Cancelar
+          </button>
+          <button (click)="submitRejection()" class="btn btn-danger btn-sm" [disabled]="isProcessingReview()">
+            <span *ngIf="isProcessingReview()" class="spinner-small"></span>
+            Confirmar Observación y Notificar al Tutor
+          </button>
+        </div>
+      </div>
+
+      <!-- ACCIONES DE VEREDICTO FINAL -->
+      <footer class="modal-footer">
+        <div class="footer-left">
+          <span class="auditor-notice">
+            🔒 La aprobación confiere el sello oficial de <strong>Patria Potestad Verificada</strong> y activa la visibilidad en el Directorio de Scouts.
+          </span>
+        </div>
+        <div class="footer-actions">
+          <button (click)="closeInspectionModal()" class="btn btn-secondary" [disabled]="isProcessingReview()">
+            Cerrar
+          </button>
+          <button *ngIf="!showRejectForm()" (click)="toggleRejectForm()" class="btn btn-danger" [disabled]="isProcessingReview()">
+            Observar / Rechazar
+          </button>
+          <button *ngIf="!showRejectForm()" (click)="approveVerification()" class="btn btn-success" [disabled]="isProcessingReview()">
+            <span *ngIf="isProcessingReview()" class="spinner-small"></span>
+            ✓ Aprobar Patria Potestad
+          </button>
+        </div>
+      </footer>
+    </div>
+  </div>
+</div>

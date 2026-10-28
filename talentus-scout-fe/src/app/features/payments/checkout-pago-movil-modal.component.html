@@ -1,0 +1,532 @@
+<div class="modal-backdrop" (click)="closeModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <!-- CABECERA DEL MODAL -->
+    <div class="modal-header">
+      <div class="header-title-group">
+        <span class="badge badge-pro">PLAN PRO ATLETA</span>
+        <h2>Activar Membresía de {{ athlete.fullName }}</h2>
+        <p class="header-caption">
+          Desbloquea la visibilidad pública en el directorio nacional de talentos y el radar en tiempo real de clubes y veedores.
+        </p>
+      </div>
+      <button (click)="closeModal()" class="btn-close" type="button" aria-label="Cerrar modal">✕</button>
+    </div>
+
+    <!-- ESTADO DE CARGA -->
+    <div *ngIf="isLoading()" class="modal-loading">
+      <div class="spinner"></div>
+      <p>Consultando pasarelas de pago y tasas oficiales...</p>
+    </div>
+
+    <!-- CUERPO PRINCIPAL DEL MODAL -->
+    <div *ngIf="!isLoading()" class="modal-body">
+      <!-- TOAST DE COPIADO / ERRORES -->
+      <div *ngIf="copyFeedback()" class="copy-alert">
+        <span>✓ {{ copyFeedback() }}</span>
+      </div>
+      <div *ngIf="errorMessage()" class="error-alert">
+        <span>⚠ {{ errorMessage() }}</span>
+      </div>
+
+      <!-- SELECTOR DE PASARELA (TABS) -->
+      <div class="method-selector-tabs" *ngIf="!isFreePromo">
+        <button
+          type="button"
+          class="tab-btn"
+          [class.tab-active]="selectedMethod() === 'PAGO_MOVIL'"
+          [class.tab-disabled]="config()?.pagoMovilEnabled === false"
+          [disabled]="config()?.pagoMovilEnabled === false"
+          (click)="setMethod('PAGO_MOVIL')"
+        >
+          <span class="tab-flag">🇻🇪</span>
+          <div class="tab-text">
+            <strong>Pago Móvil</strong>
+            <small *ngIf="config()?.pagoMovilEnabled !== false">Bolívares (Tasa BCV)</small>
+            <small *ngIf="config()?.pagoMovilEnabled === false" class="text-maintenance">En mantenimiento</small>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          class="tab-btn tab-binance"
+          [class.tab-active]="selectedMethod() === 'BINANCE_PAY'"
+          [class.tab-disabled]="config()?.binanceManualEnabled === false"
+          [disabled]="config()?.binanceManualEnabled === false"
+          (click)="setMethod('BINANCE_PAY')"
+        >
+          <span class="tab-crypto-badge">🟡</span>
+          <div class="tab-text">
+            <strong>Binance Pay</strong>
+            <small *ngIf="config()?.binanceManualEnabled !== false">USDT Cripto · Automático</small>
+            <small *ngIf="config()?.binanceManualEnabled === false" class="text-maintenance">En mantenimiento</small>
+          </div>
+        </button>
+      </div>
+
+      <div *ngIf="config()?.pagoMovilEnabled === false && config()?.binanceManualEnabled === false" class="alert-maintenance-all">
+        ⚠️ Los canales de pago se encuentran en conciliación o mantenimiento temporal. Por favor, intenta de nuevo más tarde o contáctanos a soporte.
+      </div>
+
+      <!-- PASO 1: SELECCIÓN DEL PLAN -->
+      <section class="section-plans">
+        <label class="section-label">1. Selecciona la modalidad de tu Plan Pro:</label>
+        <div class="plans-grid" *ngIf="config()?.plans as plans">
+          <div
+            *ngFor="let plan of plans"
+            class="plan-card"
+            [class.plan-selected]="selectedPlan()?.id === plan.id"
+            (click)="selectPlan(plan)"
+          >
+            <div class="plan-card-header">
+              <span class="plan-name">{{ plan.name }}</span>
+              <span *ngIf="plan.id === 'PRO_ANNUAL'" class="plan-discount-tag">Ahorra 2 Meses</span>
+            </div>
+            <div class="plan-price-row">
+              <span class="price-usd">${{ plan.priceUsd }}</span>
+              <span class="price-period">/ {{ plan.durationDays }} días</span>
+            </div>
+            <p class="plan-desc">
+              {{ plan.id === 'PRO_ANNUAL' ? 'Cobertura continua para la temporada competitiva completa.' : 'Flexibilidad mensual para mostrar el talento del atleta.' }}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN CÓDIGO DE DESCUENTO Y CONVENIOS -->
+      <section class="section-coupon">
+        <label class="section-label">¿Tienes un código de descuento o convenio institucional?</label>
+        
+        <div *ngIf="!appliedCoupon()" class="coupon-input-group">
+          <input
+            type="text"
+            class="input-control coupon-input"
+            placeholder="Ej: AFDC100, PROMO20, BECA-TALENTUS"
+            [(ngModel)]="couponInput"
+            (keyup.enter)="applyCoupon()"
+            [disabled]="isValidatingCoupon()"
+            maxlength="50"
+          />
+          <button
+            type="button"
+            class="btn-apply-coupon"
+            (click)="applyCoupon()"
+            [disabled]="isValidatingCoupon() || !couponInput.trim()"
+          >
+            <span *ngIf="isValidatingCoupon()" class="spinner-small"></span>
+            <span *ngIf="!isValidatingCoupon()">Aplicar</span>
+          </button>
+        </div>
+
+        <!-- Mensajes de feedback de cupón -->
+        <div *ngIf="couponError()" class="coupon-feedback error-feedback">
+          <span>⚠ {{ couponError() }}</span>
+        </div>
+        <div *ngIf="couponSuccess()" class="coupon-feedback success-feedback">
+          <span>✓ {{ couponSuccess() }}</span>
+        </div>
+
+        <!-- Cupón Aplicado: Desglose y Badges -->
+        <div *ngIf="appliedCoupon() as coupon" class="applied-coupon-card">
+          <div class="coupon-badge-group">
+            <span class="coupon-code-badge">{{ coupon.code }}</span>
+            <span *ngIf="coupon.organizationName" class="coupon-org-badge">
+              🏛 {{ coupon.organizationName }}
+            </span>
+            <span class="coupon-discount-badge" [class.badge-free]="coupon.isFreePromo">
+              {{ coupon.isFreePromo ? '100% BONIFICADO' : (coupon.discountType === 'PERCENTAGE' ? coupon.discountValue + '% OFF' : '$' + coupon.discountValue + ' OFF') }}
+            </span>
+            <button type="button" class="btn-remove-coupon-link" (click)="removeCoupon()">
+              ✕ Quitar
+            </button>
+          </div>
+
+          <div class="coupon-pricing-breakdown">
+            <div class="breakdown-item">
+              <span class="item-label">Precio Regular:</span>
+              <span class="item-value original-strikethrough">${{ coupon.originalAmountUsd | number:'1.2-2' }} USD</span>
+            </div>
+            <div class="breakdown-item discount-item">
+              <span class="item-label">Descuento Aplicado:</span>
+              <span class="item-value">-${{ coupon.discountAmountUsd | number:'1.2-2' }} USD</span>
+            </div>
+            <div class="breakdown-item total-item">
+              <span class="item-label">Total a Pagar:</span>
+              <span class="item-value highlight-price">
+                ${{ coupon.finalAmountUsd | number:'1.2-2' }} USD
+                <small *ngIf="coupon.finalAmountVes && coupon.finalAmountVes > 0">({{ coupon.finalAmountVes | number:'1.2-2' }} Bs.)</small>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECCIÓN ACTIVACIÓN 100% BONIFICADA (BECAS / CONVENIOS) -->
+      <section *ngIf="isFreePromo" class="section-free-activation">
+        <div class="free-promo-card">
+          <div class="free-promo-icon">🎁</div>
+          <div class="free-promo-content">
+            <h3>¡Convenio Institucional / Beca 100% Bonificada!</h3>
+            <p>
+              El código <strong>{{ appliedCoupon()?.code }}</strong> cubre la totalidad de la membresía Pro para <strong>{{ athlete.fullName }}</strong>. 
+              No requieres comprobante bancario, pago móvil ni pasarela de criptomonedas.
+            </p>
+            <div class="free-promo-org" *ngIf="appliedCoupon()?.organizationName">
+              <span>Organización Aliada: <strong>{{ appliedCoupon()?.organizationName }}</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          class="btn-activate-free"
+          [disabled]="isSubmitting()"
+          (click)="redeemFreeSubscription()"
+        >
+          <span *ngIf="isSubmitting()" class="spinner-small"></span>
+          <span *ngIf="!isSubmitting()">⚡ Activar Suscripción 100% Bonificada Ahora</span>
+        </button>
+      </section>
+
+      <!-- SECCIÓN VISTA PAGO MÓVIL -->
+      <div *ngIf="selectedMethod() === 'PAGO_MOVIL' && !isFreePromo">
+        <!-- CÁLCULO BCV Y DATOS BANCARIOS -->
+        <section class="section-bank-info">
+          <div class="bcv-calculation-banner">
+            <div class="bcv-rate-info">
+              <span class="bcv-label">Tasa Oficial BCV:</span>
+              <span class="bcv-val">{{ bcvRate()?.officialRate | number:'1.2-4' }} Bs. / USD</span>
+            </div>
+            <div class="bcv-amount-to-pay">
+              <span class="total-label">Total a Pagar en Bolívares:</span>
+              <strong class="total-ves">{{ calculatedAmountVes | number:'1.2-2' }} Bs.</strong>
+            </div>
+          </div>
+
+          <label class="section-label mt-3">2. Realiza tu Pago Móvil a los siguientes datos:</label>
+          <div class="bank-details-box" *ngIf="config() as cfg">
+            <div class="detail-row">
+              <div class="detail-label-val">
+                <span class="lbl">Banco Destino:</span>
+                <strong class="val">{{ cfg.recipientBank }}</strong>
+              </div>
+              <button
+                (click)="copyToClipboard(cfg.recipientBank, 'Banco')"
+                class="btn-copy"
+                type="button"
+                title="Copiar Banco"
+              >
+                Copiar
+              </button>
+            </div>
+
+            <div class="detail-row">
+              <div class="detail-label-val">
+                <span class="lbl">Teléfono Destino:</span>
+                <strong class="val">{{ cfg.recipientPhone }}</strong>
+              </div>
+              <button
+                (click)="copyToClipboard(cfg.recipientPhone, 'Teléfono')"
+                class="btn-copy"
+                type="button"
+                title="Copiar Teléfono"
+              >
+                Copiar
+              </button>
+            </div>
+
+            <div class="detail-row">
+              <div class="detail-label-val">
+                <span class="lbl">C.I. / RIF:</span>
+                <strong class="val">{{ cfg.recipientIdDocument }}</strong>
+              </div>
+              <button
+                (click)="copyToClipboard(cfg.recipientIdDocument, 'Documento de Identidad')"
+                class="btn-copy"
+                type="button"
+                title="Copiar Cédula o RIF"
+              >
+                Copiar
+              </button>
+            </div>
+
+            <div class="detail-row">
+              <div class="detail-label-val">
+                <span class="lbl">Titular de la Cuenta:</span>
+                <strong class="val">{{ cfg.recipientAccountHolder }}</strong>
+              </div>
+              <button
+                (click)="copyToClipboard(cfg.recipientAccountHolder, 'Titular')"
+                class="btn-copy"
+                type="button"
+                title="Copiar Titular"
+              >
+                Copiar
+              </button>
+            </div>
+
+            <div class="detail-row highlight-amount-row">
+              <div class="detail-label-val">
+                <span class="lbl">Monto Exacto:</span>
+                <strong class="val amount-strong">{{ calculatedAmountVes | number:'1.2-2' }} Bs.</strong>
+              </div>
+              <button
+                (click)="copyToClipboard(calculatedAmountVes.toString(), 'Monto en Bs.')"
+                class="btn-copy btn-copy-highlight"
+                type="button"
+                title="Copiar Monto Exacto"
+              >
+                Copiar Monto
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <!-- FORMULARIO DE REPORTE PAGO MÓVIL -->
+        <section class="section-form">
+          <label class="section-label">3. Registra los datos de tu comprobante:</label>
+          <p class="form-instructions">
+            Sin capturas de pantalla requeridas. Ingresa la referencia para conciliación rápida en administración.
+          </p>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="referenceNumber" class="input-label">
+                Número de Referencia Bancaria <span class="required">*</span>
+              </label>
+              <input
+                id="referenceNumber"
+                type="text"
+                class="input-control"
+                placeholder="Ej: 849201 ó 00481923"
+                [(ngModel)]="referenceNumber"
+                maxlength="30"
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="paymentDate" class="input-label">
+                Fecha de la Transacción <span class="required">*</span>
+              </label>
+              <input
+                id="paymentDate"
+                type="date"
+                class="input-control"
+                [(ngModel)]="paymentDate"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="originBank" class="input-label">Banco Emisor</label>
+              <select id="originBank" class="input-control" [(ngModel)]="originBank">
+                <option *ngFor="let bank of popularBanks" [value]="bank">{{ bank }}</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="originPhone" class="input-label">Teléfono Emisor (Opcional)</label>
+              <input
+                id="originPhone"
+                type="tel"
+                class="input-control"
+                placeholder="Ej: 04121234567"
+                [(ngModel)]="originPhone"
+                maxlength="20"
+              />
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- SECCIÓN VISTA BINANCE PAY / USDT MANUAL -->
+      <div *ngIf="selectedMethod() === 'BINANCE_PAY' && !isFreePromo" class="binance-flow-section">
+        <div class="binance-benefit-banner">
+          <div class="binance-logo-title">
+            <span class="binance-diamond">◆</span>
+            <h4>Transferencia Cripto USDT (Binance Pay & Billetera)</h4>
+          </div>
+          <p>
+            Transfiere el monto exacto en USDT desde tu app de Binance o cualquier billetera cripto. Tu pago será auditado y conciliado por administración para activar el perfil Pro de tu atleta.
+          </p>
+        </div>
+
+        <!-- TARJETA BENTO DE DATOS DE RECEPCIÓN -->
+        <div class="binance-credentials-grid">
+          <!-- Columna QR -->
+          <div class="binance-qr-col">
+            <div class="binance-qr-box">
+              <svg *ngIf="!config()?.binanceQrImageUrl" class="binance-qr-svg" viewBox="0 0 100 100" fill="currentColor">
+                <!-- QR Vector Estilizado -->
+                <rect x="5" y="5" width="25" height="25" rx="3" fill="#0B0E14" />
+                <rect x="9" y="9" width="17" height="17" fill="#FFFFFF" />
+                <rect x="13" y="13" width="9" height="9" fill="#F0B90B" />
+
+                <rect x="70" y="5" width="25" height="25" rx="3" fill="#0B0E14" />
+                <rect x="74" y="9" width="17" height="17" fill="#FFFFFF" />
+                <rect x="78" y="13" width="9" height="9" fill="#F0B90B" />
+
+                <rect x="5" y="70" width="25" height="25" rx="3" fill="#0B0E14" />
+                <rect x="9" y="74" width="17" height="17" fill="#FFFFFF" />
+                <rect x="13" y="78" width="9" height="9" fill="#F0B90B" />
+
+                <rect x="35" y="10" width="5" height="20" fill="#0B0E14" />
+                <rect x="45" y="5" width="20" height="5" fill="#0B0E14" />
+                <rect x="55" y="15" width="10" height="10" fill="#F0B90B" />
+                <rect x="40" y="25" width="15" height="5" fill="#0B0E14" />
+
+                <rect x="10" y="35" width="20" height="5" fill="#0B0E14" />
+                <rect x="25" y="45" width="10" height="20" fill="#0B0E14" />
+                <rect x="40" y="35" width="20" height="20" rx="2" fill="#F0B90B" />
+                <rect x="65" y="35" width="25" height="5" fill="#0B0E14" />
+                <rect x="75" y="45" width="10" height="15" fill="#0B0E14" />
+
+                <rect x="35" y="65" width="5" height="25" fill="#0B0E14" />
+                <rect x="45" y="70" width="15" height="10" fill="#0B0E14" />
+                <rect x="65" y="65" width="30" height="5" fill="#0B0E14" />
+                <rect x="70" y="75" width="10" height="15" fill="#F0B90B" />
+                <rect x="85" y="75" width="10" height="15" fill="#0B0E14" />
+              </svg>
+              <img
+                *ngIf="config()?.binanceQrImageUrl"
+                [src]="config()?.binanceQrImageUrl"
+                alt="Código QR Binance Pay Talentus Scout"
+                class="binance-qr-img"
+              />
+            </div>
+            <span class="qr-caption">Escanea con la app de Binance</span>
+          </div>
+
+          <!-- Columna Datos de Billetera -->
+          <div class="binance-data-col">
+            <!-- Binance Pay ID -->
+            <div class="credential-row">
+              <span class="credential-label">Binance Pay ID:</span>
+              <div class="credential-value-wrap">
+                <span class="credential-code">{{ config()?.binancePayId || '283918273' }}</span>
+                <button
+                  type="button"
+                  class="btn-copy-mini"
+                  (click)="copyToClipboard(config()?.binancePayId || '283918273', 'Binance Pay ID')"
+                >
+                  Copiar
+                </button>
+              </div>
+            </div>
+
+            <!-- Dirección de Wallet -->
+            <div class="credential-row">
+              <span class="credential-label">Dirección de Billetera (USDT):</span>
+              <div class="credential-value-wrap">
+                <span class="credential-code wallet-code" [title]="config()?.binanceWalletAddress || 'TLsV5289FjK93kdJ8193jd93kd9'">
+                  {{ config()?.binanceWalletAddress || 'TLsV5289FjK93kdJ8193jd93kd9' }}
+                </span>
+                <button
+                  type="button"
+                  class="btn-copy-mini"
+                  (click)="copyToClipboard(config()?.binanceWalletAddress || 'TLsV5289FjK93kdJ8193jd93kd9', 'Dirección de Wallet')"
+                >
+                  Copiar
+                </button>
+              </div>
+            </div>
+
+            <!-- Red Soportada -->
+            <div class="network-badge-box">
+              <span class="network-icon">🛡️</span>
+              <div class="network-info">
+                <strong>Red Obligatoria:</strong>
+                <span>{{ config()?.binanceNetwork || 'USDT (TRC-20 / BEP-20)' }}</span>
+              </div>
+            </div>
+
+            <!-- Total en USDT -->
+            <div class="crypto-amount-box">
+              <span class="crypto-amount-label">Monto exacto a transferir:</span>
+              <strong class="crypto-amount-val">{{ effectiveAmountUsd | number:'1.2-2' }} USDT</strong>
+            </div>
+
+            <!-- Feedback de Copiado -->
+            <div *ngIf="copyFeedback()" class="copy-alert">
+              ✓ {{ copyFeedback() }}
+            </div>
+          </div>
+        </div>
+
+        <!-- FORMULARIO DE REPORTE BINANCE -->
+        <div class="binance-report-form">
+          <h5 class="form-section-title">Registra los datos de tu transferencia</h5>
+
+          <div class="form-group">
+            <label for="binanceRefInput">
+              Número de Referencia / ID de Orden de Binance / TxID <span class="required">*</span>
+            </label>
+            <input
+              id="binanceRefInput"
+              type="text"
+              class="form-control"
+              [(ngModel)]="binanceReference"
+              placeholder="Ej: 2849182948 o TxID de transferencia"
+              maxlength="100"
+              autocomplete="off"
+            />
+            <small class="form-hint">Lo encuentras en el historial de transacciones de tu billetera o Binance Pay.</small>
+          </div>
+
+          <div class="form-row-dual">
+            <div class="form-group">
+              <label for="binanceDateInput">Fecha de la Transferencia <span class="required">*</span></label>
+              <input
+                id="binanceDateInput"
+                type="date"
+                class="form-control"
+                [(ngModel)]="binancePaymentDate"
+              />
+            </div>
+            <div class="form-group">
+              <label for="binanceOriginInput">Usuario Binance o Wallet de Envío (Opcional)</label>
+              <input
+                id="binanceOriginInput"
+                type="text"
+                class="form-control"
+                [(ngModel)]="binanceOriginAccount"
+                placeholder="Ej: @tu_usuario o primeros dígitos de wallet"
+                maxlength="80"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PIE DEL MODAL CON ACCIÓN -->
+    <div class="modal-footer" *ngIf="!isLoading()">
+      <button (click)="closeModal()" [disabled]="isSubmitting() || isSubmittingBinance()" class="btn btn-secondary" type="button">
+        Cerrar
+      </button>
+
+      <!-- Botón Pago Móvil -->
+      <button
+        *ngIf="selectedMethod() === 'PAGO_MOVIL' && !isFreePromo"
+        (click)="submitReport()"
+        [disabled]="isSubmitting() || !referenceNumber"
+        class="btn btn-primary btn-submit-payment"
+        type="button"
+      >
+        <span *ngIf="isSubmitting()" class="spinner-small"></span>
+        <span>{{ isSubmitting() ? 'Verificando con el banco...' : 'Confirmar y Notificar Pago' }}</span>
+      </button>
+
+      <!-- Botón Binance Pay -->
+      <button
+        *ngIf="selectedMethod() === 'BINANCE_PAY' && !isFreePromo"
+        (click)="submitBinanceReport()"
+        [disabled]="isSubmittingBinance() || !binanceReference"
+        class="btn btn-primary btn-submit-binance"
+        type="button"
+      >
+        <span *ngIf="isSubmittingBinance()" class="spinner-small"></span>
+        <span>{{ isSubmittingBinance() ? 'Registrando transferencia...' : 'Confirmar y Notificar Pago Binance' }}</span>
+      </button>
+    </div>
+  </div>
+</div>

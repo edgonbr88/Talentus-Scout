@@ -1,0 +1,346 @@
+<div class="auth-wrapper">
+  <div class="auth-card register-card">
+    <div class="auth-header">
+      <div style="margin-bottom: 20px; text-align: center;">
+        <app-brand-logo variant="imagotipo" theme="dark" [height]="95" [clickable]="true"></app-brand-logo>
+      </div>
+      <span class="badge badge-legal">PROTECCIÓN INTEGRAL DEL MENOR</span>
+      <h1 class="auth-title">Crear Cuenta de Tutor Legal</h1>
+      <p class="auth-subtitle">
+        Habilita la administración segura y oficial de las cédulas deportivas de tus atletas menores de edad.
+      </p>
+    </div>
+
+    @if (errorMessage) {
+      <div class="alert alert-danger" role="alert">
+        <span>⚠️</span>
+        <span>{{ errorMessage }}</span>
+      </div>
+    }
+
+    <!-- OPCIONES SOCIALES -->
+    <div class="social-auth-section">
+      <button
+        type="button"
+        class="btn-social"
+        (click)="registerWithGoogle()"
+        [disabled]="isLoading"
+      >
+        <svg class="social-icon" viewBox="0 0 24 24" width="20" height="20">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"/>
+          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
+        </svg>
+        <span>Crear cuenta rápida con Google</span>
+      </button>
+
+      <button
+        type="button"
+        class="btn-social"
+        (click)="registerWithMicrosoft()"
+        [disabled]="isLoading"
+      >
+        <svg class="social-icon" viewBox="0 0 23 23" width="19" height="19">
+          <rect x="1" y="1" width="10" height="10" fill="#f25022"/>
+          <rect x="12" y="1" width="10" height="10" fill="#7fba00"/>
+          <rect x="1" y="12" width="10" height="10" fill="#00a4ef"/>
+          <rect x="12" y="12" width="10" height="10" fill="#ffb900"/>
+        </svg>
+        <span>Crear cuenta rápida con Microsoft</span>
+      </button>
+
+      <div style="text-align: center; margin-top: 4px;">
+        <button type="button" (click)="openConfigModal('all')" style="background: none; border: none; color: #94a3b8; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 4px;">
+          <span>⚙️</span>
+          <span>Configurar Client IDs de OAuth2</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="auth-divider">
+      <span>o completa tus datos con respaldo de identidad</span>
+    </div>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="auth-form" novalidate>
+      <!-- Nombre Completo -->
+      <div class="form-group">
+        <label for="fullName" class="form-label">Nombre y apellido del tutor</label>
+        <input
+          id="fullName"
+          type="text"
+          formControlName="fullName"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('fullName')"
+          placeholder="Ej: Carlos Eduardo Mendoza"
+          autocomplete="name"
+        />
+        @if (isFieldInvalid('fullName')) {
+          <div class="form-error">
+            <span>El nombre completo es obligatorio</span>
+          </div>
+        }
+      </div>
+
+      <!-- Correo Electrónico -->
+      <div class="form-group">
+        <label for="email" class="form-label">Correo electrónico</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('email')"
+          placeholder="carlos.mendoza@correo.com"
+          autocomplete="email"
+        />
+        @if (isFieldInvalid('email')) {
+          <div class="form-error">
+            <span>Ingresa un correo electrónico válido</span>
+          </div>
+        }
+      </div>
+
+      <!-- Teléfono Internacional E.164 -->
+      <div class="form-group">
+        <label for="phoneNumber" class="form-label">Teléfono de contacto (Formato Internacional)</label>
+        <input
+          id="phoneNumber"
+          type="tel"
+          formControlName="phoneNumber"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('phoneNumber')"
+          placeholder="+584121234567"
+          autocomplete="tel"
+        />
+        <span class="form-hint">Debe incluir código de país (ej: +58 para Venezuela, seguido del código de área y número).</span>
+        @if (isFieldInvalid('phoneNumber')) {
+          <div class="form-error">
+            <span>El formato debe ser internacional E.164 (ej: +584121234567)</span>
+          </div>
+        }
+      </div>
+
+      <!-- Ubicación y Domicilio del Tutor -->
+      <div class="document-section">
+        <div class="section-badge">UBICACIÓN Y DOMICILIO DEL REPRESENTANTE</div>
+        
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="country" class="form-label">País de residencia</label>
+            <select
+              id="country"
+              formControlName="country"
+              class="form-control select-control"
+              [class.is-invalid]="isFieldInvalid('country')"
+            >
+              @for (c of authorizedCountries; track c) {
+                <option [value]="c">{{ c }}</option>
+              }
+            </select>
+            @if (isFieldInvalid('country')) {
+              <div class="form-error">
+                <span>El país es obligatorio</span>
+              </div>
+            }
+          </div>
+
+          <div class="form-group">
+            <label for="state" class="form-label">Estado / Provincia</label>
+            <input
+              id="state"
+              type="text"
+              formControlName="state"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('state')"
+              placeholder="Ej: Miranda / Antioquia / Santiago"
+            />
+            @if (isFieldInvalid('state')) {
+              <div class="form-error">
+                <span>El estado o provincia es obligatorio</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 12px;">
+          <label for="address" class="form-label">Dirección física de habitación (Opcional)</label>
+          <input
+            id="address"
+            type="text"
+            formControlName="address"
+            class="form-control"
+            [class.is-invalid]="isFieldInvalid('address')"
+            placeholder="Ej: Av. Principal, Urb. Los Rosales, Casa N° 14"
+          />
+          @if (isFieldInvalid('address')) {
+            <div class="form-error">
+              <span>La dirección no puede exceder los 255 caracteres</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Documento de Identidad del Tutor -->
+      <div class="document-section">
+        <div class="section-badge">DOCUMENTO DE IDENTIDAD DEL REPRESENTANTE</div>
+        
+        <div class="form-row-2">
+          <div class="form-group">
+            <label for="idDocumentType" class="form-label">Tipo de documento</label>
+            <select
+              id="idDocumentType"
+              formControlName="idDocumentType"
+              class="form-control select-control"
+              [class.is-invalid]="isFieldInvalid('idDocumentType')"
+            >
+              <option value="CEDULA">Cédula de Identidad</option>
+              <option value="DNI">DNI (Documento Nacional)</option>
+              <option value="PASAPORTE">Pasaporte</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="idDocumentNumber" class="form-label">Número de documento</label>
+            <input
+              id="idDocumentNumber"
+              type="text"
+              formControlName="idDocumentNumber"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('idDocumentNumber')"
+              placeholder="Ej: V-18456789"
+            />
+            @if (isFieldInvalid('idDocumentNumber')) {
+              <div class="form-error">
+                <span>El número de documento es obligatorio</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Carga de Archivo Físico -->
+        <div class="form-group file-upload-group">
+          <label class="form-label">Comprobante físico de identidad (Foto o PDF)</label>
+          
+          <div 
+            class="file-dropzone" 
+            [class.has-file]="!!selectedFile"
+            [class.is-invalid]="fileError"
+            (click)="fileInput.click()"
+          >
+            <input
+              #fileInput
+              type="file"
+              accept=".jpg,.jpeg,.png,.pdf"
+              (change)="onFileSelected($event)"
+              style="display: none"
+            />
+
+            <div *ngIf="!selectedFile" class="dropzone-empty">
+              <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              <span class="dropzone-text">Haz clic para adjuntar tu documento</span>
+              <span class="dropzone-hint">Formatos: JPG, PNG o PDF (Máximo 5MB)</span>
+            </div>
+
+            <div *ngIf="selectedFile" class="dropzone-file">
+              <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              <div class="file-info">
+                <span class="file-name">{{ selectedFile.name }}</span>
+                <span class="file-size">{{ (selectedFile.size / 1024 / 1024).toFixed(2) }} MB</span>
+              </div>
+              <button type="button" class="btn-remove-file" (click)="removeFile($event)">✕</button>
+            </div>
+          </div>
+
+          @if (fileError) {
+            <div class="form-error">
+              <span>{{ fileError }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Contraseña -->
+      <div class="form-group">
+        <label for="password" class="form-label">Contraseña (Mínimo 8 caracteres)</label>
+        <input
+          id="password"
+          type="password"
+          formControlName="password"
+          class="form-control"
+          [class.is-invalid]="isFieldInvalid('password')"
+          placeholder="••••••••"
+          autocomplete="new-password"
+        />
+        @if (isFieldInvalid('password')) {
+          <div class="form-error">
+            <span>La contraseña debe contener al menos 8 caracteres</span>
+          </div>
+        }
+      </div>
+
+      <!-- TARJETA DE CONSENTIMIENTO Y PROTECCIÓN LEGAL AL MENOR -->
+      <div class="legal-consent-card" [class.consent-error]="isFieldInvalid('acceptLopnnaTerms')">
+        <div class="consent-header">
+          <span class="shield-icon">🛡️</span>
+          <span class="consent-title">Marco de Protección Integral del Menor y Consentimiento Legal</span>
+        </div>
+        <p class="consent-text">
+          Conforme a las normativas de salvaguarda y protección integral de menores en el deporte y la legislación aplicable en su país, 
+          ninguna plataforma deportiva puede registrar datos de menores sin la debida autorización de su representante legal con patria potestad.
+        </p>
+        <label class="consent-checkbox-label">
+          <input
+            type="checkbox"
+            formControlName="acceptLopnnaTerms"
+            class="consent-checkbox"
+          />
+          <span class="checkbox-text">
+            Declaro bajo fe de juramento que soy el padre, madre o tutor legal con patria potestad del menor, 
+            y autorizo expresamente la gestión y publicación de su cédula deportiva en Talentus Scout.
+          </span>
+        </label>
+        @if (isFieldInvalid('acceptLopnnaTerms')) {
+          <div class="form-error consent-error-text">
+            <span>Debe aceptar obligatoriamente los términos de protección integral del menor para continuar</span>
+          </div>
+        }
+      </div>
+
+      <button
+        type="submit"
+        class="btn btn-primary btn-block"
+        [disabled]="registerForm.invalid || !selectedFile || isLoading"
+      >
+        @if (isLoading) {
+          <span>Enviando registro y verificando...</span>
+        } @else {
+          <span>Crear Cuenta y Verificar Correo</span>
+        }
+      </button>
+    </form>
+
+    <div class="auth-footer">
+      <p>¿Ya tienes una cuenta registrada?</p>
+      <a routerLink="/login" class="link-login">
+        Iniciar sesión con tu correo
+      </a>
+    </div>
+  </div>
+</div>
+
+@if (showConfigModal) {
+  <app-oauth-config-modal
+    [targetProvider]="configModalProvider"
+    (saved)="onConfigSaved($event)"
+    (closed)="closeConfigModal()"
+  ></app-oauth-config-modal>
+}
+

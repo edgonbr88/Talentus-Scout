@@ -1,0 +1,36 @@
+:host {
+  display: inline-flex;
+  vertical-align: middle;
+}
+
+.brand-logo-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  line-height: 0;
+}
+
+.brand-logo-link:hover {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.brand-logo-link:active {
+  transform: translateY(0);
+}
+
+.brand-logo-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.brand-logo-img {
+  display: block;
+  object-fit: contain;
+  max-width: 100%;
+}

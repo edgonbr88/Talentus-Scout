@@ -6,15 +6,54 @@
 
 <footer class="main-footer">
   <div class="container footer-container">
+    <!-- Columna 1: Identidad y Misión -->
     <div class="footer-brand">
-      <span class="footer-logo">TALENTUS SCOUT</span>
+      <div class="footer-logo-container">
+        <app-brand-logo variant="logotipo" theme="dark" [height]="46" [clickable]="true" altText="TALENTUS SCOUT"></app-brand-logo>
+      </div>
       <p class="footer-copy">
-        Plataforma Oficial de Fichas Deportivas y Scouting de Fútbol Juvenil en Venezuela.
-        Protección integral al menor en estricto cumplimiento del Artículo 65 de la LOPNNA.
+        Plataforma Oficial de Fichas Deportivas y Scouting de Fútbol Juvenil.
+        Protección y salvaguarda integral del menor en el ámbito deportivo digital.
       </p>
     </div>
+
+    <!-- Columna 2: Canales Oficiales y Redes (TS-57) -->
+    <div class="footer-channels">
+      <span class="footer-col-title">Canales Oficiales</span>
+      <div class="footer-links-group">
+        <a
+          href="https://www.instagram.com/talentusscout/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="footer-link-item"
+          aria-label="Instagram oficial @talentusscout (abre en nueva pestaña)"
+        >
+          <svg class="footer-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+          </svg>
+          <span>Instagram: &#64;talentusscout</span>
+        </a>
+
+        <a
+          href="mailto:contacto@talentusscout.com"
+          class="footer-link-item"
+          aria-label="Enviar correo institucional a contacto@talentusscout.com"
+        >
+          <svg class="footer-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          <span>contacto&#64;talentusscout.com</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Columna 3: Salvaguarda Legal y Derechos -->
     <div class="footer-legal">
-      <span class="badge badge-lopnna">LOPNNA ART. 65 CERTIFICADO</span>
+      <span class="badge badge-verified">PROTECCIÓN AL MENOR CERTIFICADA</span>
+      <span class="legal-text">LOPNNA Art. 65 · Normativas FIFA de Menores</span>
       <span class="legal-text">© 2026 Talentus Scout. Todos los derechos reservados.</span>
     </div>
   </div>

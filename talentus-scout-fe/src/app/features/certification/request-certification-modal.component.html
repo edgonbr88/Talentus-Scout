@@ -1,0 +1,207 @@
+<div class="modal-backdrop" (click)="onBackdropClick($event)">
+  <div class="modal-dialog">
+    <header class="modal-header">
+      <div>
+        <span class="badge-mini">ACREDITACIÓN DE MÉRITO</span>
+        <h2 class="modal-title">Solicitar Certificación Oficial</h2>
+        <p class="modal-subtitle">Para el atleta: <strong>{{ athleteName }}</strong></p>
+      </div>
+      <button class="btn-close" (click)="closeModal()" aria-label="Cerrar modal">&times;</button>
+    </header>
+
+    @if (!successResponse) {
+      <!-- Paso 1: Selección de Tipo -->
+      <div class="step-container">
+        <label class="step-label">1. Selecciona la categoría de certificación</label>
+        <div class="category-grid">
+          <button
+            type="button"
+            class="category-card"
+            [class.active]="selectedType === 'MEDICAL_ANTHRO'"
+            (click)="selectType('MEDICAL_ANTHRO')"
+          >
+            <span class="category-icon">🩺</span>
+            <span class="category-title">Médica & Antropométrica</span>
+            <span class="category-desc">Estatura, peso, masa y grasa avalados por médico o pediatra.</span>
+          </button>
+
+          <button
+            type="button"
+            class="category-card"
+            [class.active]="selectedType === 'SPORT_ACHIEVEMENT'"
+            (click)="selectType('SPORT_ACHIEVEMENT')"
+          >
+            <span class="category-icon">🏆</span>
+            <span class="category-title">Logro & Palmarés</span>
+            <span class="category-desc">Campeonatos, trofeo de goleador o títulos avalados por ligas.</span>
+          </button>
+
+          <button
+            type="button"
+            class="category-card"
+            [class.active]="selectedType === 'FEDERATION_LICENSE'"
+            (click)="selectType('FEDERATION_LICENSE')"
+          >
+            <span class="category-icon">📋</span>
+            <span class="category-title">Ficha Federativa</span>
+            <span class="category-desc">Número de registro oficial ante la federación o asociación.</span>
+          </button>
+
+          <button
+            type="button"
+            class="category-card"
+            [class.active]="selectedType === 'CLUB_AFFILIATION'"
+            (click)="selectType('CLUB_AFFILIATION')"
+          >
+            <span class="category-icon">🛡️</span>
+            <span class="category-title">Club o Academia</span>
+            <span class="category-desc">Pertenencia activa ratificada por directivos del club.</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Paso 2: Selección de Método -->
+      <div class="step-container">
+        <label class="step-label">2. Elige el método de validación</label>
+        <div class="method-toggle">
+          <button
+            type="button"
+            class="method-btn"
+            [class.active]="selectedMethod === 'TOKEN_LINK'"
+            (click)="selectMethod('TOKEN_LINK')"
+          >
+            <span>✉️ Enlace por Correo</span>
+            <small>El doctor, directivo o liga certifica con token único sin login</small>
+          </button>
+          <button
+            type="button"
+            class="method-btn"
+            [class.active]="selectedMethod === 'DOCUMENT_UPLOAD'"
+            (click)="selectMethod('DOCUMENT_UPLOAD')"
+          >
+            <span>📄 Subir Documento / Foto</span>
+            <small>Subir carnet o informe firmado para revisión del Administrador</small>
+          </button>
+        </div>
+      </div>
+
+      <!-- Formulario según Método -->
+      <form [formGroup]="requestForm" (ngSubmit)="onSubmit()" class="modal-form">
+        <div class="form-group">
+          <label for="title" class="form-label">Título o Aval Solicitado *</label>
+          <input
+            id="title"
+            type="text"
+            formControlName="title"
+            class="form-input"
+            [placeholder]="getTitlePlaceholder()"
+          />
+        </div>
+
+        <!-- Campos si es TOKEN_LINK -->
+        @if (selectedMethod === 'TOKEN_LINK') {
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="targetName" class="form-label">Nombre del Certificador / Profesional *</label>
+              <input
+                id="targetName"
+                type="text"
+                formControlName="targetName"
+                class="form-input"
+                placeholder="Ej. Dr. Rafael Silva / Prof. Carlos Rivas"
+              />
+            </div>
+            <div class="form-group">
+              <label for="targetEmail" class="form-label">Correo Electrónico del Certificador *</label>
+              <input
+                id="targetEmail"
+                type="email"
+                formControlName="targetEmail"
+                class="form-input"
+                placeholder="certificador@clinica.com / liga@futbol.org"
+              />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="targetOrganization" class="form-label">Institución u Organización (Opcional)</label>
+            <input
+              id="targetOrganization"
+              type="text"
+              formControlName="targetOrganization"
+              class="form-input"
+              placeholder="Ej. Policlínica Metropolitana / Asociación de Fútbol Distrito Capital"
+            />
+          </div>
+        }
+
+        <!-- Campos si es DOCUMENT_UPLOAD -->
+        @if (selectedMethod === 'DOCUMENT_UPLOAD') {
+          <div class="form-group">
+            <label for="evidenceDocumentUrl" class="form-label">Enlace o URL del Comprobante / Archivo *</label>
+            <input
+              id="evidenceDocumentUrl"
+              type="url"
+              formControlName="evidenceDocumentUrl"
+              class="form-input"
+              placeholder="https://... o ruta del archivo escaneado"
+            />
+          </div>
+        }
+
+        <div class="form-group">
+          <label for="description" class="form-label">Notas Adicionales (Opcional)</label>
+          <textarea
+            id="description"
+            formControlName="description"
+            class="form-input form-textarea"
+            rows="2"
+            placeholder="Detalles de contexto para el certificador o administrador..."
+          ></textarea>
+        </div>
+
+        @if (errorMessage) {
+          <div class="error-banner">
+            <span>⚠️ {{ errorMessage }}</span>
+          </div>
+        }
+
+        <footer class="modal-footer">
+          <button type="button" class="btn-cancel" (click)="closeModal()">Cancelar</button>
+          <button
+            type="submit"
+            class="btn-confirm"
+            [disabled]="requestForm.invalid || isSubmitting"
+          >
+            @if (isSubmitting) {
+              <span>Enviando solicitud...</span>
+            } @else {
+              <span>{{ selectedMethod === 'TOKEN_LINK' ? 'Enviar Invitación por Correo' : 'Enviar a Revisión de Administrador' }}</span>
+            }
+          </button>
+        </footer>
+      </form>
+    } @else {
+      <!-- Éxito -->
+      <div class="success-box">
+        <div class="success-icon">✓</div>
+        <h3>¡Solicitud de Certificación Generada!</h3>
+        <p>{{ successMessage }}</p>
+
+        @if (generatedLink) {
+          <div class="link-share-box">
+            <label>Enlace de Certificación Único:</label>
+            <div class="copy-row">
+              <input type="text" readonly [value]="generatedLink" class="form-input copy-input" />
+              <button type="button" class="btn-copy" (click)="copyLink()">Copiar</button>
+            </div>
+            <small class="link-hint">Este enlace también ha sido enviado por correo electrónico al certificador.</small>
+          </div>
+        }
+
+        <button type="button" class="btn-confirm btn-block" (click)="closeModal()">
+          Entendido
+        </button>
+      </div>
+    }
+  </div>
+</div>

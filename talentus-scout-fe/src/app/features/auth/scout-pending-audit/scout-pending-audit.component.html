@@ -1,0 +1,287 @@
+<div class="audit-wrapper">
+  <div class="audit-card">
+    <div style="margin-bottom: 24px; text-align: center;">
+      <app-brand-logo variant="imagotipo" theme="dark" [height]="95" [clickable]="true"></app-brand-logo>
+    </div>
+
+    <!-- ESTADO: ACREDITACIÓN APROBADA -->
+    @if (isApproved()) {
+      <div class="audit-status-badge status-approved">
+        <span class="status-icon" aria-hidden="true">✓</span>
+      </div>
+
+      <div class="audit-header">
+        <span class="badge badge-approved">ACREDITACIÓN OFICIAL VERIFICADA</span>
+        <h1 class="audit-title">¡Bienvenido al Radar Oficial!</h1>
+        <p class="audit-subtitle">
+          Tu identidad profesional ha sido validada por el comité de Talentus Scout. Tu credencial se encuentra activa y cuentas con autorización oficial para explorar y contactar atletas juveniles.
+        </p>
+      </div>
+
+      <div class="audit-actions">
+        <a routerLink="/scout/directory" class="btn btn-primary">
+          Ingresar al Directorio de Talentos
+        </a>
+        <button type="button" (click)="logout()" class="btn btn-secondary">
+          Cerrar Sesión
+        </button>
+      </div>
+    }
+
+    <!-- ESTADO: RECHAZADO / SUBSANACIÓN REQUERIDA -->
+    @else if (isRejected()) {
+      <div class="audit-status-badge status-rejected">
+        <div class="pulse-ring-rejected"></div>
+        <span class="status-icon" aria-hidden="true">⚠️</span>
+      </div>
+
+      <div class="audit-header">
+        <span class="badge badge-rejected">SUBSANACIÓN DE CREDENCIAL REQUERIDA</span>
+        <h1 class="audit-title">Documentación con Observaciones</h1>
+        <p class="audit-subtitle">
+          El comité de admisiones ha revisado tu postulación deportiva y requiere que consignes nuevamente tu acreditación para continuar con el proceso de verificación.
+        </p>
+      </div>
+
+      <!-- Caja de Observación del Comité -->
+      <div class="rejection-box" role="alert">
+        <div class="rejection-header">
+          <span class="rejection-icon" aria-hidden="true">📋</span>
+          <span class="rejection-label">MOTIVO DE OBSERVACIÓN EMITIDO POR EL COMITÉ:</span>
+        </div>
+        <p class="rejection-reason">
+          "{{ rejectionReason() || 'El documento presentado no permite constatar fehacientemente tu vinculación oficial con la entidad deportiva. Por favor adjunta una credencial vigente o carta aval membretada.' }}"
+        </p>
+      </div>
+
+      <!-- Alertas de Feedback -->
+      @if (uploadSuccessMessage()) {
+        <div class="alert alert-success" role="status">
+          <span class="alert-icon" aria-hidden="true">✓</span>
+          <span>{{ uploadSuccessMessage() }}</span>
+        </div>
+      }
+
+      @if (uploadErrorMessage()) {
+        <div class="alert alert-danger" role="alert">
+          <span class="alert-icon" aria-hidden="true">⚠️</span>
+          <span>{{ uploadErrorMessage() }}</span>
+        </div>
+      }
+
+      <!-- Formulario de Re-subida / Dropzone -->
+      <div class="remediation-section">
+        <h2 class="remediation-title">Carga de Nueva Credencial o Aval Deportivo</h2>
+        <p class="remediation-desc">
+          Adjunta un carnet federativo, credencial oficial vigente del club o constancia membretada en formato PDF, PNG o JPG (máximo 10 MB).
+        </p>
+
+        <div
+          class="dropzone"
+          [class.dropzone-dragging]="isDragging()"
+          [class.dropzone-has-file]="selectedFile()"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onFileDropped($event)"
+        >
+          <input
+            #fileInput
+            type="file"
+            id="remediationFileInput"
+            class="visually-hidden"
+            accept=".pdf,.png,.jpg,.jpeg"
+            (change)="onFileSelected($event)"
+          />
+
+          @if (!selectedFile()) {
+            <label for="remediationFileInput" class="dropzone-label">
+              <span class="dropzone-icon" aria-hidden="true">📁</span>
+              <span class="dropzone-prompt">
+                <strong class="dropzone-cta">Haz clic para seleccionar</strong> o arrastra el archivo aquí
+              </span>
+              <span class="dropzone-formats">PDF, PNG o JPG (máx. 10 MB)</span>
+            </label>
+          } @else {
+            <div class="file-preview-card">
+              <div class="file-preview-info">
+                <span class="file-icon" aria-hidden="true">📄</span>
+                <div class="file-details">
+                  <span class="file-name">{{ selectedFile()?.name }}</span>
+                  <span class="file-size">{{ ((selectedFile()?.size || 0) / 1024 / 1024) | number:'1.1-2' }} MB</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="btn-remove-file"
+                (click)="removeFile()"
+                aria-label="Eliminar archivo seleccionado"
+              >
+                ✕
+              </button>
+            </div>
+          }
+        </div>
+
+        @if (fileError()) {
+          <div class="file-error-text" role="alert">
+            {{ fileError() }}
+          </div>
+        }
+
+        <div class="remediation-actions">
+          <button
+            type="button"
+            class="btn btn-primary btn-submit-remediation"
+            [disabled]="!selectedFile() || isUploading()"
+            (click)="submitRemediation()"
+          >
+            @if (isUploading()) {
+              <span class="spinner" aria-hidden="true"></span>
+              <span>Enviando nueva credencial...</span>
+            } @else {
+              <span>Reenviar Credencial para Nueva Auditoría</span>
+            }
+          </button>
+        </div>
+      </div>
+
+      <!-- Respaldo LOPNNA / FIFA -->
+      <div class="safeguard-disclaimer">
+        <div class="disclaimer-icon">🛡️</div>
+        <div class="disclaimer-body">
+          <h3 class="disclaimer-title">Protocolo de Salvaguarda y Protección</h3>
+          <p class="disclaimer-text">
+            Conforme al <strong>Art. 65 de la LOPNNA</strong> y directrices de protección juvenil de la <strong>FIFA</strong>,
+            todos los profesionales deben contar con respaldo verificable para salvaguardar la integridad de los atletas.
+          </p>
+        </div>
+      </div>
+
+      <!-- Acciones Secundarias -->
+      <div class="audit-actions">
+        <button type="button" (click)="logout()" class="btn btn-secondary">
+          Cerrar Sesión
+        </button>
+        <a routerLink="/" class="btn btn-ghost">
+          Volver a la Página Principal
+        </a>
+      </div>
+    }
+
+    <!-- ESTADO: AUDITORÍA EN PROCESO (PENDING / DEFAULT) -->
+    @else {
+      <!-- Icono de Estado / Radar -->
+      <div class="audit-status-badge">
+        <div class="pulse-ring"></div>
+        <span class="status-icon" aria-hidden="true">⏳</span>
+      </div>
+
+      <!-- Encabezado -->
+      <div class="audit-header">
+        <span class="badge badge-audit">AUDITORÍA DE IDENTIDAD EN PROCESO</span>
+        <h1 class="audit-title">Solicitud de Acreditación Recibida</h1>
+        <p class="audit-subtitle">
+          @if (organizationName) {
+            Hemos recibido tu postulación oficial en representación de <strong>{{ organizationName }}</strong>.
+          } @else {
+            Hemos recibido tu postulación oficial como veedor deportivo.
+          }
+        </p>
+      </div>
+
+      @if (uploadSuccessMessage()) {
+        <div class="alert alert-success" role="status">
+          <span class="alert-icon" aria-hidden="true">✓</span>
+          <span>{{ uploadSuccessMessage() }}</span>
+        </div>
+      }
+
+      <!-- Indicador de Correo de Notificación -->
+      @if (scoutEmail || currentUser()?.email) {
+        <div class="email-notice-box">
+          <span class="email-icon" aria-hidden="true">📧</span>
+          <span class="email-text">
+            Las notificaciones sobre la resolución de tu solicitud se enviarán a <strong>{{ scoutEmail || currentUser()?.email }}</strong>.
+          </span>
+        </div>
+      }
+
+      <!-- Timeline de Evaluación Deportiva -->
+      <div class="audit-timeline">
+        <!-- Paso 1 -->
+        <div class="timeline-step completed">
+          <div class="step-marker">
+            <span class="step-check" aria-hidden="true">✓</span>
+          </div>
+          <div class="step-content">
+            <h2 class="step-title">1. Consignación de Datos y Credencial</h2>
+            <p class="step-desc">
+              Información del postulante y archivo probatorio cargados exitosamente en nuestros servidores seguros.
+            </p>
+          </div>
+        </div>
+
+        <!-- Paso 2 -->
+        <div class="timeline-step active">
+          <div class="step-marker">
+            <span class="step-dot" aria-hidden="true">•</span>
+          </div>
+          <div class="step-content">
+            <h2 class="step-title">2. Validación de Filiación y Trayectoria</h2>
+            <p class="step-desc">
+              El comité de admisiones de Talentus Scout verifica la autenticidad de la credencial y la vinculación con el club o agencia deportiva.
+            </p>
+            <span class="step-timeframe">⏱ Plazo estimado de respuesta: 24 a 48 horas hábiles</span>
+          </div>
+        </div>
+
+        <!-- Paso 3 -->
+        <div class="timeline-step pending">
+          <div class="step-marker">
+            <span class="step-number" aria-hidden="true">3</span>
+          </div>
+          <div class="step-content">
+            <h2 class="step-title">3. Activación y Acceso al Radar de Talentos</h2>
+            <p class="step-desc">
+              Al ser aprobado, recibirás confirmación oficial y se habilitará el Directorio de Atletas, filtros biométricos y solicitud de contacto con representantes.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Caja de Respaldo Legal LOPNNA / FIFA -->
+      <div class="safeguard-disclaimer">
+        <div class="disclaimer-icon">🛡️</div>
+        <div class="disclaimer-body">
+          <h3 class="disclaimer-title">¿Por qué es indispensable este proceso?</h3>
+          <p class="disclaimer-text">
+            En apego estricto al <strong>Art. 65 de la LOPNNA</strong> y el protocolo de salvaguarda juvenil de la <strong>FIFA</strong>,
+            Talentus Scout garantiza a los tutores legales que sus hijos menores de edad únicamente son contactados y evaluados
+            por profesionales verificados con acreditación activa.
+          </p>
+        </div>
+      </div>
+
+      <!-- Acciones -->
+      <div class="audit-actions">
+        @if (authService.isAuthenticated()) {
+          <button type="button" (click)="logout()" class="btn btn-secondary">
+            Cerrar Sesión
+          </button>
+          <a routerLink="/" class="btn btn-ghost">
+            Volver a la Página Principal
+          </a>
+        } @else {
+          <a routerLink="/login" class="btn btn-primary">
+            Ir a Iniciar Sesión
+          </a>
+          <a routerLink="/" class="btn btn-secondary">
+            Volver a la Página Principal
+          </a>
+        }
+      </div>
+    }
+
+  </div>
+</div>
+

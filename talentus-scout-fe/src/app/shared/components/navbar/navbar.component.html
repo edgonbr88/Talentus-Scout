@@ -1,0 +1,46 @@
+<header class="navbar-header">
+  <div class="container navbar-container">
+    <!-- Logotipo Oficial Talentus Scout -->
+    <a routerLink="/" class="navbar-brand" aria-label="Ir al inicio de Talentus Scout">
+      <app-brand-logo variant="isotipo" theme="color" [height]="38" [clickable]="false"></app-brand-logo>
+      <div class="brand-text">
+        <span class="brand-title">TALENTUS</span>
+        <span class="brand-subtitle">SCOUT</span>
+      </div>
+    </a>
+
+    <!-- Navegación Principal -->
+    <nav class="navbar-nav">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-link">Inicio</a>
+      @if (authService.isTutor()) {
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">Mi Panel</a>
+      }
+      @if (authService.canAccessDirectory()) {
+        <a routerLink="/scout/directory" routerLinkActive="active" class="nav-link">Directorio Scouts</a>
+      }
+      @if (authService.isAdmin()) {
+        <a routerLink="/admin/scouts" routerLinkActive="active" class="nav-link">Auditoría Scouts</a>
+        <a routerLink="/admin/pagos" routerLinkActive="active" class="nav-link">Auditoría Pagos</a>
+        <a routerLink="/admin/verificacion-legal" routerLinkActive="active" class="nav-link">Patria Potestad</a>
+        <a routerLink="/admin/clubes" routerLinkActive="active" class="nav-link">Clubes y Academias</a>
+      }
+      @if (!authService.isAuthenticated()) {
+        <a routerLink="/register-scout" routerLinkActive="active" class="nav-link">¿Eres Scout?</a>
+      }
+    </nav>
+
+    <!-- Acciones de Usuario / Autenticación -->
+    <div class="navbar-actions">
+      @if (authService.isAuthenticated()) {
+        <div class="user-pill">
+          <span class="badge badge-official">{{ authService.currentUser()?.role || 'USUARIO' }}</span>
+          <span class="user-name">{{ authService.currentUser()?.fullName || authService.currentUser()?.email }}</span>
+        </div>
+        <button (click)="logout()" class="btn btn-secondary btn-sm">Cerrar sesión</button>
+      } @else {
+        <a routerLink="/login" class="btn btn-secondary btn-sm">Iniciar sesión</a>
+        <a routerLink="/register-tutor" class="btn btn-primary btn-sm">Registro de Representante</a>
+      }
+    </div>
+  </div>
+</header>
