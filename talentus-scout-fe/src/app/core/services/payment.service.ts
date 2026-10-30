@@ -14,7 +14,10 @@ import {
   PaymentTransactionResponse,
   ReportBinanceManualPaymentRequest,
   ReportPagoMovilRequest,
-  UpdatePaymentGatewaySettingsRequest
+  UpdatePaymentGatewaySettingsRequest,
+  SubscriptionPlanAdminDto,
+  CreateSubscriptionPlanRequest,
+  UpdateSubscriptionPlanRequest
 } from '../models/payment.model';
 
 @Injectable({
@@ -137,4 +140,27 @@ export class PaymentService {
     formData.append('file', file);
     return this.http.post<{ qrImageUrl: string }>('/api/v1/admin/payments/gateway-settings/binance-qr', formData);
   }
+
+  // --- Mantenedor de Planes y Precios (TS-63) ---
+
+  getAdminSubscriptionPlans(): Observable<SubscriptionPlanAdminDto[]> {
+    return this.http.get<SubscriptionPlanAdminDto[]>('/api/v1/admin/subscription-plans');
+  }
+
+  getAdminSubscriptionPlanById(id: string): Observable<SubscriptionPlanAdminDto> {
+    return this.http.get<SubscriptionPlanAdminDto>(`/api/v1/admin/subscription-plans/${id}`);
+  }
+
+  createSubscriptionPlan(request: CreateSubscriptionPlanRequest): Observable<SubscriptionPlanAdminDto> {
+    return this.http.post<SubscriptionPlanAdminDto>('/api/v1/admin/subscription-plans', request);
+  }
+
+  updateSubscriptionPlan(id: string, request: UpdateSubscriptionPlanRequest): Observable<SubscriptionPlanAdminDto> {
+    return this.http.put<SubscriptionPlanAdminDto>(`/api/v1/admin/subscription-plans/${id}`, request);
+  }
+
+  toggleSubscriptionPlanStatus(id: string): Observable<SubscriptionPlanAdminDto> {
+    return this.http.patch<SubscriptionPlanAdminDto>(`/api/v1/admin/subscription-plans/${id}/toggle-status`, {});
+  }
 }
+

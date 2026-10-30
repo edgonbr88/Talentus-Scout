@@ -1,33 +1,15 @@
 <div class="admin-page container">
-  <!-- ENCABEZADO DE COMANDO ADMINISTRATIVO -->
-  <header class="admin-header">
-    <div class="header-content">
-      <div class="header-badges">
-        <span class="badge badge-admin">PANEL ADMINISTRATIVO</span>
-        <span class="badge badge-verified">SALVAGUARDA LOPNNA & FIFA</span>
-      </div>
-      <h1 class="admin-title">Auditoría de Patria Potestad y Representación Legal</h1>
-      <p class="admin-subtitle">
-        Coteja en paralelo la documentación de identidad del tutor frente a la partida de nacimiento del menor para certificar la potestad jurídica antes de permitir su visibilidad pública y ante scouts.
-      </p>
-    </div>
-
-    <div class="header-action">
-      <a routerLink="/admin/scouts" class="btn btn-secondary btn-sm mr-2">
-        Auditoría Scouts
-      </a>
-      <a routerLink="/admin/pagos" class="btn btn-secondary btn-sm mr-2">
-        Auditoría Pagos
-      </a>
-      <a routerLink="/admin/clubes" class="btn btn-secondary btn-sm mr-2">
-        Clubes y Academias
-      </a>
-      <button (click)="loadData()" [disabled]="isLoading()" class="btn btn-primary btn-sm" type="button">
-        <span *ngIf="isLoading()" class="spinner-small"></span>
-        Actualizar cola
-      </button>
-    </div>
-  </header>
+  <!-- ENCABEZADO ESTANDARIZADO DE COMANDO ADMINISTRATIVO -->
+  <app-admin-header
+    title="Auditoría de Patria Potestad y Representación Legal"
+    subtitle="Coteja en paralelo la documentación de identidad del tutor frente a la partida de nacimiento del menor para certificar la potestad jurídica antes de permitir su visibilidad pública y ante scouts."
+    badgeText="SALVAGUARDA LOPNNA & FIFA"
+  >
+    <button actions (click)="loadData()" [disabled]="isLoading()" class="btn btn-primary btn-sm" type="button">
+      <span *ngIf="isLoading()" class="spinner-small"></span>
+      Actualizar cola
+    </button>
+  </app-admin-header>
 
   <!-- MENSAJES DE ALERTA -->
   <div *ngIf="successMessage()" class="alert alert-success">

@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { AdminHeaderComponent } from '../../../shared/components/admin-header/admin-header.component';
 import { AdminClubService } from '../../../core/services/admin-club.service';
 import {
   AdminClub,
@@ -13,7 +14,7 @@ import {
 @Component({
   selector: 'app-admin-clubs',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, AdminHeaderComponent],
   templateUrl: './admin-clubs.component.html',
   styleUrls: ['./admin-clubs.component.css']
 })

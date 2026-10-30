@@ -1,33 +1,15 @@
 <div class="admin-page container">
-  <!-- ENCABEZADO DE COMANDO ADMINISTRATIVO -->
-  <header class="admin-header">
-    <div class="header-content">
-      <div class="header-badges">
-        <span class="badge badge-admin">PANEL ADMINISTRATIVO</span>
-        <span class="badge badge-verified">SALVAGUARDA Y PROTECCIÓN DE MENORES</span>
-      </div>
-      <h1 class="admin-title">Auditoría y Acreditación de Scouts</h1>
-      <p class="admin-subtitle">
-        Verifica la autenticidad de credenciales consignadas por reclutadores y directores de clubes antes de habilitar su acceso al radar privado de talentos juveniles.
-      </p>
-    </div>
-
-    <div class="header-action">
-      <a routerLink="/admin/verificacion-legal" class="btn btn-secondary btn-sm" style="margin-right: 8px;">
-        Patria Potestad
-      </a>
-      <a routerLink="/admin/pagos" class="btn btn-secondary btn-sm" style="margin-right: 8px;">
-        Auditoría de Pagos
-      </a>
-      <a routerLink="/admin/clubes" class="btn btn-secondary btn-sm" style="margin-right: 8px;">
-        Clubes y Academias
-      </a>
-      <button (click)="loadPendingScouts()" [disabled]="isLoading()" class="btn btn-primary btn-sm" type="button">
-        <span *ngIf="isLoading()" class="spinner-small"></span>
-        Actualizar cola
-      </button>
-    </div>
-  </header>
+  <!-- ENCABEZADO ESTANDARIZADO DE COMANDO ADMINISTRATIVO -->
+  <app-admin-header
+    title="Auditoría y Acreditación de Scouts"
+    subtitle="Verifica la autenticidad de credenciales consignadas por reclutadores y directores de clubes antes de habilitar su acceso al radar privado de talentos juveniles."
+    badgeText="SALVAGUARDA Y PROTECCIÓN DE MENORES"
+  >
+    <button actions (click)="loadPendingScouts()" [disabled]="isLoading()" class="btn btn-primary btn-sm" type="button">
+      <span *ngIf="isLoading()" class="spinner-small"></span>
+      Actualizar cola
+    </button>
+  </app-admin-header>
 
   <!-- BANNER BENTO DE MÉTRICAS OPERATIVAS -->
   <section class="bento-metrics">

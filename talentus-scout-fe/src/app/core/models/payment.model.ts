@@ -3,6 +3,9 @@ export interface SubscriptionPlanDto {
   name: string;
   priceUsd: number;
   durationDays: number;
+  maxVideos?: number;
+  hasRadarViews?: boolean;
+  hasPdfCv?: boolean;
   description?: string;
   isActive: boolean;
 }
@@ -235,3 +238,37 @@ export interface UpdatePaymentGatewaySettingsRequest {
   binanceNetwork?: string;
 }
 
+export interface SubscriptionPlanAdminDto {
+  id: string;
+  name: string;
+  priceUsd: number;
+  durationDays: number;
+  maxVideos: number;
+  hasRadarViews: boolean;
+  hasPdfCv: boolean;
+  isActive: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  activeSubscribersCount?: number;
+}
+
+export interface CreateSubscriptionPlanRequest {
+  id: string;
+  name: string;
+  priceUsd: number;
+  durationDays: number;
+  maxVideos: number;
+  hasRadarViews: boolean;
+  hasPdfCv: boolean;
+  isActive: boolean;
+}
+
+export interface UpdateSubscriptionPlanRequest {
+  name: string;
+  priceUsd: number;
+  durationDays: number;
+  maxVideos: number;
+  hasRadarViews: boolean;
+  hasPdfCv: boolean;
+  isActive: boolean;
+}

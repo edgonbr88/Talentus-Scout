@@ -1,0 +1,169 @@
+/* ==========================================================================
+   Admin Header Component — Estandarización de Layout y Subnavegación
+   Conforme a directrices de fe-desing.md y Design System Tokens
+   ========================================================================== */
+
+:host {
+  display: block;
+  width: 100%;
+  margin-bottom: 32px;
+}
+
+.admin-shared-header {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* FILA SUPERIOR: BADGES, TÍTULOS Y ACCIONES LOCALES */
+.header-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.header-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.header-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 3px 10px;
+  border-radius: var(--radius-full, 9999px);
+  text-transform: uppercase;
+}
+
+.badge-admin {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: var(--color-accent-gold, #F59E0B);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.badge-verified {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: var(--color-accent-pitch, #10B981);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.admin-title {
+  font-family: var(--font-family-display, 'Outfit', sans-serif);
+  font-size: clamp(1.8rem, 3.2vw, 2.35rem);
+  font-weight: 800;
+  color: var(--color-text-main, #F8FAFC);
+  margin-bottom: 8px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.admin-subtitle {
+  color: var(--color-text-muted, #94A3B8);
+  font-size: 15px;
+  max-width: 780px;
+  line-height: 1.5;
+}
+
+/* ACCIONES PRIMARIAS LOCALES */
+.header-actions-slot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+/* BARRA DE SUBNAVEGACIÓN INTERMODULAR */
+.admin-subnav {
+  border-top: 1px solid var(--color-border, #22314D);
+  padding-top: 18px;
+}
+
+.subnav-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+  padding-bottom: 4px;
+}
+
+.subnav-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+/* PASTILLAS DE NAVEGACIÓN (PILLS) */
+.subnav-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: var(--color-surface, #141D30);
+  border: 1px solid var(--color-border, #22314D);
+  border-radius: var(--radius-full, 9999px);
+  color: var(--color-text-muted, #94A3B8);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all var(--transition-fast, 0.18s ease);
+}
+
+.subnav-pill:hover {
+  background-color: var(--color-surface-hover, #1A253D);
+  color: var(--color-text-main, #F8FAFC);
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
+}
+
+.subnav-pill.active {
+  background-color: rgba(16, 185, 129, 0.14);
+  border-color: rgba(16, 185, 129, 0.45);
+  color: var(--color-accent-pitch, #10B981);
+  font-weight: 700;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.18);
+}
+
+.pill-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.pill-label {
+  letter-spacing: 0.01em;
+}
+
+/* ADAPTABILIDAD RESPONSIVE */
+@media (max-width: 768px) {
+  .header-top-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .header-actions-slot {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .subnav-container {
+    padding-bottom: 8px;
+  }
+
+  .subnav-pill {
+    padding: 7px 14px;
+    font-size: 12.5px;
+  }
+}

@@ -477,15 +477,20 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 16px;
+  padding: 20px 16px;
+  overflow-y: auto;
 }
 
 .modal-card {
+  margin: auto;
   background-color: #0F172A;
   border: 1px solid #334155;
   border-radius: 12px;
   max-width: 520px;
   width: 100%;
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
   color: #F8FAFC;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
   overflow: hidden;
@@ -497,6 +502,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .modal-header h3 {
@@ -515,6 +521,23 @@
 
 .modal-body {
   padding: 20px;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-body::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+}
+.modal-body::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
 
 .modal-desc {
@@ -583,6 +606,7 @@
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  flex-shrink: 0;
 }
 
 /* Indicadores de KPIs */
@@ -1084,6 +1108,69 @@
   margin-top: 4px;
 }
 
+/* Tarjetas de beneficios en el modal de planes */
+.plan-benefits-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.benefit-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background-color: #1E293B;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.benefit-card:hover {
+  border-color: #475569;
+  background-color: rgba(30, 41, 59, 0.9);
+}
+
+.benefit-card input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: #10B981;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.benefit-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.benefit-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #F8FAFC;
+}
+
+.benefit-desc {
+  font-size: 12px;
+  color: #94A3B8;
+  line-height: 1.35;
+}
+
+.benefit-card-active {
+  border-color: rgba(16, 185, 129, 0.35);
+  background-color: rgba(16, 185, 129, 0.06);
+}
+
+.benefit-card-active:hover {
+  border-color: rgba(16, 185, 129, 0.55);
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
 /* --- ESTILOS DE CUENTAS DE COBRO Y PASARELAS (TS-58) --- */
 .gateway-settings-section {
   display: flex;
@@ -1372,5 +1459,230 @@
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+/* ==========================================================================
+   GESTIÓN DE PLANES Y PRECIOS DE SUSCRIPCIÓN (TS-63) - BENTO DESIGN SYSTEM
+   ========================================================================== */
+
+.plans-config-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bento-plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.bento-plan-card {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius-md, 14px);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+}
+
+.bento-plan-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(16, 185, 129, 0.35);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.35);
+}
+
+.bento-plan-card.plan-card-inactive {
+  opacity: 0.75;
+  border-color: rgba(255, 255, 255, 0.04);
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.bento-plan-card.plan-card-inactive:hover {
+  opacity: 0.9;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.plan-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.plan-badge-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.plan-id-badge {
+  font-family: monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  background: rgba(255, 255, 255, 0.08);
+  color: #94A3B8;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.plan-status-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.plan-status-badge.status-active {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.plan-status-badge.status-inactive {
+  background: rgba(148, 163, 184, 0.1);
+  color: #94A3B8;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.plan-subscribers-chip {
+  font-size: 11.5px;
+  color: #CBD5E1;
+  background: rgba(30, 41, 59, 0.8);
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.plan-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.plan-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: #F8FAFC;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.plan-price-block {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.plan-currency {
+  font-size: 20px;
+  font-weight: 700;
+  color: #10B981;
+}
+
+.plan-price {
+  font-size: 32px;
+  font-weight: 800;
+  color: #F8FAFC;
+  letter-spacing: -0.03em;
+  line-height: 1;
+}
+
+.plan-period {
+  font-size: 13px;
+  color: #94A3B8;
+  margin-left: 4px;
+}
+
+.plan-specs-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  background: rgba(30, 41, 59, 0.5);
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.spec-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.spec-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #94A3B8;
+}
+
+.spec-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: #E2E8F0;
+}
+
+.plan-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.feature-item.feature-enabled .feature-icon {
+  color: #10B981;
+  font-weight: 800;
+}
+
+.feature-item.feature-enabled .feature-text {
+  color: #E2E8F0;
+}
+
+.feature-item.feature-disabled .feature-icon {
+  color: #64748B;
+}
+
+.feature-item.feature-disabled .feature-text {
+  color: #64748B;
+  text-decoration: line-through;
+}
+
+.plan-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  flex-wrap: wrap;
+}
+
+.plan-toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-status-label {
+  font-size: 11.5px;
+  color: #94A3B8;
 }
 

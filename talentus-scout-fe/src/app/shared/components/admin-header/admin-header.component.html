@@ -1,0 +1,33 @@
+<header class="admin-shared-header">
+  <!-- FILA SUPERIOR: BADGES, TÍTULOS Y ACCIONES LOCALES -->
+  <div class="header-top-row">
+    <div class="header-content">
+      <div class="header-badges">
+        <span class="badge badge-admin">PANEL ADMINISTRATIVO</span>
+        <span class="badge badge-verified" *ngIf="badgeText">{{ badgeText }}</span>
+      </div>
+      <h1 class="admin-title">{{ title }}</h1>
+      <p class="admin-subtitle">{{ subtitle }}</p>
+    </div>
+
+    <!-- RANURA DE ACCIONES PRIMARIAS LOCALES DE LA PANTALLA -->
+    <div class="header-actions-slot">
+      <ng-content select="[actions]"></ng-content>
+    </div>
+  </div>
+
+  <!-- BARRA ESTANDARIZADA DE SUBNAVEGACIÓN INTERMODULAR -->
+  <nav class="admin-subnav" aria-label="Navegación de módulos administrativos">
+    <div class="subnav-container">
+      <a
+        *ngFor="let mod of navModules"
+        [routerLink]="mod.route"
+        routerLinkActive="active"
+        class="subnav-pill"
+      >
+        <span class="pill-icon" aria-hidden="true">{{ mod.icon }}</span>
+        <span class="pill-label">{{ mod.label }}</span>
+      </a>
+    </div>
+  </nav>
+</header>

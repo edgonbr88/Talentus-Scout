@@ -2,13 +2,14 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { AdminHeaderComponent } from '../../../shared/components/admin-header/admin-header.component';
 import { AdminScoutService } from '../../../core/services/admin-scout.service';
 import { PendingScout } from '../../../core/models/admin-scout.model';
 
 @Component({
   selector: 'app-admin-scouts',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, AdminHeaderComponent],
   templateUrl: './admin-scouts.component.html',
   styleUrls: ['./admin-scouts.component.css']
 })

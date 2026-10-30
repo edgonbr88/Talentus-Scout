@@ -761,17 +761,21 @@
   align-items: center;
   justify-content: center;
   padding: 1rem;
+  overflow-y: auto;
 }
 
 .auth-prompt-card {
+  margin: auto;
   background: #0D1527;
   border: 1px solid rgba(56, 79, 120, 0.5);
   border-radius: 16px;
   padding: 1.75rem;
   max-width: 440px;
   width: 100%;
+  max-height: calc(100vh - 40px);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
   text-align: center;
+  overflow-y: auto;
 }
 
 .prompt-icon-badge {

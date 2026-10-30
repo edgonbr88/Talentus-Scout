@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule, DatePipe, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { AdminHeaderComponent } from '../../../shared/components/admin-header/admin-header.component';
 import { PaymentService } from '../../../core/services/payment.service';
 import {
   AdminPaymentSummary,
@@ -10,13 +11,16 @@ import {
   CreateDiscountCodeRequest,
   UpdateDiscountCodeRequest,
   PaymentGatewaySettingsDto,
-  UpdatePaymentGatewaySettingsRequest
+  UpdatePaymentGatewaySettingsRequest,
+  SubscriptionPlanAdminDto,
+  CreateSubscriptionPlanRequest,
+  UpdateSubscriptionPlanRequest
 } from '../../../core/models/payment.model';
 
 @Component({
   selector: 'app-admin-payments',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, DatePipe, DecimalPipe],
+  imports: [CommonModule, FormsModule, RouterLink, DatePipe, DecimalPipe, AdminHeaderComponent],
   templateUrl: './admin-payments.component.html',
   styleUrls: ['./admin-payments.component.css']
 })
@@ -24,7 +28,7 @@ export class AdminPaymentsComponent implements OnInit {
   private paymentService = inject(PaymentService);
 
   // Pestaña activa
-  readonly activeTab = signal<'PENDING' | 'HISTORY' | 'COUPONS' | 'GATEWAY_SETTINGS'>('PENDING');
+  readonly activeTab = signal<'PENDING' | 'HISTORY' | 'COUPONS' | 'GATEWAY_SETTINGS' | 'PLANS_CONFIG'>('PENDING');
 
   // Métricas y KPIs
   readonly summary = signal<AdminPaymentSummary | null>(null);
@@ -104,13 +108,32 @@ export class AdminPaymentsComponent implements OnInit {
   binanceNetworkInput = 'USDT (TRC-20 / BEP-20)';
   readonly binanceQrImageUrlDisplay = signal<string>('/assets/images/binance-qr-sample.png');
 
+  // Gestión de Planes y Precios (TS-63)
+  readonly subscriptionPlans = signal<SubscriptionPlanAdminDto[]>([]);
+  readonly isLoadingPlans = signal<boolean>(false);
+  readonly isPlanModalOpen = signal<boolean>(false);
+  readonly editingPlanId = signal<string | null>(null);
+  readonly isSavingPlan = signal<boolean>(false);
+  readonly planFormError = signal<string | null>(null);
+
+  // Formulario de Planes
+  planIdInput = '';
+  planNameInput = '';
+  planPriceUsdInput = 5;
+  planDurationDaysInput = 30;
+  planMaxVideosInput = 5;
+  planHasRadarViewsInput = true;
+  planHasPdfCvInput = true;
+  planIsActiveInput = true;
+
   ngOnInit(): void {
     this.loadSummary();
     this.loadPendingPayments();
     this.loadGatewaySettings();
+    this.loadSubscriptionPlans();
   }
 
-  setTab(tab: 'PENDING' | 'HISTORY' | 'COUPONS' | 'GATEWAY_SETTINGS'): void {
+  setTab(tab: 'PENDING' | 'HISTORY' | 'COUPONS' | 'GATEWAY_SETTINGS' | 'PLANS_CONFIG'): void {
     this.activeTab.set(tab);
     if (tab === 'HISTORY' && this.historyPayments().length === 0) {
       this.loadHistory();
@@ -119,6 +142,8 @@ export class AdminPaymentsComponent implements OnInit {
       this.loadClubs();
     } else if (tab === 'GATEWAY_SETTINGS' && !this.gatewaySettings()) {
       this.loadGatewaySettings();
+    } else if (tab === 'PLANS_CONFIG' && this.subscriptionPlans().length === 0) {
+      this.loadSubscriptionPlans();
     }
   }
 
@@ -536,6 +561,168 @@ export class AdminPaymentsComponent implements OnInit {
   cancelSelectedQr(): void {
     this.selectedQrFile = null;
     this.qrPreviewUrl.set(null);
+  }
+
+  // ==========================================
+  // Métodos de Planes de Suscripción (TS-63)
+  // ==========================================
+
+  getActivePlansCount(): number {
+    return this.subscriptionPlans().filter(p => p.isActive).length;
+  }
+
+  loadSubscriptionPlans(): void {
+    this.isLoadingPlans.set(true);
+    this.paymentService.getAdminSubscriptionPlans().subscribe({
+      next: (plans) => {
+        this.subscriptionPlans.set(plans || []);
+        this.isLoadingPlans.set(false);
+      },
+      error: (err) => {
+        this.isLoadingPlans.set(false);
+        this.showFeedback('error', 'Error al cargar los planes de suscripción: ' + (err.error?.message || err.message));
+      }
+    });
+  }
+
+  openCreatePlanModal(): void {
+    this.editingPlanId.set(null);
+    this.planIdInput = '';
+    this.planNameInput = '';
+    this.planPriceUsdInput = 5;
+    this.planDurationDaysInput = 30;
+    this.planMaxVideosInput = 5;
+    this.planHasRadarViewsInput = true;
+    this.planHasPdfCvInput = true;
+    this.planIsActiveInput = true;
+    this.planFormError.set(null);
+    this.isPlanModalOpen.set(true);
+  }
+
+  openEditPlanModal(plan: SubscriptionPlanAdminDto): void {
+    this.editingPlanId.set(plan.id);
+    this.planIdInput = plan.id;
+    this.planNameInput = plan.name;
+    this.planPriceUsdInput = plan.priceUsd;
+    this.planDurationDaysInput = plan.durationDays;
+    this.planMaxVideosInput = plan.maxVideos;
+    this.planHasRadarViewsInput = plan.hasRadarViews;
+    this.planHasPdfCvInput = plan.hasPdfCv;
+    this.planIsActiveInput = plan.isActive;
+    this.planFormError.set(null);
+    this.isPlanModalOpen.set(true);
+  }
+
+  closePlanModal(): void {
+    if (this.isSavingPlan()) return;
+    this.isPlanModalOpen.set(false);
+    this.editingPlanId.set(null);
+    this.planFormError.set(null);
+  }
+
+  savePlan(): void {
+    this.planFormError.set(null);
+    const name = this.planNameInput.trim();
+    if (!name) {
+      this.planFormError.set('El nombre del plan es obligatorio.');
+      return;
+    }
+    if (this.planPriceUsdInput == null || this.planPriceUsdInput < 0) {
+      this.planFormError.set('El precio en USD debe ser igual o mayor a 0.00.');
+      return;
+    }
+    if (!this.planDurationDaysInput || this.planDurationDaysInput < 1) {
+      this.planFormError.set('La duración debe ser de al menos 1 día.');
+      return;
+    }
+    if (this.planMaxVideosInput == null || this.planMaxVideosInput < 0) {
+      this.planFormError.set('El cupo de videos no puede ser negativo.');
+      return;
+    }
+
+    this.isSavingPlan.set(true);
+
+    if (this.editingPlanId()) {
+      // Modo Edición
+      const req: UpdateSubscriptionPlanRequest = {
+        name,
+        priceUsd: this.planPriceUsdInput,
+        durationDays: this.planDurationDaysInput,
+        maxVideos: this.planMaxVideosInput,
+        hasRadarViews: this.planHasRadarViewsInput,
+        hasPdfCv: this.planHasPdfCvInput,
+        isActive: this.planIsActiveInput
+      };
+
+      this.paymentService.updateSubscriptionPlan(this.editingPlanId()!, req).subscribe({
+        next: (updated) => {
+          this.isSavingPlan.set(false);
+          this.subscriptionPlans.update(plans => plans.map(p => p.id === updated.id ? updated : p));
+          this.closePlanModal();
+          this.showFeedback('success', `Plan '${updated.name}' actualizado exitosamente.`);
+        },
+        error: (err) => {
+          this.isSavingPlan.set(false);
+          this.planFormError.set(err.error?.message || 'Error al actualizar el plan de suscripción');
+        }
+      });
+    } else {
+      // Modo Creación
+      const rawId = this.planIdInput.trim().toUpperCase();
+      if (!rawId) {
+        this.planFormError.set('El identificador único del plan es obligatorio.');
+        this.isSavingPlan.set(false);
+        return;
+      }
+      const idRegex = /^[A-Z0-9_]{3,50}$/;
+      if (!idRegex.test(rawId)) {
+        this.planFormError.set('El ID debe tener entre 3 y 50 caracteres (solo mayúsculas, números y guiones bajos, ej. PRO_SEMESTRAL).');
+        this.isSavingPlan.set(false);
+        return;
+      }
+
+      const req: CreateSubscriptionPlanRequest = {
+        id: rawId,
+        name,
+        priceUsd: this.planPriceUsdInput,
+        durationDays: this.planDurationDaysInput,
+        maxVideos: this.planMaxVideosInput,
+        hasRadarViews: this.planHasRadarViewsInput,
+        hasPdfCv: this.planHasPdfCvInput,
+        isActive: this.planIsActiveInput
+      };
+
+      this.paymentService.createSubscriptionPlan(req).subscribe({
+        next: (created) => {
+          this.isSavingPlan.set(false);
+          this.subscriptionPlans.update(plans => [...plans, created].sort((a, b) => a.priceUsd - b.priceUsd));
+          this.closePlanModal();
+          this.showFeedback('success', `Plan '${created.name}' (${created.id}) creado exitosamente.`);
+        },
+        error: (err) => {
+          this.isSavingPlan.set(false);
+          this.planFormError.set(err.error?.message || 'Error al crear el nuevo plan de suscripción');
+        }
+      });
+    }
+  }
+
+  togglePlanStatus(plan: SubscriptionPlanAdminDto): void {
+    if (plan.isActive && this.getActivePlansCount() <= 1) {
+      this.showFeedback('error', 'No es posible desactivar el único plan activo disponible en la plataforma.');
+      return;
+    }
+
+    this.paymentService.toggleSubscriptionPlanStatus(plan.id).subscribe({
+      next: (updated) => {
+        this.subscriptionPlans.update(plans => plans.map(p => p.id === updated.id ? updated : p));
+        const statusText = updated.isActive ? 'activado' : 'pausado / desactivado';
+        this.showFeedback('success', `Plan '${updated.name}' ${statusText} correctamente.`);
+      },
+      error: (err) => {
+        this.showFeedback('error', 'Error al cambiar estado del plan: ' + (err.error?.message || err.message));
+      }
+    });
   }
 
   private showFeedback(type: 'success' | 'error', text: string): void {

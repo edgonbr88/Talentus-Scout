@@ -3,9 +3,9 @@ import { of } from 'rxjs';
 import { provideRouter } from '@angular/router';
 import { AdminPaymentsComponent } from './admin-payments.component';
 import { PaymentService } from '../../../core/services/payment.service';
-import { PaymentGatewaySettingsDto } from '../../../core/models/payment.model';
+import { PaymentGatewaySettingsDto, SubscriptionPlanAdminDto } from '../../../core/models/payment.model';
 
-describe('AdminPaymentsComponent (TS-58) - Mantenedor de Cuentas de Cobro', () => {
+describe('AdminPaymentsComponent - Auditoría y Configuración de Pagos', () => {
   let component: AdminPaymentsComponent;
   let fixture: ComponentFixture<AdminPaymentsComponent>;
   let paymentServiceSpy: jasmine.SpyObj<PaymentService>;
@@ -25,6 +25,31 @@ describe('AdminPaymentsComponent (TS-58) - Mantenedor de Cuentas de Cobro', () =
     updatedAt: new Date().toISOString()
   };
 
+  const mockPlans: SubscriptionPlanAdminDto[] = [
+    {
+      id: 'PRO_MONTHLY',
+      name: 'Plan Pro Mensual',
+      priceUsd: 5.00,
+      durationDays: 30,
+      maxVideos: 5,
+      hasRadarViews: true,
+      hasPdfCv: true,
+      isActive: true,
+      activeSubscribersCount: 12
+    },
+    {
+      id: 'PRO_ANNUAL',
+      name: 'Plan Pro Anual',
+      priceUsd: 50.00,
+      durationDays: 365,
+      maxVideos: 10,
+      hasRadarViews: true,
+      hasPdfCv: true,
+      isActive: true,
+      activeSubscribersCount: 8
+    }
+  ];
+
   beforeEach(async () => {
     paymentServiceSpy = jasmine.createSpyObj('PaymentService', [
       'getAdminPaymentSummary',
@@ -34,7 +59,12 @@ describe('AdminPaymentsComponent (TS-58) - Mantenedor de Cuentas de Cobro', () =
       'getClubs',
       'getPaymentGatewaySettings',
       'updatePaymentGatewaySettings',
-      'uploadBinanceQrImage'
+      'uploadBinanceQrImage',
+      'getAdminSubscriptionPlans',
+      'getAdminSubscriptionPlanById',
+      'createSubscriptionPlan',
+      'updateSubscriptionPlan',
+      'toggleSubscriptionPlanStatus'
     ]);
 
     paymentServiceSpy.getAdminPaymentSummary.and.returnValue(of({
@@ -50,6 +80,7 @@ describe('AdminPaymentsComponent (TS-58) - Mantenedor de Cuentas de Cobro', () =
 
     paymentServiceSpy.getPendingPayments.and.returnValue(of([]));
     paymentServiceSpy.getPaymentGatewaySettings.and.returnValue(of(mockGatewaySettings));
+    paymentServiceSpy.getAdminSubscriptionPlans.and.returnValue(of(mockPlans));
 
     await TestBed.configureTestingModule({
       imports: [AdminPaymentsComponent],
@@ -68,64 +99,93 @@ describe('AdminPaymentsComponent (TS-58) - Mantenedor de Cuentas de Cobro', () =
     expect(component).toBeTruthy();
   });
 
-  it('should load gateway settings on initialization', () => {
+  it('should load gateway settings and subscription plans on initialization', () => {
     expect(paymentServiceSpy.getPaymentGatewaySettings).toHaveBeenCalled();
+    expect(paymentServiceSpy.getAdminSubscriptionPlans).toHaveBeenCalled();
     expect(component.gatewaySettings()).toEqual(mockGatewaySettings);
-    expect(component.pmBankInput).toBe('Banco Nacional de Crédito (BNC)');
-    expect(component.pmPhoneInput).toBe('04141234567');
-    expect(component.pmIdNumberInput).toBe('J-50123456-7');
-    expect(component.binancePayIdInput).toBe('283918273');
-    expect(component.binanceWalletInput).toBe('TLsV5289FjK93kdJ8193jd93kd9');
+    expect(component.subscriptionPlans()).toEqual(mockPlans);
+    expect(component.getActivePlansCount()).toBe(2);
   });
 
-  it('should switch active tab to GATEWAY_SETTINGS', () => {
-    component.setTab('GATEWAY_SETTINGS');
-    expect(component.activeTab()).toBe('GATEWAY_SETTINGS');
+  it('should switch active tab to PLANS_CONFIG', () => {
+    component.setTab('PLANS_CONFIG');
+    expect(component.activeTab()).toBe('PLANS_CONFIG');
   });
 
-  it('should render the Cuentas de Cobro tab button and section', () => {
-    component.setTab('GATEWAY_SETTINGS');
+  it('should render the Planes y Precios tab button and section', () => {
+    component.setTab('PLANS_CONFIG');
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const tabBtn = compiled.querySelector('.admin-tabs-nav button:nth-child(4)');
-    expect(tabBtn?.textContent).toContain('Cuentas de Cobro');
+    const tabButtons = compiled.querySelectorAll('.admin-tabs-nav button');
+    const plansTabBtn = Array.from(tabButtons).find(btn => btn.textContent?.includes('Planes y Precios'));
+    expect(plansTabBtn).toBeTruthy();
 
-    const configCards = compiled.querySelectorAll('.bento-config-card');
-    expect(configCards.length).toBe(2); // Pago Móvil card and Binance card
+    const planCards = compiled.querySelectorAll('.bento-plan-card');
+    expect(planCards.length).toBe(2);
   });
 
-  it('should update gateway settings successfully when form is submitted', () => {
-    const updatedDto: PaymentGatewaySettingsDto = {
-      ...mockGatewaySettings,
-      pagoMovilBank: 'Banco Mercantil',
-      pagoMovilPhone: '04241112233'
+  it('should open modal for creating a new plan', () => {
+    component.openCreatePlanModal();
+    expect(component.isPlanModalOpen()).toBeTrue();
+    expect(component.editingPlanId()).toBeNull();
+    expect(component.planIdInput).toBe('');
+    expect(component.planNameInput).toBe('');
+  });
+
+  it('should open modal for editing an existing plan', () => {
+    component.openEditPlanModal(mockPlans[0]);
+    expect(component.isPlanModalOpen()).toBeTrue();
+    expect(component.editingPlanId()).toBe('PRO_MONTHLY');
+    expect(component.planIdInput).toBe('PRO_MONTHLY');
+    expect(component.planNameInput).toBe('Plan Pro Mensual');
+    expect(component.planPriceUsdInput).toBe(5.00);
+  });
+
+  it('should create a new subscription plan successfully', () => {
+    const newPlan: SubscriptionPlanAdminDto = {
+      id: 'PRO_SEMESTRAL',
+      name: 'Plan Semestral',
+      priceUsd: 25.00,
+      durationDays: 180,
+      maxVideos: 8,
+      hasRadarViews: true,
+      hasPdfCv: true,
+      isActive: true
     };
-    paymentServiceSpy.updatePaymentGatewaySettings.and.returnValue(of(updatedDto));
+    paymentServiceSpy.createSubscriptionPlan.and.returnValue(of(newPlan));
 
-    component.pmBankInput = 'Banco Mercantil';
-    component.pmPhoneInput = '04241112233';
-    component.saveGatewaySettings();
+    component.openCreatePlanModal();
+    component.planIdInput = 'PRO_SEMESTRAL';
+    component.planNameInput = 'Plan Semestral';
+    component.planPriceUsdInput = 25.00;
+    component.planDurationDaysInput = 180;
+    component.planMaxVideosInput = 8;
+    component.planHasRadarViewsInput = true;
+    component.planHasPdfCvInput = true;
 
-    expect(paymentServiceSpy.updatePaymentGatewaySettings).toHaveBeenCalledWith(jasmine.objectContaining({
-      pagoMovilBank: 'Banco Mercantil',
-      pagoMovilPhone: '04241112233'
+    component.savePlan();
+
+    expect(paymentServiceSpy.createSubscriptionPlan).toHaveBeenCalledWith(jasmine.objectContaining({
+      id: 'PRO_SEMESTRAL',
+      name: 'Plan Semestral',
+      priceUsd: 25.00,
+      durationDays: 180
     }));
-    expect(component.gatewaySettings()?.pagoMovilBank).toBe('Banco Mercantil');
+    expect(component.isPlanModalOpen()).toBeFalse();
     expect(component.feedback()?.type).toBe('success');
   });
 
-  it('should upload binance QR code and update preview url', () => {
-    paymentServiceSpy.uploadBinanceQrImage.and.returnValue(of({ qrImageUrl: '/uploads/payments/new-qr.png' }));
+  it('should toggle subscription plan status', () => {
+    const updatedPlan: SubscriptionPlanAdminDto = {
+      ...mockPlans[1],
+      isActive: false
+    };
+    paymentServiceSpy.toggleSubscriptionPlanStatus.and.returnValue(of(updatedPlan));
 
-    const mockFile = new File(['mock content'], 'qr.png', { type: 'image/png' });
-    component.selectedQrFile = mockFile;
+    component.togglePlanStatus(mockPlans[1]);
 
-    component.uploadSelectedQr();
-
-    expect(paymentServiceSpy.uploadBinanceQrImage).toHaveBeenCalledWith(mockFile);
-    expect(component.binanceQrImageUrlDisplay()).toBe('/uploads/payments/new-qr.png');
-    expect(component.selectedQrFile).toBeNull();
+    expect(paymentServiceSpy.toggleSubscriptionPlanStatus).toHaveBeenCalledWith('PRO_ANNUAL');
     expect(component.feedback()?.type).toBe('success');
   });
 });

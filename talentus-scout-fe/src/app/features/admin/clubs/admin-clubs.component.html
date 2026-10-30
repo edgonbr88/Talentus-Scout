@@ -1,26 +1,14 @@
 <div class="admin-page container">
-  <!-- ENCABEZADO DE COMANDO ADMINISTRATIVO -->
-  <header class="admin-header">
-    <div class="header-content">
-      <div class="header-badges">
-        <span class="badge badge-admin">PANEL ADMINISTRATIVO</span>
-        <span class="badge badge-verified">DIRECTORIO INSTITUCIONAL</span>
-      </div>
-      <h1 class="admin-title">Mantenedor de Clubes y Organizaciones</h1>
-      <p class="admin-subtitle">
-        Gestiona, audita y valida las academias, clubes formativos y universidades del fútbol juvenil venezolano. Promueve organizaciones oficiales y administra la integridad del ecosistema deportivo.
-      </p>
-    </div>
-
-    <div class="header-action">
-      <a routerLink="/admin/scouts" class="btn btn-secondary btn-sm">Auditoría Scouts</a>
-      <a routerLink="/admin/verificacion-legal" class="btn btn-secondary btn-sm">Patria Potestad</a>
-      <a routerLink="/admin/pagos" class="btn btn-secondary btn-sm">Auditoría Pagos</a>
-      <button (click)="openCreateModal()" class="btn btn-primary btn-sm" type="button">
-        <span class="btn-icon">＋</span> Registrar Club Oficial
-      </button>
-    </div>
-  </header>
+  <!-- ENCABEZADO ESTANDARIZADO DE COMANDO ADMINISTRATIVO -->
+  <app-admin-header
+    title="Mantenedor de Clubes y Organizaciones"
+    subtitle="Gestiona, audita y valida las academias, clubes formativos y universidades del fútbol juvenil venezolano. Promueve organizaciones oficiales y administra la integridad del ecosistema deportivo."
+    badgeText="DIRECTORIO INSTITUCIONAL"
+  >
+    <button actions (click)="openCreateModal()" class="btn btn-primary btn-sm" type="button">
+      <span class="btn-icon">＋</span> Registrar Club Oficial
+    </button>
+  </app-admin-header>
 
   <!-- BANNER BENTO DE MÉTRICAS OPERATIVAS -->
   <section class="bento-metrics">

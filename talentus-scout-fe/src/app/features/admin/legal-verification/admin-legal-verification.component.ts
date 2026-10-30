@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { AdminHeaderComponent } from '../../../shared/components/admin-header/admin-header.component';
 import { AdminLegalVerificationService } from '../../../core/services/admin-legal-verification.service';
 import {
   LegalVerificationItem,
@@ -13,7 +14,7 @@ import {
 @Component({
   selector: 'app-admin-legal-verification',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, AdminHeaderComponent],
   templateUrl: './admin-legal-verification.component.html',
   styleUrls: ['./admin-legal-verification.component.css']
 })

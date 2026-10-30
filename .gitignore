@@ -35,3 +35,5 @@ logs/
 # Archivos de soporte de pruebas / scratch
 scratch/
 .neon
+*.pdf
+usdt_qr.jpeg
