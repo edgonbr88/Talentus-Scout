@@ -214,11 +214,12 @@ CMD ["node", "/app/dist/talentus-scout-fe/server/server.mjs"]
 * **Notificación al Tutor:** Una vez auditado el pago, se envía un correo automático al tutor confirmando la activación de la Ficha Técnica o detallando el motivo del rechazo.
 * **Tasa de Cambio Oficial (BCV):** Integración con la API del Banco Central de Venezuela con almacenamiento en caché (TTL 6 horas) y tasa de fallback para calcular el monto en Bolívares (VES).
 
-### 4.6. Módulo de Video (Estrategia MVP Go-Live)
+### 4.6. Módulo de Video (Estrategia MVP Go-Live & Roadmap de Activación)
 * Para el lanzamiento inicial a producción (Fase 1), el Feature Flag `VIDEO_FEATURE_ENABLED` se mantiene en `false` por defecto:
   * El Backend rechaza cargas de video con HTTP 503 (`Módulo de Video programado para Fase 2`).
   * El Frontend oculta la zona de carga y despliega un banner estilizado con Bento Grid informando: *"Próximamente disponible: Carga de jugadas destacadas en video HD"*.
   * Cero costos de almacenamiento de video y ancho de banda durante el lanzamiento inicial.
+* **Hoja de Ruta Técnica:** El paso a paso exhaustivo y secuencial para aprovisionar Cloudflare Stream, vincular credenciales en GCP Secret Manager y habilitar el pipeline de subida y reproducción se encuentra documentado en la [Sección 11.4](#114-activación-integral-de-carga-y-reproducción-de-video-cloudflare-stream) y en la [Fase 5 del Checklist](#fase-5-habilitación-de-carga-y-reproducción-de-video-en-producción-cloudflare-stream-pendiente).
 
 ---
 
@@ -391,6 +392,16 @@ En esta fase de lanzamiento, la observabilidad se apoya enteramente en herramien
 - [ ] **F4.5:** Simulación de reporte de Pago Móvil y Binance Pay, validación en el panel `/admin/pagos` y comprobación de restricción antifraude con referencia duplicada.
 - [ ] **F4.6:** Comprobación de que compartir el enlace de un atleta en WhatsApp/Twitter renderiza la tarjeta Open Graph generada por SSR.
 
+### Fase 5: Habilitación de Carga y Reproducción de Video en Producción (Cloudflare Stream) [PENDIENTE]
+- [ ] **F5.1:** Activar suscripción de Cloudflare Stream en la consola de Cloudflare y obtener `Account ID`.
+- [ ] **F5.2:** Generar API Token en Cloudflare con permisos de edición sobre Stream (`Stream:Edit`).
+- [ ] **F5.3:** Configurar webhook de notificación de estado en Cloudflare Stream apuntando a `https://api.talentusscout.com/api/v1/videos/webhook` y obtener el `Signing Secret`.
+- [ ] **F5.4:** Registrar los 3 secretos en GCP Secret Manager (`CLOUDFLARE_STREAM_ACCOUNT_ID`, `CLOUDFLARE_STREAM_API_TOKEN`, `CLOUDFLARE_STREAM_WEBHOOK_SECRET`) y dar permisos a la Service Account de Cloud Run.
+- [ ] **F5.5:** Activar `talentus.video.enabled: true` y `talentus.video.provider: cloudflare` en `application-prod.yml` vinculando las variables de entorno inyectadas.
+- [ ] **F5.6:** Desplegar actualización del backend `talentus-backend-prod` en Cloud Run vía GitHub Actions.
+- [ ] **F5.7:** Habilitar el módulo de carga en Frontend (`tutor-dashboard.component.html`) y validar subida directa cliente -> Cloudflare Stream con barra de progreso.
+- [ ] **F5.8:** Validar procesamiento de webhook HMAC y reproducción adaptativa HLS (`.m3u8`) en el perfil público del atleta y radar de veedores.
+
 ---
 
 ## 10. Criterios de Aceptación (Definition of Done - DoD Inicial)
@@ -440,3 +451,161 @@ Los siguientes componentes han sido postergados intencionalmente para la etapa d
   2. Configurar en Cloud Run:
      * **Startup Probe:** HTTP GET `/actuator/health/liveness`, puerto 8080, `initialDelaySeconds=5`, `periodSeconds=5`, `failureThreshold=20`.
      * **Liveness Probe:** HTTP GET `/actuator/health/liveness`, puerto 8080, `periodSeconds=15`.
+
+---
+
+### 11.4. Activación Integral de Carga y Reproducción de Video (Cloudflare Stream) [PENDIENTE]
+
+#### 11.4.1. Fundamento Arquitectónico (Direct-to-Cloud)
+En entornos serverless como Google Cloud Run con autoescalado a cero (`min-instances=0`), los archivos de video **NUNCA deben subirse a través del contenedor backend**:
+1. **Memoria y Ancho de Banda:** Archivos de video de 100MB a 500MB desbordarían rápidamente la memoria RAM asignada (1024 MiB) y saturarían el ancho de banda del servicio.
+2. **Almacenamiento Efímero:** El sistema de archivos local de Cloud Run es volátil; cualquier archivo almacenado localmente se destruiría al apagarse o escalar la instancia.
+3. **Solución Canónica (Direct Upload):** El frontend solicita un ticket temporal al backend (`POST /api/v1/videos/request-upload`), el backend le pide a Cloudflare Stream una URL de subida directa de un solo uso, y el navegador del tutor transmite el video directamente a los servidores perimetrales de Cloudflare. Una vez completada la transcodificación adaptativa HLS, Cloudflare notifica al backend vía Webhook autenticado con firma HMAC-SHA256 para actualizar el estado del video en Neon PostgreSQL a `READY`.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Tutor as Tutor Legal (Navegador)
+    participant Front as Frontend (Angular 18+)
+    participant Back as Backend (Cloud Run)
+    participant Neon as Neon DB (PostgreSQL)
+    participant CF as Cloudflare Stream API
+
+    Tutor->>Front: Selecciona video (.mp4/.mov < 500MB)
+    Front->>Front: Extrae miniatura en Canvas (HTML5 Video API)
+    Front->>Back: POST /api/v1/videos/request-upload (Bearer JWT)
+    Back->>Back: Valida suscripción activa y patria potestad (LOPNNA)
+    Back->>Neon: Inserta AthleteVideo (status = PENDING_UPLOAD)
+    Back->>CF: POST /client/v4/accounts/{id}/stream/direct_upload
+    CF-->>Back: Upload URL de un solo uso + providerVideoId
+    Back-->>Front: Retorna UploadTicketResponse (uploadUrl, videoId)
+    Front->>CF: POST multipart/form-data (Upload directo con barra de progreso)
+    CF-->>Front: HTTP 200 / Video recibido
+    CF->>CF: Transcodificación adaptativa (HLS 1080p, 720p, 480p, 360p)
+    CF->>Back: POST /api/v1/videos/webhook (Firma Webhook-Signature HMAC)
+    Back->>Back: Verifica firma HMAC-SHA256 con secret
+    Back->>Neon: Actualiza AthleteVideo (status = READY, hlsUrl, duration, thumbnail)
+    Front->>Back: GET /api/v1/athletes/{id}/videos
+    Back-->>Front: Listado de videos con URLs HLS listas
+    Front->>Tutor: Reproducción fluida HLS vía hls.js (VideoPlayerComponent)
+```
+
+---
+
+#### 11.4.2. Guía Técnica Paso a Paso para la Activación en Producción
+
+##### Paso 1: Configurar Suscripción y Credenciales en Cloudflare Stream
+1. Iniciar sesión en el **Cloudflare Dashboard** con la cuenta propietaria del dominio `talentusscout.com`.
+2. En el menú lateral izquierdo, ingresar a **Stream**.
+3. Activar el servicio de Stream (Costo inicial: **$5 USD/mes** por cada 1.000 minutos de almacenamiento y visualización ilimitada incluida).
+4. Copiar el **Account ID** de Cloudflare (ubicado en la barra lateral derecha de la página principal de la cuenta).
+5. Crear un **API Token de Cloudflare**:
+   * Ir a **My Profile** -> **API Tokens** -> **Create Token**.
+   * Seleccionar la plantilla **Create Custom Token**.
+   * **Nombre:** `talentus-cloudflare-stream-prod`.
+   * **Permisos:** `Account` -> `Stream` -> `Edit`.
+   * **Recursos de la Cuenta:** `Include` -> `All accounts` (o seleccionar la cuenta de Talentus).
+   * Generar token y copiar el valor (`CLOUDFLARE_STREAM_API_TOKEN`).
+6. Configurar el **Webhook de Cloudflare Stream**:
+   * Dentro de **Stream** -> **Webhooks**, hacer clic en **Add Webhook**.
+   * **Notification URL:** `https://api.talentusscout.com/api/v1/videos/webhook`
+   * Cloudflare generará automáticamente un **Secret** criptográfico para la firma de eventos (`CLOUDFLARE_STREAM_WEBHOOK_SECRET`). Copiar este valor.
+
+##### Paso 2: Registrar Secretos en Google Cloud Secret Manager
+Desde la consola de Google Cloud (o vía `gcloud CLI` autenticado con la configuración `talentus`):
+
+```bash
+# 1. Registrar Account ID de Cloudflare Stream
+echo -n "TU_CLOUDFLARE_ACCOUNT_ID" | gcloud secrets create CLOUDFLARE_STREAM_ACCOUNT_ID \
+  --project="project-3f3415b6-8b35-4d04-be4" \
+  --data-file=- \
+  --replication-policy="automatic"
+
+# 2. Registrar API Token con permisos Stream:Edit
+echo -n "TU_CLOUDFLARE_API_TOKEN" | gcloud secrets create CLOUDFLARE_STREAM_API_TOKEN \
+  --project="project-3f3415b6-8b35-4d04-be4" \
+  --data-file=- \
+  --replication-policy="automatic"
+
+# 3. Registrar Webhook Secret para validar firmas HMAC
+echo -n "TU_CLOUDFLARE_WEBHOOK_SECRET" | gcloud secrets create CLOUDFLARE_STREAM_WEBHOOK_SECRET \
+  --project="project-3f3415b6-8b35-4d04-be4" \
+  --data-file=- \
+  --replication-policy="automatic"
+
+# 4. Otorgar permisos a la Service Account de Cloud Run (si aplica)
+SERVICE_ACCOUNT="994142432241-compute@developer.gserviceaccount.com"
+for SECRET in CLOUDFLARE_STREAM_ACCOUNT_ID CLOUDFLARE_STREAM_API_TOKEN CLOUDFLARE_STREAM_WEBHOOK_SECRET; do
+  gcloud secrets add-iam-policy-binding "$SECRET" \
+    --project="project-3f3415b6-8b35-4d04-be4" \
+    --member="serviceAccount:${SERVICE_ACCOUNT}" \
+    --role="roles/secretmanager.secretAccessor"
+done
+```
+
+##### Paso 3: Configurar Variables en el Perfil de Producción (`application-prod.yml`)
+En `talentus-scout-be/src/main/resources/application-prod.yml`, actualizar el bloque de video para activar el proveedor Cloudflare y vincular los secretos:
+
+```yaml
+talentus:
+  video:
+    enabled: ${VIDEO_FEATURE_ENABLED:true}
+    provider: ${VIDEO_STREAM_PROVIDER:cloudflare}
+    max-size-bytes: 524288000 # 500MB
+    cloudflare:
+      account-id: ${CLOUDFLARE_STREAM_ACCOUNT_ID}
+      api-token: ${CLOUDFLARE_STREAM_API_TOKEN}
+      webhook-secret: ${CLOUDFLARE_STREAM_WEBHOOK_SECRET}
+```
+
+##### Paso 4: Ajuste y Validación en el Backend (`talentus-scout-be`)
+1. **Validación del Feature Flag:** En `VideoService.java`, verificar que si `talentus.video.enabled` es `false`, el método `requestUpload` arroje una excepción controlada:
+   ```java
+   if (!videoEnabled) {
+       throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "El módulo de video está temporalmente desactivado para mantenimiento.");
+   }
+   ```
+2. **Proveedor Cloudflare:** Verificar que la clase `CloudflareStreamProvider.java` esté anotada con:
+   ```java
+   @Component
+   @ConditionalOnProperty(name = "talentus.video.provider", havingValue = "cloudflare")
+   public class CloudflareStreamProvider implements VideoStreamProvider { ... }
+   ```
+3. **Manejo de Webhook:** Confirmar que `CloudflareStreamProvider.verifyWebhookSignature()` valida la cabecera `Webhook-Signature` comparando el hash HMAC-SHA256 con el `webhookSecret` configurado para prevenir ataques de suplantación.
+
+##### Paso 5: Actualizar el Servicio en Cloud Run
+Actualizar el servicio `talentus-backend-prod` en Cloud Run vinculando los 3 nuevos secretos desde Secret Manager como variables de entorno:
+
+```bash
+gcloud run services update talentus-backend-prod \
+  --region=southamerica-east1 \
+  --project=project-3f3415b6-8b35-4d04-be4 \
+  --set-env-vars=VIDEO_FEATURE_ENABLED=true,VIDEO_STREAM_PROVIDER=cloudflare \
+  --set-secrets=CLOUDFLARE_STREAM_ACCOUNT_ID=CLOUDFLARE_STREAM_ACCOUNT_ID:latest,\
+CLOUDFLARE_STREAM_API_TOKEN=CLOUDFLARE_STREAM_API_TOKEN:latest,\
+CLOUDFLARE_STREAM_WEBHOOK_SECRET=CLOUDFLARE_STREAM_WEBHOOK_SECRET:latest
+```
+
+##### Paso 6: Habilitación en Frontend (`talentus-scout-fe`)
+1. En `tutor-dashboard.component.html`, retirar cualquier flag temporal de bloqueo para mostrar libremente el componente `app-video-uploader` cuando el atleta posea estatus de suscripción activo (`ACTIVE`).
+2. En `VideoUploadService.ts`, confirmar que `isExternalUpload` identifique las URLs de Cloudflare (`uploadUrl.includes('cloudflarestream.com')` o dominio externo) para **no** enviar la cabecera local `Authorization: Bearer <token>` a los servidores de Cloudflare (evitando errores de CORS o fuga de JWT).
+3. En `video-player.component.ts`, validar que la directiva `hls.js` inicialice y cargue el archivo `manifest/video.m3u8` generado por Cloudflare Stream con reproducción responsiva en resoluciones 1080p, 720p y 480p.
+
+---
+
+#### 11.4.3. Matriz de Pruebas de Humo para el Módulo de Video (Smoke Test)
+Una vez desplegada la actualización a producción, ejecutar las siguientes validaciones en vivo:
+1. **Solicitud de Ticket (Backend):**
+   * Como tutor autenticado, solicitar ticket de subida vía `POST /api/v1/videos/request-upload`.
+   * Verificar respuesta HTTP 201 con `directUploadUrl` apuntando a `https://upload.videodelivery.net/...`.
+2. **Carga Directa (Frontend):**
+   * Seleccionar un archivo MP4 de prueba de 20MB a 50MB en el panel de tutor.
+   * Verificar que la barra de progreso avance gradualmente hasta 100%.
+   * Verificar en DevTools (pestaña Red) que el payload binario viaja directamente hacia `upload.videodelivery.net` y **no** hacia `api.talentusscout.com`.
+3. **Webhook de Transcodificación:**
+   * En Cloudflare Stream Dashboard -> Webhooks, verificar que el evento de estado `ready` reporte HTTP 200 OK despachado a `api.talentusscout.com/api/v1/videos/webhook`.
+   * En la base de datos Neon, verificar que el registro en `athlete_videos` cambie su estatus a `READY` con `hls_manifest_url` poblada.
+4. **Reproducción Adaptativa HLS:**
+   * Ingresar al perfil público del atleta (`https://talentusscout.com/perfil/<slug>`).
+   * Verificar que el video reproduzca de inmediato en escritorio (Chrome/Firefox/Safari) y en dispositivos móviles (iOS/Android).
+   * Probar el modal de video en el radar de veedores (`/scouts/talentos`).
