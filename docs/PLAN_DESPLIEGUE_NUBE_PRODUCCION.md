@@ -302,7 +302,8 @@ CMD ["node", "/app/dist/talentus-scout-fe/server/server.mjs"]
 * **Puerto:** 8080.
 * **Variables de Entorno y Secretos:**
   * `SPRING_PROFILES_ACTIVE=prod`
-  * Secretos vinculados desde Secret Manager (`DB_URL`, `DB_USER`, `DB_PWD`, `JWT_SECRET_KEY`, `ENCRYPTION_SECRET_KEY`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `RESEND_API_KEY`).
+  * `R2_ENDPOINT=https://1ebb8ecfc3a08280b36e84ca874af33b.r2.cloudflarestorage.com`
+  * Secretos vinculados desde Secret Manager (`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PWD`, `JWT_SECRET_KEY`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `RESEND_API_KEY`).
 
 ### 6.2. Frontend (`talentus-scout-fe`)
 * **Nombre del Servicio:** `talentus-frontend-prod`

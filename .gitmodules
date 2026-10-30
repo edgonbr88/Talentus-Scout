@@ -1,0 +1,6 @@
+[submodule "talentus-scout-be"]
+	path = talentus-scout-be
+	url = https://github.com/edgonbr88/talentus-scout-be.git
+[submodule "talentus-scout-migrations"]
+	path = talentus-scout-migrations
+	url = https://github.com/edgonbr88/talentus-scout-migrations.git
