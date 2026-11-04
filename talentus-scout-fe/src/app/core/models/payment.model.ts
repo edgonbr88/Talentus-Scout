@@ -22,6 +22,10 @@ export interface PaymentConfigResponse {
   binanceQrImageUrl?: string;
   pagoMovilEnabled?: boolean;
   binanceManualEnabled?: boolean;
+  zelleEnabled?: boolean;
+  zelleEmail?: string;
+  zelleAccountHolder?: string;
+  zelleQrImageUrl?: string;
 }
 
 export interface BcvRateResponse {
@@ -49,6 +53,16 @@ export interface ReportBinanceManualPaymentRequest {
   referenceNumber: string;
   paymentDate: string; // YYYY-MM-DD
   originAccount?: string;
+  discountCode?: string;
+}
+
+export interface ReportZellePaymentRequest {
+  athleteId: string;
+  planId: string;
+  referenceNumber: string;
+  originAccountHolder: string;
+  originEmailOrPhone?: string;
+  paymentDate: string; // YYYY-MM-DD
   discountCode?: string;
 }
 
@@ -119,6 +133,7 @@ export interface AdminPaymentSummary {
   rejectedCount: number;
   binancePayApprovedCount: number;
   pagoMovilApprovedCount: number;
+  zelleApprovedCount?: number;
 }
 
 export interface PaymentHistoryPage {
@@ -223,6 +238,10 @@ export interface PaymentGatewaySettingsDto {
   binanceWalletAddress?: string;
   binanceNetwork?: string;
   binanceQrImageUrl?: string;
+  zelleEnabled?: boolean;
+  zelleEmail?: string;
+  zelleAccountHolder?: string;
+  zelleQrImageUrl?: string;
   updatedAt?: string;
 }
 
@@ -236,6 +255,9 @@ export interface UpdatePaymentGatewaySettingsRequest {
   binancePayId?: string;
   binanceWalletAddress?: string;
   binanceNetwork?: string;
+  zelleEnabled?: boolean;
+  zelleEmail?: string;
+  zelleAccountHolder?: string;
 }
 
 export interface SubscriptionPlanAdminDto {

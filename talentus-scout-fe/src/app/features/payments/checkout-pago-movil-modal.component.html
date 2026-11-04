@@ -57,13 +57,29 @@
           <span class="tab-crypto-badge">🟡</span>
           <div class="tab-text">
             <strong>Binance Pay</strong>
-            <small *ngIf="config()?.binanceManualEnabled !== false">USDT Cripto · Automático</small>
+            <small *ngIf="config()?.binanceManualEnabled !== false">USDT Cripto · Billetera</small>
             <small *ngIf="config()?.binanceManualEnabled === false" class="text-maintenance">En mantenimiento</small>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          class="tab-btn tab-zelle"
+          [class.tab-active]="selectedMethod() === 'ZELLE'"
+          [class.tab-disabled]="config()?.zelleEnabled === false"
+          [disabled]="config()?.zelleEnabled === false"
+          (click)="setMethod('ZELLE')"
+        >
+          <span class="tab-zelle-badge">🟣</span>
+          <div class="tab-text">
+            <strong>Zelle</strong>
+            <small *ngIf="config()?.zelleEnabled !== false">Transferencia USD</small>
+            <small *ngIf="config()?.zelleEnabled === false" class="text-maintenance">En mantenimiento</small>
           </div>
         </button>
       </div>
 
-      <div *ngIf="config()?.pagoMovilEnabled === false && config()?.binanceManualEnabled === false" class="alert-maintenance-all">
+      <div *ngIf="config()?.pagoMovilEnabled === false && config()?.binanceManualEnabled === false && config()?.zelleEnabled === false" class="alert-maintenance-all">
         ⚠️ Los canales de pago se encuentran en conciliación o mantenimiento temporal. Por favor, intenta de nuevo más tarde o contáctanos a soporte.
       </div>
 
@@ -496,11 +512,151 @@
           </div>
         </div>
       </div>
+
+      <!-- SECCIÓN VISTA ZELLE (USD DIRECTO) - TS-66 -->
+      <div *ngIf="selectedMethod() === 'ZELLE' && !isFreePromo" class="zelle-flow-section">
+        <div class="zelle-benefit-banner">
+          <div class="zelle-logo-title">
+            <span class="zelle-badge-icon">Z$</span>
+            <h4>Transferencia Bancaria Directa con Zelle (USD)</h4>
+          </div>
+          <p>
+            Envía el pago en dólares estadounidenses desde tu banco en EE. UU. a nuestra cuenta institucional. Una vez registrado tu comprobante, administración conciliará la operación y activará el Plan Pro de tu atleta.
+          </p>
+        </div>
+
+        <!-- TARJETA BENTO DE DATOS RECEPTORES ZELLE -->
+        <div class="zelle-credentials-grid" [class.zelle-grid-no-qr]="!config()?.zelleQrImageUrl">
+          <!-- Columna QR Zelle (si fue cargado por el admin) -->
+          <div class="zelle-qr-col" *ngIf="config()?.zelleQrImageUrl">
+            <div class="zelle-qr-box">
+              <img
+                [src]="config()?.zelleQrImageUrl"
+                alt="Código QR Zelle Talentus Scout"
+                class="zelle-qr-img"
+              />
+            </div>
+            <span class="qr-caption">Escanea con tu app bancaria Zelle</span>
+          </div>
+
+          <!-- Columna Datos Institucionales Zelle -->
+          <div class="zelle-data-col">
+            <!-- Correo Receptor Zelle -->
+            <div class="credential-row">
+              <span class="credential-label">Correo Receptor Zelle:</span>
+              <div class="credential-value-wrap zelle-value-wrap">
+                <span class="credential-code zelle-email-code">{{ config()?.zelleEmail || 'pagos@talentusscout.com' }}</span>
+                <button
+                  type="button"
+                  class="btn-copy-mini btn-copy-zelle"
+                  (click)="copyToClipboard(config()?.zelleEmail || 'pagos@talentusscout.com', 'Correo Zelle')"
+                >
+                  Copiar
+                </button>
+              </div>
+            </div>
+
+            <!-- Nombre del Titular Zelle -->
+            <div class="credential-row">
+              <span class="credential-label">Nombre del Titular Oficial:</span>
+              <div class="credential-value-wrap zelle-value-wrap">
+                <span class="credential-code">{{ config()?.zelleAccountHolder || 'Talentus Scout LLC' }}</span>
+                <button
+                  type="button"
+                  class="btn-copy-mini btn-copy-zelle"
+                  (click)="copyToClipboard(config()?.zelleAccountHolder || 'Talentus Scout LLC', 'Titular Zelle')"
+                >
+                  Copiar
+                </button>
+              </div>
+            </div>
+
+            <!-- Monto Exacto en USD -->
+            <div class="zelle-amount-box">
+              <span class="zelle-amount-label">Monto exacto a transferir:</span>
+              <div class="zelle-amount-right">
+                <strong class="zelle-amount-val">${{ effectiveAmountUsd | number:'1.2-2' }} USD</strong>
+                <button
+                  type="button"
+                  class="btn-copy-mini btn-copy-zelle"
+                  (click)="copyToClipboard(effectiveAmountUsd.toFixed(2), 'Monto en USD')"
+                >
+                  Copiar Monto
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FORMULARIO DE REPORTE ZELLE -->
+        <div class="zelle-report-form">
+          <h5 class="form-section-title">Registra los datos de tu transferencia Zelle</h5>
+
+          <div class="form-row-dual">
+            <div class="form-group">
+              <label for="zelleHolderInput">
+                Nombre del Titular de la Cuenta Emisora <span class="required">*</span>
+              </label>
+              <input
+                id="zelleHolderInput"
+                type="text"
+                class="form-control"
+                [(ngModel)]="zelleOriginAccountHolder"
+                placeholder="Ej: Roberto Carlos Rivas"
+                maxlength="100"
+                autocomplete="off"
+              />
+              <small class="form-hint">Tal como aparece registrado en el banco desde donde enviaste el Zelle.</small>
+            </div>
+
+            <div class="form-group">
+              <label for="zelleEmailOrPhoneInput">Correo o Teléfono Emisor Zelle (Opcional)</label>
+              <input
+                id="zelleEmailOrPhoneInput"
+                type="text"
+                class="form-control"
+                [(ngModel)]="zelleOriginEmailOrPhone"
+                placeholder="Ej: tu.correo@gmail.com o +1 (305)..."
+                maxlength="150"
+                autocomplete="off"
+              />
+              <small class="form-hint">Facilita la conciliación inmediata en nuestro estado de cuenta.</small>
+            </div>
+          </div>
+
+          <div class="form-row-dual">
+            <div class="form-group">
+              <label for="zelleRefInput">
+                Número de Confirmación / Referencia Zelle <span class="required">*</span>
+              </label>
+              <input
+                id="zelleRefInput"
+                type="text"
+                class="form-control"
+                [(ngModel)]="zelleReference"
+                placeholder="Ej: JPM992837465 o código de confirmación"
+                maxlength="100"
+                autocomplete="off"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="zelleDateInput">Fecha de la Transferencia <span class="required">*</span></label>
+              <input
+                id="zelleDateInput"
+                type="date"
+                class="form-control"
+                [(ngModel)]="zellePaymentDate"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- PIE DEL MODAL CON ACCIÓN -->
     <div class="modal-footer" *ngIf="!isLoading()">
-      <button (click)="closeModal()" [disabled]="isSubmitting() || isSubmittingBinance()" class="btn btn-secondary" type="button">
+      <button (click)="closeModal()" [disabled]="isSubmitting() || isSubmittingBinance() || isSubmittingZelle()" class="btn btn-secondary" type="button">
         Cerrar
       </button>
 
@@ -526,6 +682,18 @@
       >
         <span *ngIf="isSubmittingBinance()" class="spinner-small"></span>
         <span>{{ isSubmittingBinance() ? 'Registrando transferencia...' : 'Confirmar y Notificar Pago Binance' }}</span>
+      </button>
+
+      <!-- Botón Zelle -->
+      <button
+        *ngIf="selectedMethod() === 'ZELLE' && !isFreePromo"
+        (click)="submitZelleReport()"
+        [disabled]="isSubmittingZelle() || !zelleReference || !zelleOriginAccountHolder"
+        class="btn btn-primary btn-submit-zelle"
+        type="button"
+      >
+        <span *ngIf="isSubmittingZelle()" class="spinner-small"></span>
+        <span>{{ isSubmittingZelle() ? 'Registrando transferencia Zelle...' : 'Confirmar y Notificar Pago Zelle' }}</span>
       </button>
     </div>
   </div>

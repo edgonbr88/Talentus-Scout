@@ -40,6 +40,9 @@ describe('CheckoutPagoMovilModalComponent - TS-44 Validación y Envío de amount
     binanceWalletAddress: 'TLsV5289FjK93kdJ8193jd93kd9',
     binanceNetwork: 'USDT (TRC-20 / BEP-20)',
     binanceQrImageUrl: '/assets/images/binance-qr-sample.png',
+    zelleEnabled: true,
+    zelleEmail: 'pagos@talentusscout.com',
+    zelleAccountHolder: 'Talentus Scout LLC',
     plans: [
       {
         id: 'PRO_MONTHLY',
@@ -89,6 +92,7 @@ describe('CheckoutPagoMovilModalComponent - TS-44 Validación y Envío de amount
       'getBcvRate',
       'reportPagoMovil',
       'reportBinanceManual',
+      'reportZellePayment',
       'validateCoupon',
       'redeemFreePromo',
       'createBinanceOrder',
@@ -250,5 +254,59 @@ describe('CheckoutPagoMovilModalComponent - TS-44 Validación y Envío de amount
 
     expect(paymentServiceSpy.reportBinanceManual).not.toHaveBeenCalled();
     expect(component.errorMessage()).toContain('mínimo 4 caracteres');
+  });
+
+  it('debe cambiar al método ZELLE y renderizar correo receptor y titular oficial (TS-66)', () => {
+    component.setMethod('ZELLE');
+    fixture.detectChanges();
+
+    expect(component.selectedMethod()).toBe('ZELLE');
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('pagos@talentusscout.com');
+    expect(compiled.textContent).toContain('Talentus Scout LLC');
+  });
+
+  it('debe despachar submitZelleReport() hacia PaymentService con titular y referencia (TS-66)', () => {
+    const mockZelleTx: PaymentTransactionResponse = {
+      ...mockTransactionResponse,
+      method: 'ZELLE',
+      referenceNumber: 'ZELLE-CONF-2026',
+      amountVes: 0,
+      bcvExchangeRate: 0
+    };
+
+    paymentServiceSpy.reportZellePayment.and.returnValue(of(mockZelleTx));
+    spyOn(component.paymentReported, 'emit');
+
+    component.setMethod('ZELLE');
+    component.zelleReference = 'ZELLE-CONF-2026';
+    component.zelleOriginAccountHolder = 'Roberto Rivas';
+    component.zelleOriginEmailOrPhone = 'roberto@usbank.com';
+    component.zellePaymentDate = '2026-11-03';
+
+    component.submitZelleReport();
+
+    expect(paymentServiceSpy.reportZellePayment).toHaveBeenCalledTimes(1);
+    const payload = paymentServiceSpy.reportZellePayment.calls.mostRecent().args[0];
+
+    expect(payload.athleteId).toBe('ath-123-uuid');
+    expect(payload.planId).toBe('PRO_MONTHLY');
+    expect(payload.referenceNumber).toBe('ZELLE-CONF-2026');
+    expect(payload.originAccountHolder).toBe('Roberto Rivas');
+    expect(payload.originEmailOrPhone).toBe('roberto@usbank.com');
+    expect(payload.paymentDate).toBe('2026-11-03');
+
+    expect(component.paymentReported.emit).toHaveBeenCalledWith(mockZelleTx);
+    expect(component.isSubmittingZelle()).toBeFalse();
+  });
+
+  it('debe validar titular y referencia antes de enviar reporte de Zelle (TS-66)', () => {
+    component.setMethod('ZELLE');
+    component.zelleReference = 'ZELLE-12345';
+    component.zelleOriginAccountHolder = '';
+    component.submitZelleReport();
+
+    expect(paymentServiceSpy.reportZellePayment).not.toHaveBeenCalled();
+    expect(component.errorMessage()).toContain('titular');
   });
 });

@@ -22,6 +22,9 @@ describe('AdminPaymentsComponent - Auditoría y Configuración de Pagos', () => 
     binanceWalletAddress: 'TLsV5289FjK93kdJ8193jd93kd9',
     binanceNetwork: 'USDT (TRC-20 / BEP-20)',
     binanceQrImageUrl: '/assets/images/binance-qr-sample.png',
+    zelleEnabled: true,
+    zelleEmail: 'pagos@talentusscout.com',
+    zelleAccountHolder: 'Talentus Scout LLC',
     updatedAt: new Date().toISOString()
   };
 
@@ -60,6 +63,7 @@ describe('AdminPaymentsComponent - Auditoría y Configuración de Pagos', () => 
       'getPaymentGatewaySettings',
       'updatePaymentGatewaySettings',
       'uploadBinanceQrImage',
+      'uploadZelleQrImage',
       'getAdminSubscriptionPlans',
       'getAdminSubscriptionPlanById',
       'createSubscriptionPlan',
@@ -186,6 +190,36 @@ describe('AdminPaymentsComponent - Auditoría y Configuración de Pagos', () => 
     component.togglePlanStatus(mockPlans[1]);
 
     expect(paymentServiceSpy.toggleSubscriptionPlanStatus).toHaveBeenCalledWith('PRO_ANNUAL');
+    expect(component.feedback()?.type).toBe('success');
+  });
+
+  it('should render Zelle configuration card in GATEWAY_SETTINGS tab and save Zelle parameters (TS-66)', () => {
+    component.setTab('GATEWAY_SETTINGS');
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.textContent).toContain('Zelle Institucional');
+    expect(component.zelleEmailInput).toBe('pagos@talentusscout.com');
+    expect(component.zelleAccountHolderInput).toBe('Talentus Scout LLC');
+    expect(component.getActiveGatewaysLabel()).toBe('3 Activas');
+
+    const updatedSettings: PaymentGatewaySettingsDto = {
+      ...mockGatewaySettings,
+      zelleEnabled: true,
+      zelleEmail: 'zelle.corp@talentus.app',
+      zelleAccountHolder: 'Talentus Corp USA'
+    };
+    paymentServiceSpy.updatePaymentGatewaySettings.and.returnValue(of(updatedSettings));
+
+    component.zelleEmailInput = 'zelle.corp@talentus.app';
+    component.zelleAccountHolderInput = 'Talentus Corp USA';
+    component.saveGatewaySettings();
+
+    expect(paymentServiceSpy.updatePaymentGatewaySettings).toHaveBeenCalledWith(jasmine.objectContaining({
+      zelleEnabled: true,
+      zelleEmail: 'zelle.corp@talentus.app',
+      zelleAccountHolder: 'Talentus Corp USA'
+    }));
     expect(component.feedback()?.type).toBe('success');
   });
 });

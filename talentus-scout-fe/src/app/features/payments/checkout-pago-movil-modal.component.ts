@@ -27,7 +27,7 @@ export class CheckoutPagoMovilModalComponent implements OnInit {
   @Output() paymentReported = new EventEmitter<PaymentTransactionResponse>();
 
   // Método de pago seleccionado
-  readonly selectedMethod = signal<'PAGO_MOVIL' | 'BINANCE_PAY'>('PAGO_MOVIL');
+  readonly selectedMethod = signal<'PAGO_MOVIL' | 'BINANCE_PAY' | 'ZELLE'>('PAGO_MOVIL');
 
   // Estados de datos
   readonly config = signal<PaymentConfigResponse | null>(null);
@@ -64,6 +64,13 @@ export class CheckoutPagoMovilModalComponent implements OnInit {
   binanceOriginAccount = '';
   readonly isSubmittingBinance = signal<boolean>(false);
 
+  // Formulario Zelle Manual (TS-66)
+  zelleReference = '';
+  zellePaymentDate = new Date().toISOString().substring(0, 10);
+  zelleOriginAccountHolder = '';
+  zelleOriginEmailOrPhone = '';
+  readonly isSubmittingZelle = signal<boolean>(false);
+
   readonly popularBanks = [
     'Banco de Venezuela',
     'Banesco',
@@ -90,10 +97,12 @@ export class CheckoutPagoMovilModalComponent implements OnInit {
           const defaultPlan = cfg.plans.find(p => p.id === 'PRO_MONTHLY') || cfg.plans[0];
           this.selectedPlan.set(defaultPlan);
         }
-        if (cfg.pagoMovilEnabled === false && cfg.binanceManualEnabled !== false) {
-          this.selectedMethod.set('BINANCE_PAY');
-        } else if (cfg.binanceManualEnabled === false && cfg.pagoMovilEnabled !== false) {
+        if (cfg.pagoMovilEnabled !== false) {
           this.selectedMethod.set('PAGO_MOVIL');
+        } else if (cfg.binanceManualEnabled !== false) {
+          this.selectedMethod.set('BINANCE_PAY');
+        } else if (cfg.zelleEnabled !== false) {
+          this.selectedMethod.set('ZELLE');
         }
         this.fetchBcvRate();
       },
@@ -116,11 +125,14 @@ export class CheckoutPagoMovilModalComponent implements OnInit {
     });
   }
 
-  setMethod(method: 'PAGO_MOVIL' | 'BINANCE_PAY'): void {
+  setMethod(method: 'PAGO_MOVIL' | 'BINANCE_PAY' | 'ZELLE'): void {
     if (method === 'PAGO_MOVIL' && this.config()?.pagoMovilEnabled === false) {
       return;
     }
     if (method === 'BINANCE_PAY' && this.config()?.binanceManualEnabled === false) {
+      return;
+    }
+    if (method === 'ZELLE' && this.config()?.zelleEnabled === false) {
       return;
     }
     this.selectedMethod.set(method);
@@ -397,8 +409,54 @@ export class CheckoutPagoMovilModalComponent implements OnInit {
     });
   }
 
+  // --- Reporte Manual Zelle (TS-66) ---
+  submitZelleReport(): void {
+    if (!this.zelleReference || this.zelleReference.trim().length < 4) {
+      this.errorMessage.set('Por favor ingresa un número de confirmación de Zelle válido (mínimo 4 caracteres).');
+      return;
+    }
+
+    if (!this.zelleOriginAccountHolder || !this.zelleOriginAccountHolder.trim()) {
+      this.errorMessage.set('Por favor ingresa el nombre del titular de la cuenta desde la que enviaste el Zelle.');
+      return;
+    }
+
+    if (!this.zellePaymentDate) {
+      this.errorMessage.set('Por favor indica la fecha en que realizaste la transferencia de Zelle.');
+      return;
+    }
+
+    const plan = this.selectedPlan();
+    if (!plan) {
+      this.errorMessage.set('Por favor selecciona un plan.');
+      return;
+    }
+
+    this.isSubmittingZelle.set(true);
+    this.errorMessage.set(null);
+
+    this.paymentService.reportZellePayment({
+      athleteId: this.athlete.id,
+      planId: plan.id,
+      referenceNumber: this.zelleReference.trim(),
+      originAccountHolder: this.zelleOriginAccountHolder.trim(),
+      originEmailOrPhone: this.zelleOriginEmailOrPhone ? this.zelleOriginEmailOrPhone.trim() : undefined,
+      paymentDate: this.zellePaymentDate,
+      discountCode: this.appliedCoupon()?.code
+    }).subscribe({
+      next: (res) => {
+        this.isSubmittingZelle.set(false);
+        this.paymentReported.emit(res);
+      },
+      error: (err) => {
+        this.isSubmittingZelle.set(false);
+        this.errorMessage.set(err.error?.message || 'Error al reportar el pago de Zelle. Por favor intenta nuevamente.');
+      }
+    });
+  }
+
   closeModal(): void {
-    if (!this.isSubmitting() && !this.isSubmittingBinance() && !this.isGeneratingBinance()) {
+    if (!this.isSubmitting() && !this.isSubmittingBinance() && !this.isSubmittingZelle() && !this.isGeneratingBinance()) {
       this.close.emit();
     }
   }

@@ -14,6 +14,7 @@ import {
   PaymentTransactionResponse,
   ReportBinanceManualPaymentRequest,
   ReportPagoMovilRequest,
+  ReportZellePaymentRequest,
   UpdatePaymentGatewaySettingsRequest,
   SubscriptionPlanAdminDto,
   CreateSubscriptionPlanRequest,
@@ -40,6 +41,10 @@ export class PaymentService {
 
   reportBinanceManual(request: ReportBinanceManualPaymentRequest): Observable<PaymentTransactionResponse> {
     return this.http.post<PaymentTransactionResponse>('/api/v1/payments/binance-pay/manual-report', request);
+  }
+
+  reportZellePayment(request: ReportZellePaymentRequest): Observable<PaymentTransactionResponse> {
+    return this.http.post<PaymentTransactionResponse>('/api/v1/payments/zelle/report', request);
   }
 
   createBinanceOrder(request: CreateBinanceOrderRequest): Observable<CreateBinanceOrderResponse> {
@@ -139,6 +144,12 @@ export class PaymentService {
     const formData = new FormData();
     formData.append('file', file);
     return this.http.post<{ qrImageUrl: string }>('/api/v1/admin/payments/gateway-settings/binance-qr', formData);
+  }
+
+  uploadZelleQrImage(file: File): Observable<{ qrImageUrl: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<{ qrImageUrl: string }>('/api/v1/admin/payments/gateway-settings/zelle-qr', formData);
   }
 
   // --- Mantenedor de Planes y Precios (TS-63) ---

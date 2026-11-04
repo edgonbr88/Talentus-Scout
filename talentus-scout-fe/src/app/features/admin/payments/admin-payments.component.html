@@ -18,7 +18,10 @@
       <div class="metric-value-row">
         <span class="metric-number">${{ (summary()?.totalRevenueUsd || 0) | number:'1.2-2' }}</span>
         <span class="metric-indicator indicator-crypto">
-          🟡 {{ summary()?.binancePayApprovedCount || 0 }} en Binance Pay
+          🟡 {{ summary()?.binancePayApprovedCount || 0 }} Binance
+        </span>
+        <span class="metric-indicator indicator-zelle" *ngIf="(summary()?.zelleApprovedCount || 0) > 0">
+          🟣 {{ summary()?.zelleApprovedCount }} Zelle
         </span>
       </div>
       <p class="metric-desc">Ingresos consolidados por planes Pro (Mensual y Anual).</p>
@@ -103,7 +106,7 @@
     >
       <span>⚙️ Cuentas de Cobro</span>
       <span class="tab-count-badge badge-active" *ngIf="gatewaySettings()">
-        {{ (gatewaySettings()?.pagoMovilEnabled && gatewaySettings()?.binanceManualEnabled) ? '2 Activas' : ((gatewaySettings()?.pagoMovilEnabled || gatewaySettings()?.binanceManualEnabled) ? '1 Activa' : 'Pausadas') }}
+        {{ getActiveGatewaysLabel() }}
       </span>
     </button>
     <button
@@ -141,8 +144,13 @@
         <div class="payment-card-header">
           <div class="header-left">
             <span class="badge badge-reference">REF: #{{ tx.referenceNumber || tx.gatewayOrderId }}</span>
-            <span class="badge" [class.badge-binance]="tx.method === 'BINANCE_PAY'" [class.badge-pagomovil]="tx.method === 'PAGO_MOVIL'">
-              {{ tx.method === 'BINANCE_PAY' ? '🟡 Binance' : '🇻🇪 Pago Móvil' }}
+            <span
+              class="badge"
+              [class.badge-binance]="tx.method === 'BINANCE_PAY'"
+              [class.badge-pagomovil]="tx.method === 'PAGO_MOVIL'"
+              [class.badge-zelle]="tx.method === 'ZELLE'"
+            >
+              {{ tx.method === 'BINANCE_PAY' ? '🟡 Binance' : (tx.method === 'ZELLE' ? '🟣 Zelle' : '🇻🇪 Pago Móvil') }}
             </span>
             <span class="payment-date">{{ tx.paymentDate }}</span>
           </div>
@@ -177,11 +185,11 @@
 
           <div class="bank-details-row" *ngIf="tx.originBank">
             <div class="bank-item">
-              <span class="bank-lbl">Banco Emisor:</span>
+              <span class="bank-lbl">{{ tx.method === 'ZELLE' ? 'Titular / Cuenta Zelle:' : 'Banco Emisor:' }}</span>
               <span class="bank-val">{{ tx.originBank }}</span>
             </div>
             <div class="bank-item" *ngIf="tx.originPhone">
-              <span class="bank-lbl">Teléfono Origen:</span>
+              <span class="bank-lbl">{{ tx.method === 'ZELLE' ? 'Contacto Emisor:' : 'Teléfono Origen:' }}</span>
               <span class="bank-val">{{ tx.originPhone }}</span>
             </div>
           </div>
@@ -225,6 +233,7 @@
           <option value="ALL">Todos los Métodos</option>
           <option value="PAGO_MOVIL">Pago Móvil (Bs)</option>
           <option value="BINANCE_PAY">Binance Pay (USDT)</option>
+          <option value="ZELLE">Zelle (USD)</option>
         </select>
       </div>
 
@@ -273,8 +282,12 @@
           <tr *ngFor="let item of historyPayments()">
             <td class="cell-date">{{ item.createdAt | date:'short' }}</td>
             <td>
-              <span class="chip-method" [class.chip-binance]="item.method === 'BINANCE_PAY'">
-                {{ item.method === 'BINANCE_PAY' ? '🟡 Binance Pay' : '🇻🇪 Pago Móvil' }}
+              <span
+                class="chip-method"
+                [class.chip-binance]="item.method === 'BINANCE_PAY'"
+                [class.chip-zelle]="item.method === 'ZELLE'"
+              >
+                {{ item.method === 'BINANCE_PAY' ? '🟡 Binance Pay' : (item.method === 'ZELLE' ? '🟣 Zelle (USD)' : '🇻🇪 Pago Móvil') }}
               </span>
             </td>
             <td class="cell-code">
@@ -728,6 +741,120 @@
           <span class="status-indicator-dot" [class.dot-online]="binanceEnabledInput"></span>
           <span class="footer-note">
             {{ binanceEnabledInput ? 'Cobros por Binance y código QR disponibles para representantes y scouts.' : 'Opción Binance oculta o deshabilitada en el checkout.' }}
+          </span>
+        </div>
+      </article>
+
+      <!-- BLOQUE 3: ZELLE (TRANSFERENCIA BANCARIA EN USD) - TS-66 -->
+      <article class="bento-config-card zelle-card">
+        <div class="config-card-header">
+          <div class="card-title-group">
+            <span class="badge badge-zelle">🟣 TRANSFERENCIA USD (EE. UU.)</span>
+            <h3 class="config-title">Zelle Institucional</h3>
+          </div>
+          <div class="switch-toggle-wrap">
+            <label class="switch-toggle" [attr.aria-label]="zelleEnabledInput ? 'Desactivar Zelle' : 'Activar Zelle'">
+              <input type="checkbox" [(ngModel)]="zelleEnabledInput" />
+              <span class="slider"></span>
+            </label>
+            <span class="toggle-status-text" [class.status-active]="zelleEnabledInput">
+              {{ zelleEnabledInput ? 'Activo en Checkout' : 'Pausado' }}
+            </span>
+          </div>
+        </div>
+
+        <p class="config-desc">
+          Cuenta receptora en dólares estadounidenses para transferencias directas vía Zelle y conciliación administrativa.
+        </p>
+
+        <div class="config-form-grid">
+          <div class="form-group">
+            <label for="zelleEmail" class="input-label">Correo Receptor Zelle <span class="required">*</span></label>
+            <input
+              id="zelleEmail"
+              type="email"
+              [(ngModel)]="zelleEmailInput"
+              class="input-control"
+              placeholder="Ej: pagos@talentusscout.com"
+              [disabled]="!zelleEnabledInput"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="zelleHolder" class="input-label">Nombre del Titular Oficial <span class="required">*</span></label>
+            <input
+              id="zelleHolder"
+              type="text"
+              [(ngModel)]="zelleAccountHolderInput"
+              class="input-control"
+              placeholder="Ej: Talentus Scout LLC"
+              [disabled]="!zelleEnabledInput"
+            />
+          </div>
+        </div>
+
+        <!-- DROPZONE / SUBIDA DE CÓDIGO QR ZELLE -->
+        <div class="qr-management-box">
+          <div class="qr-preview-pane">
+            <img
+              *ngIf="zelleQrPreviewUrl() || zelleQrImageUrlDisplay()"
+              [src]="zelleQrPreviewUrl() || zelleQrImageUrlDisplay()"
+              alt="Código QR de Zelle"
+              class="qr-img-preview"
+            />
+            <div *ngIf="!zelleQrPreviewUrl() && !zelleQrImageUrlDisplay()" class="qr-empty-placeholder">
+              <span>Z$</span>
+              <small>Sin QR</small>
+            </div>
+            <span class="qr-preview-tag" *ngIf="zelleQrPreviewUrl()">Vista Previa (Sin Guardar)</span>
+            <span class="qr-preview-tag tag-current" *ngIf="!zelleQrPreviewUrl() && zelleQrImageUrlDisplay()">QR Publicado</span>
+          </div>
+
+          <div class="qr-upload-pane">
+            <h4 class="qr-pane-title">Código QR de Zelle (Opcional)</h4>
+            <p class="qr-pane-desc">
+              Sube el código QR generado por tu banco receptor en EE. UU. (PNG, JPG o WEBP, máx 5MB) para facilitar el escaneo directo en el modal de checkout.
+            </p>
+
+            <div class="qr-actions-row">
+              <label class="btn btn-secondary btn-sm file-picker-label">
+                <span>📁 Seleccionar QR Zelle</span>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp"
+                  (change)="onZelleQrFileSelected($event)"
+                  class="sr-only"
+                />
+              </label>
+
+              <button
+                *ngIf="selectedZelleQrFile"
+                type="button"
+                (click)="uploadSelectedZelleQr()"
+                [disabled]="isUploadingZelleQr()"
+                class="btn btn-primary btn-sm"
+              >
+                <span *ngIf="isUploadingZelleQr()" class="spinner-small mr-1"></span>
+                ⬆ Subir QR Zelle
+              </button>
+
+              <button
+                *ngIf="selectedZelleQrFile"
+                type="button"
+                (click)="cancelSelectedZelleQr()"
+                [disabled]="isUploadingZelleQr()"
+                class="btn btn-secondary btn-sm"
+              >
+                ✕ Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="config-card-footer">
+          <span class="status-indicator-dot" [class.dot-online]="zelleEnabledInput"></span>
+          <span class="footer-note">
+            {{ zelleEnabledInput ? 'Visible en la pestaña Zelle (USD) del modal de checkout de los tutores.' : 'Pestaña Zelle en modo mantenimiento dentro del modal de checkout.' }}
           </span>
         </div>
       </article>

@@ -108,6 +108,15 @@ export class AdminPaymentsComponent implements OnInit {
   binanceNetworkInput = 'USDT (TRC-20 / BEP-20)';
   readonly binanceQrImageUrlDisplay = signal<string>('/assets/images/binance-qr-sample.png');
 
+  // Formulario Zelle (TS-66)
+  zelleEnabledInput = true;
+  zelleEmailInput = 'pagos@talentusscout.com';
+  zelleAccountHolderInput = 'Talentus Scout LLC';
+  readonly zelleQrImageUrlDisplay = signal<string | null>(null);
+  readonly isUploadingZelleQr = signal<boolean>(false);
+  readonly zelleQrPreviewUrl = signal<string | null>(null);
+  selectedZelleQrFile: File | null = null;
+
   // Gestión de Planes y Precios (TS-63)
   readonly subscriptionPlans = signal<SubscriptionPlanAdminDto[]>([]);
   readonly isLoadingPlans = signal<boolean>(false);
@@ -466,6 +475,12 @@ export class AdminPaymentsComponent implements OnInit {
         if (settings.binanceQrImageUrl) {
           this.binanceQrImageUrlDisplay.set(settings.binanceQrImageUrl);
         }
+
+        this.zelleEnabledInput = settings.zelleEnabled !== false;
+        this.zelleEmailInput = settings.zelleEmail || 'pagos@talentusscout.com';
+        this.zelleAccountHolderInput = settings.zelleAccountHolder || 'Talentus Scout LLC';
+        this.zelleQrImageUrlDisplay.set(settings.zelleQrImageUrl || null);
+
         this.isLoadingGateway.set(false);
       },
       error: (err) => {
@@ -483,6 +498,13 @@ export class AdminPaymentsComponent implements OnInit {
       }
     }
 
+    if (this.zelleEnabledInput) {
+      if (!this.zelleEmailInput.trim() || !this.zelleAccountHolderInput.trim()) {
+        this.showFeedback('error', 'El correo receptor y el titular de Zelle son obligatorios mientras el método esté activo.');
+        return;
+      }
+    }
+
     this.isSavingGateway.set(true);
     const request: UpdatePaymentGatewaySettingsRequest = {
       pagoMovilEnabled: this.pmEnabledInput,
@@ -493,7 +515,10 @@ export class AdminPaymentsComponent implements OnInit {
       binanceManualEnabled: this.binanceEnabledInput,
       binancePayId: this.binancePayIdInput.trim() || undefined,
       binanceWalletAddress: this.binanceWalletInput.trim() || undefined,
-      binanceNetwork: this.binanceNetworkInput.trim() || undefined
+      binanceNetwork: this.binanceNetworkInput.trim() || undefined,
+      zelleEnabled: this.zelleEnabledInput,
+      zelleEmail: this.zelleEmailInput.trim() || undefined,
+      zelleAccountHolder: this.zelleAccountHolderInput.trim() || undefined
     };
 
     this.paymentService.updatePaymentGatewaySettings(request).subscribe({
@@ -561,6 +586,71 @@ export class AdminPaymentsComponent implements OnInit {
   cancelSelectedQr(): void {
     this.selectedQrFile = null;
     this.qrPreviewUrl.set(null);
+  }
+
+  getActiveGatewaysLabel(): string {
+    const s = this.gatewaySettings();
+    if (!s) return '';
+    let count = 0;
+    if (s.pagoMovilEnabled) count++;
+    if (s.binanceManualEnabled) count++;
+    if (s.zelleEnabled !== false) count++;
+    if (count === 0) return 'Pausadas';
+    return count === 1 ? '1 Activa' : `${count} Activas`;
+  }
+
+  onZelleQrFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) {
+      return;
+    }
+    const file = input.files[0];
+
+    const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (!allowed.includes(file.type.toLowerCase())) {
+      this.showFeedback('error', 'Formato no válido. Solo se admiten imágenes PNG, JPG o WEBP.');
+      input.value = '';
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      this.showFeedback('error', 'La imagen excede el límite máximo de 5MB.');
+      input.value = '';
+      return;
+    }
+
+    this.selectedZelleQrFile = file;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.zelleQrPreviewUrl.set(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  uploadSelectedZelleQr(): void {
+    if (!this.selectedZelleQrFile) {
+      return;
+    }
+    this.isUploadingZelleQr.set(true);
+    this.paymentService.uploadZelleQrImage(this.selectedZelleQrFile).subscribe({
+      next: (res) => {
+        this.zelleQrImageUrlDisplay.set(res.qrImageUrl);
+        this.selectedZelleQrFile = null;
+        this.zelleQrPreviewUrl.set(null);
+        this.isUploadingZelleQr.set(false);
+        this.showFeedback('success', 'Código QR de Zelle actualizado y publicado con éxito.');
+      },
+      error: (err) => {
+        this.isUploadingZelleQr.set(false);
+        this.showFeedback('error', 'Error al subir el código QR de Zelle: ' + (err.error?.message || err.message));
+      }
+    });
+  }
+
+  cancelSelectedZelleQr(): void {
+    this.selectedZelleQrFile = null;
+    this.zelleQrPreviewUrl.set(null);
   }
 
   // ==========================================
