@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - 'talentus-scout-migrations/**'
+      - 'talentus-scout-migrations'
+      - '.github/workflows/deploy-migrations.yml'
   workflow_dispatch:
 
 jobs:
