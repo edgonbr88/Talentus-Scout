@@ -392,15 +392,15 @@ En esta fase de lanzamiento, la observabilidad se apoya enteramente en herramien
 - [ ] **F4.5:** Simulación de reporte de Pago Móvil y Binance Pay, validación en el panel `/admin/pagos` y comprobación de restricción antifraude con referencia duplicada.
 - [ ] **F4.6:** Comprobación de que compartir el enlace de un atleta en WhatsApp/Twitter renderiza la tarjeta Open Graph generada por SSR.
 
-### Fase 5: Habilitación de Carga y Reproducción de Video en Producción (Cloudflare Stream) [PENDIENTE]
-- [ ] **F5.1:** Activar suscripción de Cloudflare Stream en la consola de Cloudflare y obtener `Account ID`.
-- [ ] **F5.2:** Generar API Token en Cloudflare con permisos de edición sobre Stream (`Stream:Edit`).
-- [ ] **F5.3:** Configurar webhook de notificación de estado en Cloudflare Stream apuntando a `https://api.talentusscout.com/api/v1/videos/webhook` y obtener el `Signing Secret`.
-- [ ] **F5.4:** Registrar los 3 secretos en GCP Secret Manager (`CLOUDFLARE_STREAM_ACCOUNT_ID`, `CLOUDFLARE_STREAM_API_TOKEN`, `CLOUDFLARE_STREAM_WEBHOOK_SECRET`) y dar permisos a la Service Account de Cloud Run.
-- [ ] **F5.5:** Activar `talentus.video.enabled: true` y `talentus.video.provider: cloudflare` en `application-prod.yml` vinculando las variables de entorno inyectadas.
-- [ ] **F5.6:** Desplegar actualización del backend `talentus-backend-prod` en Cloud Run vía GitHub Actions.
-- [ ] **F5.7:** Habilitar el módulo de carga en Frontend (`tutor-dashboard.component.html`) y validar subida directa cliente -> Cloudflare Stream con barra de progreso.
-- [ ] **F5.8:** Validar procesamiento de webhook HMAC y reproducción adaptativa HLS (`.m3u8`) en el perfil público del atleta y radar de veedores.
+### Fase 5: Habilitación de Carga y Reproducción de Video en Producción (Cloudflare Stream) [COMPLETADO]
+- [x] **F5.1:** Activar suscripción de Cloudflare Stream en la consola de Cloudflare y obtener `Account ID`.
+- [x] **F5.2:** Generar API Token en Cloudflare con permisos de edición sobre Stream (`Stream:Edit`).
+- [x] **F5.3:** Configurar webhook de notificación de estado en Cloudflare Stream apuntando a `https://api.talentusscout.com/api/v1/videos/webhook` y obtener el `Signing Secret`.
+- [x] **F5.4:** Registrar los 3 secretos en GCP Secret Manager (`CLOUDFLARE_STREAM_ACCOUNT_ID`, `CLOUDFLARE_STREAM_API_TOKEN`, `CLOUDFLARE_STREAM_WEBHOOK_SECRET`) y dar permisos a la Service Account de Cloud Run.
+- [x] **F5.5:** Activar `talentus.video.enabled: true` y `talentus.video.provider: cloudflare` en `application-prod.yml` vinculando las variables de entorno inyectadas.
+- [x] **F5.6:** Desplegar actualización del backend `talentus-backend-prod` en Cloud Run vía GitHub Actions.
+- [x] **F5.7:** Habilitar el módulo de carga en Frontend (`tutor-dashboard.component.html`) y validar subida directa cliente -> Cloudflare Stream con barra de progreso.
+- [x] **F5.8:** Validar procesamiento de webhook HMAC y reproducción adaptativa HLS (`.m3u8`) en el perfil público del atleta y radar de veedores.
 
 ---
 

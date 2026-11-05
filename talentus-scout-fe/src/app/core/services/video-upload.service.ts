@@ -28,10 +28,17 @@ export class VideoUploadService {
    * emitiendo eventos de progreso HTTP en tiempo real y adjuntando miniatura si existe.
    */
   uploadFileWithProgress(uploadUrl: string, file: File, thumbnailFile?: File | Blob): Observable<HttpEvent<any>> {
+    const isExternalUpload = uploadUrl.startsWith('http') &&
+      !uploadUrl.includes('localhost') &&
+      !uploadUrl.includes('127.0.0.1') &&
+      !uploadUrl.includes('talentus-scout-be') &&
+      !uploadUrl.includes('/api/v1/videos/mock-upload');
+
     const formData = new FormData();
     formData.append('file', file, file.name);
 
-    if (thumbnailFile) {
+    // Cloudflare Stream direct_upload solo acepta el campo 'file' en multipart/form-data
+    if (thumbnailFile && !isExternalUpload) {
       const thumbName = thumbnailFile instanceof File ? thumbnailFile.name : 'thumbnail.jpg';
       formData.append('thumbnail', thumbnailFile, thumbName);
     }
@@ -39,12 +46,6 @@ export class VideoUploadService {
     let headers = new HttpHeaders();
     const token = this.authService.token();
     // Adjuntar token solo para endpoints locales o de mismo origen; evitar enviarlo a Cloudflare u otros proveedores externos
-    const isExternalUpload = uploadUrl.startsWith('http') &&
-      !uploadUrl.includes('localhost') &&
-      !uploadUrl.includes('127.0.0.1') &&
-      !uploadUrl.includes('talentus-scout-be') &&
-      !uploadUrl.includes('/api/v1/videos/mock-upload');
-
     if (token && !isExternalUpload) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
@@ -55,6 +56,14 @@ export class VideoUploadService {
     });
 
     return this.http.request(req);
+  }
+
+  /**
+   * Confirma en el backend que la carga directa hacia Cloudflare Stream finalizó exitosamente,
+   * retornando el registro actualizado de AthleteVideoResponse.
+   */
+  confirmDirectUpload(videoId: string): Observable<AthleteVideoResponse> {
+    return this.http.post<AthleteVideoResponse>(`/api/v1/videos/${videoId}/confirm-upload`, {});
   }
 
   /**

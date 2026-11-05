@@ -35,6 +35,7 @@ describe('VideoUploaderComponent', () => {
     videoServiceSpy = jasmine.createSpyObj('VideoUploadService', [
       'requestUploadTicket',
       'uploadFileWithProgress',
+      'confirmDirectUpload',
       'generateLocalThumbnail',
       'dataUrlToFile',
       'getVideosByAthlete'
@@ -43,6 +44,7 @@ describe('VideoUploaderComponent', () => {
     videoServiceSpy.generateLocalThumbnail.and.returnValue(Promise.resolve('data:image/jpeg;base64,fake-thumb'));
     videoServiceSpy.dataUrlToFile.and.returnValue(new File(['thumb-bytes'], 'thumb.jpg', { type: 'image/jpeg' }));
     videoServiceSpy.requestUploadTicket.and.returnValue(of(mockTicket));
+    videoServiceSpy.confirmDirectUpload.and.returnValue(of(mockVideoResponse));
 
     await TestBed.configureTestingModule({
       imports: [VideoUploaderComponent],
@@ -188,5 +190,34 @@ describe('VideoUploaderComponent', () => {
 
     expect(component.progressState.status).toBe('selected');
     expect(component.progressState.percentage).toBe(0);
+  });
+
+  it('should call confirmDirectUpload when external Cloudflare upload returns empty HttpResponse body', () => {
+    const cfTicket: UploadTicketResponse = {
+      videoId: 'vid-cf-99',
+      directUploadUrl: 'https://upload.videodelivery.net/cf-uid-99',
+      providerVideoId: 'cf-uid-99',
+      maxSizeBytes: 524288000
+    };
+    videoServiceSpy.requestUploadTicket.and.returnValue(of(cfTicket));
+
+    const validFile = new File(['fake-video-bytes'], 'jugada-cf.mp4', { type: 'video/mp4' });
+    component.handleFile(validFile);
+    component.videoTitle = 'Jugada en Cloudflare Stream';
+
+    const emptyCloudflareResponse = new HttpResponse<any>({
+      body: null,
+      status: 200
+    });
+    videoServiceSpy.uploadFileWithProgress.and.returnValue(of(emptyCloudflareResponse));
+
+    let emittedVideo: AthleteVideoResponse | null = null;
+    component.videoUploaded.subscribe((v) => (emittedVideo = v));
+
+    component.startUpload();
+
+    expect(videoServiceSpy.confirmDirectUpload).toHaveBeenCalledWith('vid-cf-99');
+    expect(component.progressState.status).toBe('ready');
+    expect(emittedVideo as any).toEqual(mockVideoResponse);
   });
 });

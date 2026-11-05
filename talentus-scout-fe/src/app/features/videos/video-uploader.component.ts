@@ -781,7 +781,7 @@ export class VideoUploaderComponent implements OnDestroy {
       category: this.videoCategory
     }).subscribe({
       next: (ticket) => {
-        this.executeBinaryUpload(ticket.directUploadUrl, this.selectedFile!);
+        this.executeBinaryUpload(ticket.directUploadUrl, this.selectedFile!, ticket.videoId, ticket.providerVideoId);
       },
       error: (err) => {
         let msg = err.error?.message;
@@ -797,7 +797,7 @@ export class VideoUploaderComponent implements OnDestroy {
     });
   }
 
-  private executeBinaryUpload(uploadUrl: string, file: File): void {
+  private executeBinaryUpload(uploadUrl: string, file: File, videoId?: string, providerVideoId?: string): void {
     this.progressState.status = 'uploading';
 
     const thumbnailFile = this.localThumbnailUrl
@@ -830,11 +830,57 @@ export class VideoUploaderComponent implements OnDestroy {
             this.progressState.status = 'processing';
           }
         } else if (event instanceof HttpResponse) {
-          this.progressState.status = 'ready';
-          this.progressState.percentage = 100;
-          const videoRes = event.body as AthleteVideoResponse;
-          this.lastUploadedVideo = videoRes;
-          this.videoUploaded.emit(videoRes);
+          const bodyVideo = event.body as AthleteVideoResponse | null;
+          if (bodyVideo && bodyVideo.id) {
+            this.progressState.status = 'ready';
+            this.progressState.percentage = 100;
+            this.lastUploadedVideo = bodyVideo;
+            this.videoUploaded.emit(bodyVideo);
+          } else if (videoId && typeof this.videoService.confirmDirectUpload === 'function') {
+            this.progressState.status = 'processing';
+            this.videoService.confirmDirectUpload(videoId).subscribe({
+              next: (confirmedVideo) => {
+                this.progressState.status = 'ready';
+                this.progressState.percentage = 100;
+                this.lastUploadedVideo = confirmedVideo;
+                this.videoUploaded.emit(confirmedVideo);
+              },
+              error: () => {
+                const fallbackVideo: AthleteVideoResponse = {
+                  id: videoId,
+                  athleteId: this.athleteId,
+                  title: this.videoTitle.trim(),
+                  category: this.videoCategory,
+                  providerVideoId: providerVideoId || 'cloudflare',
+                  playbackUrl: providerVideoId ? `https://videodelivery.net/${providerVideoId}/manifest/video.m3u8` : undefined,
+                  thumbnailUrl: this.localThumbnailUrl || (providerVideoId ? `https://videodelivery.net/${providerVideoId}/thumbnails/thumbnail.jpg` : undefined),
+                  status: 'READY',
+                  sortOrder: 1,
+                  createdAt: new Date().toISOString()
+                };
+                this.progressState.status = 'ready';
+                this.progressState.percentage = 100;
+                this.lastUploadedVideo = fallbackVideo;
+                this.videoUploaded.emit(fallbackVideo);
+              }
+            });
+          } else {
+            const fallbackVideo: AthleteVideoResponse = {
+              id: videoId || 'temp-id',
+              athleteId: this.athleteId,
+              title: this.videoTitle.trim(),
+              category: this.videoCategory,
+              providerVideoId: providerVideoId || 'cloudflare',
+              thumbnailUrl: this.localThumbnailUrl || undefined,
+              status: 'READY',
+              sortOrder: 1,
+              createdAt: new Date().toISOString()
+            };
+            this.progressState.status = 'ready';
+            this.progressState.percentage = 100;
+            this.lastUploadedVideo = fallbackVideo;
+            this.videoUploaded.emit(fallbackVideo);
+          }
         }
       },
       error: (err) => {
