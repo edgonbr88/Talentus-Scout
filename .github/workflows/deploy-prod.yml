@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'talentus-scout-be/**'
+      - 'talentus-scout-be'
       - 'talentus-scout-fe/**'
       - '.github/workflows/deploy-prod.yml'
   workflow_dispatch:
