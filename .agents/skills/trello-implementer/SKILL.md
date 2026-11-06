@@ -31,16 +31,17 @@ graph TD
     ReadPlan["1. Leer Plan Técnico en plans/<TS-ID>-plan-*.md"]
     CheckFrontend{"¿Incluye Frontend?"}
     ConsultDesign["Consultar skill frontend-design (fe-desing.md)"]
-    ExecChecklist["2. Ejecutar Checklist paso a paso (Código + Migraciones + Tests)"]
+    ExecChecklist["2. Ejecutar Checklist paso a paso (Código + Migraciones Locales + Tests)"]
     VerifyCompile["3. Validar Compilación, Pruebas y Diseño UI"]
     GenTestDoc["4. Generar Plan de Pruebas en test/<TS-ID>-test-plan-*.md"]
     UpdatePlan["5. Marcar Checkboxes [x] en el archivo de plan"]
-    MoveCard["6. Mover Tarjeta a 'in testing' con Comentario en Trello"]
+    GitAndPR["6. Rama Git, Commit, Push y Creación de PR (GitHub)"]
+    MoveCard["7. Mover Tarjeta a 'in testing' con Comentario y Links de PR en Trello"]
 
     ReadPlan --> CheckFrontend
     CheckFrontend -->|"Sí"| ConsultDesign --> ExecChecklist
     CheckFrontend -->|"No"| ExecChecklist
-    ExecChecklist --> VerifyCompile --> GenTestDoc --> UpdatePlan --> MoveCard
+    ExecChecklist --> VerifyCompile --> GenTestDoc --> UpdatePlan --> GitAndPR --> MoveCard
 ```
 
 ---
@@ -56,6 +57,8 @@ graph TD
    * Checklist items in Section 7.
 
 ### 2. Execute Code Implementation
+* **Base de Datos y Migraciones (dbmate):**
+  * **PROHIBICIÓN ESTRICTA:** Queda terminantemente **PROHIBIDO ejecutar migraciones directamente en la base de datos productiva de NEON**. Todas las migraciones DDL/dbmate deben ejecutarse y validarse exclusivamente en el entorno de desarrollo local (PostgreSQL local).
 * **Backend (Spring Boot 3 / Java 21):**
   * Follow layered architecture: Entity -> Repository -> Service -> Controller.
   * **Uso Obligatorio de Lombok:** En todas las entidades JPA (`com.talentus.scout.domain.entity`), DTOs (`com.talentus.scout.web.dto`) y modelos de servicio, aplicar Lombok para eliminar código repetitivo:
@@ -122,15 +125,23 @@ Edit the corresponding `plans/<TS-ID>-plan-*.md` file:
 * Mark each completed step with `[x]`.
 * Add any technical notes or deviations in the plan notes section.
 
-### 6. Transition Card in Trello to `in testing`
+### 6. Git Branching, Commit, Push y Creación de Pull Requests (GitHub)
+Al finalizar la implementación, pruebas y generación del plan de pruebas:
+1. Crear una rama a partir de `main` / `master` (usando convención `feature/<TS-ID>-<slug-tarea>`).
+2. Confirmar (`git commit`) y subir (`git push -u origin <rama>`) los cambios en dicha rama (tanto en submódulos afectados como `talentus-scout-be`, `talentus-scout-migrations` y en el repositorio principal `Talentus-Scout`).
+3. Crear un Pull Request desde la rama hacia `main` / `master` en GitHub con `gh pr create` para cada repositorio modificado.
+4. Conservar las URLs de los Pull Requests generados para compartirlas con el usuario.
+
+### 7. Transition Card in Trello to `in testing`
 Run the automated helper script:
 ```bash
-python3 .agents/skills/trello-implementer/scripts/move_to_testing.py <CARD_ID> "Implementación completada con éxito. Plan de pruebas generado en test/<TS-ID>-test-plan.md. Compilación y tests en verde."
+python3 .agents/skills/trello-implementer/scripts/move_to_testing.py <CARD_ID> "Implementación completada con éxito. Plan de pruebas generado en test/<TS-ID>-test-plan.md. Compilación y tests en verde. PRs: <URL_PRS>"
 ```
 Or execute via HTTP `PUT` to `https://api.trello.com/1/cards/{card_id}` with `idList=6abbbe54690c92aab5836b30`.
 
-### 7. Final Report to the User
+### 8. Final Report to the User
 Report:
+* Links directos a él o los Pull Requests (PRs) generados en GitHub.
 * Files created and modified with clickable markdown links.
 * Test execution results.
 * Clickable link to the generated test plan in `test/<TS-ID>-test-plan-*.md`.
