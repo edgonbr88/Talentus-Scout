@@ -6,11 +6,12 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { AthleteService } from '../../../core/services/athlete.service';
 import { ClubDto } from '../../../core/models/athlete.model';
 import { BrandLogoComponent } from '../../../shared/components/brand-logo/brand-logo.component';
+import { WebcamSelfieCaptureComponent } from '../../../shared/components/webcam-selfie-capture/webcam-selfie-capture.component';
 
 @Component({
   selector: 'app-register-scout',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, BrandLogoComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, BrandLogoComponent, WebcamSelfieCaptureComponent],
   templateUrl: './register-scout.component.html',
   styleUrl: './register-scout.component.css'
 })
@@ -24,6 +25,14 @@ export class RegisterScoutComponent implements OnInit {
   selectedFile: File | null = null;
   fileError: string | null = null;
   isDragging = false;
+
+  selectedIdDocumentFile: File | null = null;
+  idDocumentFileError: string | null = null;
+  isIdDocumentDragging = false;
+
+  selectedSelfieFile: File | null = null;
+  selfieError: string | null = null;
+
   isLoading = false;
   isLoadingClubs = false;
   clubs: ClubDto[] = [];
@@ -38,6 +47,12 @@ export class RegisterScoutComponent implements OnInit {
     'Entrenador Principal',
     'Analista de Rendimiento',
     'Otro'
+  ];
+
+  readonly identityDocTypes = [
+    'Cédula de Identidad',
+    'Pasaporte',
+    'DNI'
   ];
 
   readonly authorizedCountries = [
@@ -55,6 +70,8 @@ export class RegisterScoutComponent implements OnInit {
       email: ['', [Validators.required, Validators.email, Validators.maxLength(255)]],
       password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
       phoneNumber: ['', [Validators.required, Validators.pattern(/^\+[1-9]\d{7,14}$/)]],
+      idDocumentType: ['Cédula de Identidad', [Validators.required, Validators.maxLength(30)]],
+      idDocumentNumber: ['', [Validators.required, Validators.maxLength(50)]],
       organizationSelect: ['', [Validators.required]],
       organizationName: ['', [Validators.maxLength(150)]],
       organizationClubId: [''],
@@ -228,11 +245,84 @@ export class RegisterScoutComponent implements OnInit {
     this.fileError = null;
   }
 
+  onIdDocumentSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      this.validateAndSetIdDocumentFile(input.files[0]);
+    }
+  }
+
+  onIdDocumentDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isIdDocumentDragging = true;
+  }
+
+  onIdDocumentDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isIdDocumentDragging = false;
+  }
+
+  onIdDocumentDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isIdDocumentDragging = false;
+    if (event.dataTransfer?.files && event.dataTransfer.files[0]) {
+      this.validateAndSetIdDocumentFile(event.dataTransfer.files[0]);
+    }
+  }
+
+  private validateAndSetIdDocumentFile(file: File): void {
+    this.idDocumentFileError = null;
+    const allowedExtensions = ['.pdf', '.png', '.jpg', '.jpeg'];
+    const fileName = file.name.toLowerCase();
+    const hasValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+
+    if (!hasValidExtension) {
+      this.idDocumentFileError = 'Formato no soportado. Debe ser un archivo PDF, PNG o JPG.';
+      this.selectedIdDocumentFile = null;
+      return;
+    }
+
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      this.idDocumentFileError = 'El archivo supera el tamaño máximo permitido de 10 MB.';
+      this.selectedIdDocumentFile = null;
+      return;
+    }
+
+    this.selectedIdDocumentFile = file;
+  }
+
+  removeIdDocumentFile(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.selectedIdDocumentFile = null;
+    this.idDocumentFileError = null;
+  }
+
+  onSelfieCaptured(file: File): void {
+    this.selectedSelfieFile = file;
+    this.selfieError = null;
+  }
+
+  onSelfieCleared(): void {
+    this.selectedSelfieFile = null;
+  }
+
   onSubmit(): void {
-    if (this.registerForm.invalid || !this.selectedFile) {
+    if (this.registerForm.invalid || !this.selectedFile || !this.selectedIdDocumentFile || !this.selectedSelfieFile) {
       this.registerForm.markAllAsTouched();
       if (!this.selectedFile) {
         this.fileError = 'Es obligatorio consignar un documento probatorio o credencial deportiva.';
+      }
+      if (!this.selectedIdDocumentFile) {
+        this.idDocumentFileError = 'Es obligatorio adjuntar la copia de tu documento de identidad oficial.';
+      }
+      if (!this.selectedSelfieFile) {
+        this.selfieError = 'Es obligatoria la captura de tu fotografía selfie en vivo con el documento.';
       }
       return;
     }
@@ -295,6 +385,10 @@ export class RegisterScoutComponent implements OnInit {
     }
 
     formData.append('credentialsFile', this.selectedFile);
+    formData.append('idDocumentType', this.registerForm.get('idDocumentType')?.value || 'Cédula de Identidad');
+    formData.append('idDocumentNumber', this.registerForm.get('idDocumentNumber')?.value?.trim());
+    formData.append('idDocumentFile', this.selectedIdDocumentFile);
+    formData.append('selfieFile', this.selectedSelfieFile);
 
     const email = this.registerForm.get('email')?.value?.trim();
     const finalDisplayOrg = orgNameValue || 'Agente Independiente';

@@ -11,6 +11,10 @@ export interface PendingScout {
   organizationName: string;
   scoutRole: string;
   credentialsDocumentUrl: string;
+  idDocumentType?: string;
+  idDocumentNumber?: string;
+  idDocumentUrl?: string;
+  selfieUrl?: string;
   linkedinUrl?: string;
   verificationStatus: ScoutVerificationStatus;
   createdAt: string;

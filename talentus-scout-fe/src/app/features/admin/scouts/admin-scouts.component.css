@@ -335,14 +335,31 @@
   text-decoration: underline;
 }
 
-/* BOTÓN DE INSPECCIÓN DE CREDENCIAL */
+/* BOTÓN DE INSPECCIÓN DE CREDENCIAL Y EXPEDIENTE DE IDENTIDAD */
 .document-section {
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px dashed rgba(34, 49, 77, 0.6);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.btn-document {
+.document-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-dim);
+}
+
+.documents-trio-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn-doc-pill {
   width: 100%;
   display: flex;
   align-items: center;
@@ -350,12 +367,54 @@
   background-color: var(--color-surface-hover);
   border: 1px solid var(--color-border);
   color: var(--color-text-main);
-  padding: 10px 14px;
+  padding: 8px 12px;
   border-radius: var(--radius-sm);
-  font-size: 13px;
-  font-weight: 600;
   cursor: pointer;
+  text-align: left;
   transition: all var(--transition-fast);
+}
+
+.btn-doc-pill:hover {
+  background-color: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.4);
+}
+
+.doc-pill-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.doc-pill-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.doc-pill-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.doc-pill-sub {
+  font-size: 11px;
+  color: var(--color-text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.doc-arrow {
+  color: var(--color-text-dim);
+  font-size: 14px;
+}
+
+.btn-doc-pill:hover .doc-arrow {
+  color: #38bdf8;
 }
 
 .btn-document:hover {

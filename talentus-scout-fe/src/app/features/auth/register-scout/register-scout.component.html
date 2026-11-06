@@ -378,6 +378,129 @@
         }
       </div>
 
+      <!-- Expediente de Identidad Reforzado (Documento de Identidad Oficial) -->
+      <div class="form-group credential-upload-section">
+        <label class="form-label">
+          Documento Oficial de Identidad (Cédula, DNI o Pasaporte)
+          <span class="label-required">*</span>
+        </label>
+        <p class="credential-desc">
+          Consigna una copia legible de tu documento nacional de identidad o pasaporte vigente para verificar la titularidad de tu perfil profesional.
+        </p>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label for="idDocumentType" class="form-label">Tipo de documento *</label>
+            <select
+              id="idDocumentType"
+              formControlName="idDocumentType"
+              class="form-control form-select"
+            >
+              @for (docType of identityDocTypes; track docType) {
+                <option [value]="docType">{{ docType }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="idDocumentNumber" class="form-label">Número de documento *</label>
+            <input
+              id="idDocumentNumber"
+              type="text"
+              formControlName="idDocumentNumber"
+              class="form-control"
+              [class.is-invalid]="isFieldInvalid('idDocumentNumber')"
+              placeholder="Ej: V-12345678 o Nº Pasaporte"
+            />
+            @if (isFieldInvalid('idDocumentNumber')) {
+              <div class="form-error" role="alert">
+                <span>El número de documento de identidad es obligatorio.</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div
+          class="dropzone-box"
+          [class.drag-over]="isIdDocumentDragging"
+          [class.has-file]="!!selectedIdDocumentFile"
+          [class.has-error]="!!idDocumentFileError"
+          (dragover)="onIdDocumentDragOver($event)"
+          (dragleave)="onIdDocumentDragLeave($event)"
+          (drop)="onIdDocumentDrop($event)"
+          (click)="idDocFileInput.click()"
+          tabindex="0"
+          role="button"
+          (keydown.enter)="idDocFileInput.click()"
+          (keydown.space)="idDocFileInput.click()"
+        >
+          <input
+            #idDocFileInput
+            type="file"
+            accept=".pdf,.png,.jpg,.jpeg"
+            (change)="onIdDocumentSelected($event)"
+            style="display: none"
+          />
+
+          @if (!selectedIdDocumentFile) {
+            <div class="dropzone-empty">
+              <div class="dropzone-icon-circle">
+                <svg class="dropzone-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                  <polyline points="10 9 9 9 8 9" />
+                </svg>
+              </div>
+              <span class="dropzone-title">Haz clic o arrastra tu documento de identidad aquí</span>
+              <span class="dropzone-subtitle">Archivos PDF, PNG o JPG (Máximo 10 MB)</span>
+            </div>
+          } @else {
+            <div class="dropzone-file-preview">
+              <div class="file-icon-wrapper">
+                <span class="file-type-icon">🪪</span>
+              </div>
+              <div class="file-meta">
+                <span class="file-name">{{ selectedIdDocumentFile.name }}</span>
+                <span class="file-size">{{ (selectedIdDocumentFile.size / 1024 / 1024).toFixed(2) }} MB</span>
+              </div>
+              <button
+                type="button"
+                class="btn-remove-file"
+                (click)="removeIdDocumentFile($event)"
+                title="Remover documento de identidad"
+                aria-label="Remover documento de identidad seleccionado"
+              >
+                ✕
+              </button>
+            </div>
+          }
+        </div>
+
+        @if (idDocumentFileError) {
+          <div class="form-error dropzone-error" role="alert">
+            <span>{{ idDocumentFileError }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Expediente de Identidad Reforzado (Selfie en Vivo con Documento) -->
+      <div class="form-group credential-upload-section">
+        <app-webcam-selfie-capture
+          label="Fotografía Selfie de Validación en Vivo"
+          helperText="Toma una selfie en tiempo real con tu cámara mostrando tu documento de identidad junto a tu rostro, o sube una fotografía nítida si tu equipo no dispone de cámara."
+          [required]="true"
+          (photoSelected)="onSelfieCaptured($event)"
+          (photoCleared)="onSelfieCleared()"
+        ></app-webcam-selfie-capture>
+        @if (selfieError) {
+          <div class="form-error dropzone-error" role="alert">
+            <span>{{ selfieError }}</span>
+          </div>
+        }
+      </div>
+
       <!-- Declaración Jurada y Aceptación de Términos -->
       <div class="form-group checkbox-group">
         <label class="checkbox-label">
@@ -403,7 +526,7 @@
       <button
         type="submit"
         class="btn btn-primary btn-submit"
-        [disabled]="registerForm.invalid || !selectedFile || isLoading"
+        [disabled]="registerForm.invalid || !selectedFile || !selectedIdDocumentFile || !selectedSelfieFile || isLoading"
       >
         @if (isLoading) {
           <span class="loading-spinner"></span>

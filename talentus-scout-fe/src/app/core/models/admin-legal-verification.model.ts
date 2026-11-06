@@ -17,9 +17,12 @@ export interface LegalVerificationItem {
   tutorFullName: string;
   tutorEmail: string;
   tutorPhoneNumber: string;
+  tutorRelationshipType?: string;
   tutorDocType: string;
   tutorDocNumber: string;
   tutorDocFileUrl: string;
+  tutorSelfieUrl?: string;
+  tutorRepresentationDocumentUrl?: string;
   submittedAt: string;
   status: LegalVerificationStatus;
   notes?: string;

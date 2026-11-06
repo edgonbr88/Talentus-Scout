@@ -6,11 +6,12 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { SocialAuthManagerService } from '../../../core/auth/social-auth-manager.service';
 import { OauthConfigModalComponent } from '../../../shared/components/oauth-config-modal/oauth-config-modal.component';
 import { BrandLogoComponent } from '../../../shared/components/brand-logo/brand-logo.component';
+import { WebcamSelfieCaptureComponent } from '../../../shared/components/webcam-selfie-capture/webcam-selfie-capture.component';
 
 @Component({
   selector: 'app-register-tutor',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, OauthConfigModalComponent, BrandLogoComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, OauthConfigModalComponent, BrandLogoComponent, WebcamSelfieCaptureComponent],
   templateUrl: './register-tutor.component.html',
   styles: [`
     .auth-wrapper {
@@ -383,6 +384,102 @@ import { BrandLogoComponent } from '../../../shared/components/brand-logo/brand-
     .link-login:hover {
       text-decoration: underline;
     }
+
+    .relationship-group {
+      margin-bottom: 18px;
+    }
+
+    .relationship-options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 6px;
+    }
+
+    @media (max-width: 540px) {
+      .relationship-options-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .relationship-card {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 14px 12px;
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .relationship-card:hover {
+      border-color: rgba(56, 189, 248, 0.4);
+      background: rgba(56, 189, 248, 0.02);
+    }
+
+    .relationship-card.selected {
+      border-color: #38bdf8;
+      background: rgba(56, 189, 248, 0.08);
+      box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
+    }
+
+    .radio-hidden {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .card-radio-indicator {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid #64748b;
+      margin-top: 2px;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .relationship-card.selected .card-radio-indicator {
+      border-color: #38bdf8;
+      background: #38bdf8;
+      box-shadow: inset 0 0 0 3px #090d16;
+    }
+
+    .card-content {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+
+    .card-desc {
+      font-size: 11px;
+      color: #94a3b8;
+      line-height: 1.35;
+    }
+
+    .representation-upload-box {
+      background: rgba(245, 158, 11, 0.03);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: 10px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    .representation-desc {
+      font-size: 11.5px;
+      color: #94a3b8;
+      margin: 2px 0 10px;
+      line-height: 1.4;
+    }
   `]
 })
 export class RegisterTutorComponent {
@@ -415,11 +512,88 @@ export class RegisterTutorComponent {
     country: ['Venezuela', [Validators.required]],
     state: ['', [Validators.required, Validators.maxLength(100)]],
     address: ['', [Validators.maxLength(255)]],
+    relationshipType: ['PARENT', [Validators.required]],
     idDocumentType: ['CEDULA', [Validators.required]],
     idDocumentNumber: ['', [Validators.required, Validators.maxLength(50)]],
     password: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(100)]],
     acceptLopnnaTerms: [false, [Validators.requiredTrue]]
   });
+
+  selectedSelfieFile: File | null = null;
+  selfieError: string | null = null;
+  selectedRepresentationFile: File | null = null;
+  representationFileError: string | null = null;
+  isRepresentationDragging = false;
+
+  get isLegalRepresentative(): boolean {
+    return this.registerForm.get('relationshipType')?.value === 'LEGAL_REPRESENTATIVE';
+  }
+
+  onSelfieCaptured(file: File): void {
+    this.selectedSelfieFile = file;
+    this.selfieError = null;
+  }
+
+  onSelfieCleared(): void {
+    this.selectedSelfieFile = null;
+  }
+
+  onRepresentationSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.validateAndSetRepresentationFile(input.files[0]);
+    }
+  }
+
+  onRepresentationDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isRepresentationDragging = false;
+    if (event.dataTransfer?.files && event.dataTransfer.files[0]) {
+      this.validateAndSetRepresentationFile(event.dataTransfer.files[0]);
+    }
+  }
+
+  onRepresentationDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isRepresentationDragging = true;
+  }
+
+  onRepresentationDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isRepresentationDragging = false;
+  }
+
+  private validateAndSetRepresentationFile(file: File): void {
+    this.representationFileError = null;
+    const maxBytes = 10 * 1024 * 1024; // 10MB
+    const allowedExts = ['jpg', 'jpeg', 'png', 'pdf'];
+    const fileExt = file.name.split('.').pop()?.toLowerCase();
+
+    if (!fileExt || !allowedExts.includes(fileExt)) {
+      this.representationFileError = 'Solo se permiten archivos en formato JPG, PNG o PDF.';
+      this.selectedRepresentationFile = null;
+      return;
+    }
+
+    if (file.size > maxBytes) {
+      this.representationFileError = 'El archivo supera el tamaño máximo permitido de 10MB.';
+      this.selectedRepresentationFile = null;
+      return;
+    }
+
+    this.selectedRepresentationFile = file;
+  }
+
+  removeRepresentationFile(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.selectedRepresentationFile = null;
+    this.representationFileError = null;
+  }
 
   isFieldInvalid(fieldName: string): boolean {
     const field = this.registerForm.get(fieldName);
@@ -533,10 +707,16 @@ export class RegisterTutorComponent {
   }
 
   onSubmit(): void {
-    if (this.registerForm.invalid || !this.selectedFile) {
+    if (this.registerForm.invalid || !this.selectedFile || !this.selectedSelfieFile || (this.isLegalRepresentative && !this.selectedRepresentationFile)) {
       this.registerForm.markAllAsTouched();
       if (!this.selectedFile) {
         this.fileError = 'Es obligatorio adjuntar el archivo físico de tu documento de identidad.';
+      }
+      if (!this.selectedSelfieFile) {
+        this.selfieError = 'Es obligatoria la captura de tu selfie en vivo con el documento.';
+      }
+      if (this.isLegalRepresentative && !this.selectedRepresentationFile) {
+        this.representationFileError = 'Es obligatorio adjuntar el documento de poder notariado o tutela legal.';
       }
       return;
     }
@@ -556,9 +736,15 @@ export class RegisterTutorComponent {
       formData.append('address', addressVal.trim());
     }
     formData.append('acceptLopnnaTerms', String(this.registerForm.get('acceptLopnnaTerms')?.value));
+    formData.append('relationshipType', this.registerForm.get('relationshipType')?.value || 'PARENT');
     formData.append('idDocumentType', this.registerForm.get('idDocumentType')?.value);
     formData.append('idDocumentNumber', this.registerForm.get('idDocumentNumber')?.value);
     formData.append('idDocumentFile', this.selectedFile);
+    formData.append('selfieFile', this.selectedSelfieFile);
+
+    if (this.selectedRepresentationFile) {
+      formData.append('representationDocumentFile', this.selectedRepresentationFile);
+    }
 
     const email = this.registerForm.get('email')?.value;
 
