@@ -177,6 +177,12 @@
               <span class="info-value bold">{{ selectedItem()?.tutorFullName }}</span>
             </div>
             <div class="info-row">
+              <span class="info-label">Parentesco / Calidad:</span>
+              <span class="badge-relationship" [class.badge-legal-rep]="selectedItem()?.tutorRelationshipType === 'LEGAL_REPRESENTATIVE'">
+                {{ selectedItem()?.tutorRelationshipType === 'LEGAL_REPRESENTATIVE' ? '⚖️ Representante Legal' : '👨‍👩‍👧 Padre / Madre' }}
+              </span>
+            </div>
+            <div class="info-row">
               <span class="info-label">Documento:</span>
               <span class="info-value">{{ selectedItem()?.tutorDocType }}: {{ selectedItem()?.tutorDocNumber || 'No especificado' }}</span>
             </div>
@@ -190,37 +196,128 @@
             </div>
           </div>
 
-          <!-- VISOR DE DOCUMENTO DEL TUTOR -->
-          <div class="viewer-container">
-            <div class="viewer-toolbar">
-              <span class="viewer-tag">Documento de Identidad del Tutor</span>
-              <a *ngIf="selectedItem()?.tutorDocFileUrl" [href]="selectedItem()?.tutorDocFileUrl" target="_blank" rel="noopener noreferrer" class="link-external">
-                Abrir en pestaña nueva ↗
-              </a>
-            </div>
+          <!-- PESTAÑAS DE EXPEDIENTE DEL TUTOR -->
+          <div class="tutor-doc-tabs">
+            <button
+              type="button"
+              class="doc-tab-btn"
+              [class.active]="activeTutorDocTab() === 'ID'"
+              (click)="setTutorDocTab('ID')"
+            >
+              📄 Cédula / DNI
+            </button>
+            <button
+              type="button"
+              class="doc-tab-btn"
+              [class.active]="activeTutorDocTab() === 'SELFIE'"
+              (click)="setTutorDocTab('SELFIE')"
+            >
+              📸 Selfie en Vivo
+            </button>
+            <button
+              *ngIf="selectedItem()?.tutorRelationshipType === 'LEGAL_REPRESENTATIVE' || selectedItem()?.tutorRepresentationDocumentUrl"
+              type="button"
+              class="doc-tab-btn"
+              [class.active]="activeTutorDocTab() === 'REPRESENTATION'"
+              (click)="setTutorDocTab('REPRESENTATION')"
+            >
+              📜 Poder Notariado
+            </button>
+          </div>
 
-            <div class="viewer-viewport">
-              <ng-container *ngIf="selectedItem()?.tutorDocFileUrl; else noTutorDoc">
-                <iframe
-                  *ngIf="isPdf(selectedItem()?.tutorDocFileUrl)"
-                  [src]="getSafeUrl(selectedItem()?.tutorDocFileUrl)"
-                  class="doc-frame"
-                  title="Documento Tutor">
-                </iframe>
-                <img
-                  *ngIf="!isPdf(selectedItem()?.tutorDocFileUrl)"
-                  [src]="selectedItem()?.tutorDocFileUrl"
-                  alt="Documento del Tutor"
-                  class="doc-img"
-                  [style.transform]="'scale(' + tutorZoom() + ')'"
-                />
-              </ng-container>
-              <ng-template #noTutorDoc>
-                <div class="no-doc-alert">
-                  ⚠️ El tutor aún no ha consignado copia digital de su documento en tutor_legal_consents.
-                </div>
-              </ng-template>
-            </div>
+          <!-- VISOR DE DOCUMENTO DEL TUTOR: SEGÚN PESTAÑA ACTIVA -->
+          <div class="viewer-container">
+            <!-- Pestaña 1: Cédula / DNI -->
+            <ng-container *ngIf="activeTutorDocTab() === 'ID'">
+              <div class="viewer-toolbar">
+                <span class="viewer-tag">Cédula / Documento de Identidad</span>
+                <a *ngIf="selectedItem()?.tutorDocFileUrl" [href]="selectedItem()?.tutorDocFileUrl" target="_blank" rel="noopener noreferrer" class="link-external">
+                  Abrir en pestaña nueva ↗
+                </a>
+              </div>
+
+              <div class="viewer-viewport">
+                <ng-container *ngIf="selectedItem()?.tutorDocFileUrl; else noTutorDoc">
+                  <iframe
+                    *ngIf="isPdf(selectedItem()?.tutorDocFileUrl)"
+                    [src]="getSafeUrl(selectedItem()?.tutorDocFileUrl)"
+                    class="doc-frame"
+                    title="Documento Tutor">
+                  </iframe>
+                  <img
+                    *ngIf="!isPdf(selectedItem()?.tutorDocFileUrl)"
+                    [src]="selectedItem()?.tutorDocFileUrl"
+                    alt="Documento del Tutor"
+                    class="doc-img"
+                    [style.transform]="'scale(' + tutorZoom() + ')'"
+                  />
+                </ng-container>
+                <ng-template #noTutorDoc>
+                  <div class="no-doc-alert">
+                    ⚠️ El tutor no ha consignado copia digital de su documento en tutor_legal_consents.
+                  </div>
+                </ng-template>
+              </div>
+            </ng-container>
+
+            <!-- Pestaña 2: Selfie en Vivo -->
+            <ng-container *ngIf="activeTutorDocTab() === 'SELFIE'">
+              <div class="viewer-toolbar">
+                <span class="viewer-tag">Fotografía Selfie de Validación</span>
+                <a *ngIf="selectedItem()?.tutorSelfieUrl" [href]="selectedItem()?.tutorSelfieUrl" target="_blank" rel="noopener noreferrer" class="link-external">
+                  Abrir en pestaña nueva ↗
+                </a>
+              </div>
+
+              <div class="viewer-viewport">
+                <ng-container *ngIf="selectedItem()?.tutorSelfieUrl; else noSelfieDoc">
+                  <img
+                    [src]="selectedItem()?.tutorSelfieUrl"
+                    alt="Selfie del Tutor"
+                    class="doc-img"
+                    [style.transform]="'scale(' + tutorZoom() + ')'"
+                  />
+                </ng-container>
+                <ng-template #noSelfieDoc>
+                  <div class="no-doc-alert">
+                    ℹ️ El tutor no tiene selfie registrada (registro previo a la actualización del expediente).
+                  </div>
+                </ng-template>
+              </div>
+            </ng-container>
+
+            <!-- Pestaña 3: Poder Notariado -->
+            <ng-container *ngIf="activeTutorDocTab() === 'REPRESENTATION'">
+              <div class="viewer-toolbar">
+                <span class="viewer-tag">Poder Notariado / Sentencia de Tutela</span>
+                <a *ngIf="selectedItem()?.tutorRepresentationDocumentUrl" [href]="selectedItem()?.tutorRepresentationDocumentUrl" target="_blank" rel="noopener noreferrer" class="link-external">
+                  Abrir en pestaña nueva ↗
+                </a>
+              </div>
+
+              <div class="viewer-viewport">
+                <ng-container *ngIf="selectedItem()?.tutorRepresentationDocumentUrl; else noRepDoc">
+                  <iframe
+                    *ngIf="isPdf(selectedItem()?.tutorRepresentationDocumentUrl)"
+                    [src]="getSafeUrl(selectedItem()?.tutorRepresentationDocumentUrl)"
+                    class="doc-frame"
+                    title="Poder Notariado">
+                  </iframe>
+                  <img
+                    *ngIf="!isPdf(selectedItem()?.tutorRepresentationDocumentUrl)"
+                    [src]="selectedItem()?.tutorRepresentationDocumentUrl"
+                    alt="Poder Notariado"
+                    class="doc-img"
+                    [style.transform]="'scale(' + tutorZoom() + ')'"
+                  />
+                </ng-container>
+                <ng-template #noRepDoc>
+                  <div class="no-doc-alert">
+                    ⚠️ Representante legal sin poder notariado adjunto. Se recomienda observar la solicitud.
+                  </div>
+                </ng-template>
+              </div>
+            </ng-container>
           </div>
         </div>
 

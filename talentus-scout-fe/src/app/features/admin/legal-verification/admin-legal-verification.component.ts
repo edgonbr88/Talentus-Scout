@@ -41,6 +41,7 @@ export class AdminLegalVerificationComponent implements OnInit {
   isModalOpen = signal<boolean>(false);
   showRejectForm = signal<boolean>(false);
   rejectionNotes = signal<string>('');
+  activeTutorDocTab = signal<'ID' | 'SELFIE' | 'REPRESENTATION'>('ID');
 
   // Visor de documentos: niveles de zoom
   tutorZoom = signal<number>(1);
@@ -90,9 +91,14 @@ export class AdminLegalVerificationComponent implements OnInit {
     this.selectedItem.set(item);
     this.showRejectForm.set(false);
     this.rejectionNotes.set('');
+    this.activeTutorDocTab.set('ID');
     this.tutorZoom.set(1);
     this.athleteZoom.set(1);
     this.isModalOpen.set(true);
+  }
+
+  setTutorDocTab(tab: 'ID' | 'SELFIE' | 'REPRESENTATION'): void {
+    this.activeTutorDocTab.set(tab);
   }
 
   closeInspectionModal(): void {

@@ -1,0 +1,136 @@
+<div class="webcam-capture-container">
+  <div class="capture-header">
+    <div class="label-row">
+      <span class="capture-label">
+        <svg class="icon-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+        {{ label }}
+      </span>
+      <span *ngIf="required" class="required-badge">Obligatorio</span>
+    </div>
+    <p class="helper-text">{{ helperText }}</p>
+  </div>
+
+  <!-- Estado 1: IDLE / Inicial -->
+  <div *ngIf="mode === 'idle'" class="idle-state-box" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)" [class.drag-over]="isDragOver">
+    <div class="idle-icon-wrapper">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+        <circle cx="12" cy="7" r="4"></circle>
+      </svg>
+    </div>
+
+    <div class="idle-instructions">
+      <h4 class="idle-title">Captura tu Selfie de Identidad</h4>
+      <p class="idle-desc">
+        Activa tu cámara para una captura instantánea en vivo, o sube una fotografía sosteniendo tu documento de identidad.
+      </p>
+    </div>
+
+    <div class="action-buttons-row">
+      <button type="button" class="btn-action-primary" (click)="startCamera()" [disabled]="isStartingCamera">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+          <circle cx="12" cy="13" r="4"></circle>
+        </svg>
+        <span>{{ isStartingCamera ? 'Iniciando cámara...' : 'Activar Cámara' }}</span>
+      </button>
+
+      <button type="button" class="btn-action-secondary" (click)="triggerFileInput()">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        <span>Subir archivo</span>
+      </button>
+    </div>
+
+    <div class="drop-hint">o arrastra y suelta tu foto aquí (JPG, PNG, WEBP máx 10MB)</div>
+  </div>
+
+  <!-- Estado 2: Cámara en Vivo -->
+  <div *ngIf="mode === 'camera-live'" class="live-camera-box">
+    <div class="video-wrapper">
+      <video #videoElement autoplay playsinline muted class="camera-stream-video"></video>
+      
+      <!-- Guía biométrica de encuadre -->
+      <div class="biometric-guide-overlay">
+        <div class="face-oval-guide">
+          <span class="guide-text">Centra tu rostro y documento aquí</span>
+        </div>
+      </div>
+
+      <div class="live-indicator">
+        <span class="live-dot"></span>
+        <span>CÁMARA EN VIVO</span>
+      </div>
+    </div>
+
+    <div class="live-controls-row">
+      <button type="button" class="btn-cancel" (click)="cancelCapture()">
+        Cancelar
+      </button>
+
+      <button type="button" class="btn-snap" (click)="capturePhoto()">
+        <span class="snap-inner-circle"></span>
+        <span class="snap-text">Tomar Foto</span>
+      </button>
+
+      <button type="button" class="btn-fallback-switch" (click)="triggerFileInput()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        <span>Subir archivo</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Estado 3 y 4: Foto Capturada o Archivo Subido -->
+  <div *ngIf="mode === 'captured' || mode === 'file-uploaded'" class="captured-preview-box">
+    <div class="preview-image-wrapper">
+      <img [src]="previewUrl" alt="Selfie de verificación" class="preview-img" />
+      <div class="success-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span>Foto cargada con éxito</span>
+      </div>
+    </div>
+
+    <div class="preview-actions-row">
+      <button type="button" class="btn-retake" (click)="retakePhoto()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 4v6h-6"></path>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+        <span>Tomar otra foto</span>
+      </button>
+
+      <button type="button" class="btn-clear-photo" (click)="clearPhoto()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+        <span>Eliminar</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Input de archivo oculto para fallback -->
+  <input #fileInput type="file" accept="image/jpeg,image/png,image/webp" style="display: none" (change)="onFileSelected($event)" />
+
+  <!-- Mensajes de Error -->
+  <div *ngIf="errorMessage" class="error-alert">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+    <span>{{ errorMessage }}</span>
+  </div>
+</div>

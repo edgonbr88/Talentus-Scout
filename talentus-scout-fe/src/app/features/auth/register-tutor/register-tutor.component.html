@@ -183,8 +183,32 @@
 
       <!-- Documento de Identidad del Tutor -->
       <div class="document-section">
-        <div class="section-badge">DOCUMENTO DE IDENTIDAD DEL REPRESENTANTE</div>
+        <div class="section-badge">DOCUMENTO DE IDENTIDAD Y REPRESENTACIÓN LEGAL</div>
         
+        <!-- Calidad de Representación / Parentesco -->
+        <div class="form-group relationship-group">
+          <label class="form-label">Calidad de Representación Legal <span class="required">*</span></label>
+          <div class="relationship-options-grid">
+            <label class="relationship-card" [class.selected]="registerForm.get('relationshipType')?.value === 'PARENT'">
+              <input type="radio" formControlName="relationshipType" value="PARENT" class="radio-hidden" />
+              <div class="card-radio-indicator"></div>
+              <div class="card-content">
+                <span class="card-title">Padre / Madre</span>
+                <span class="card-desc">Filiación directa por patria potestad biológica o adoptiva.</span>
+              </div>
+            </label>
+
+            <label class="relationship-card" [class.selected]="registerForm.get('relationshipType')?.value === 'LEGAL_REPRESENTATIVE'">
+              <input type="radio" formControlName="relationshipType" value="LEGAL_REPRESENTATIVE" class="radio-hidden" />
+              <div class="card-radio-indicator"></div>
+              <div class="card-content">
+                <span class="card-title">Representante Legal Autorizado</span>
+                <span class="card-desc">Tutor legal designado, apoderado notariado o custodio legal.</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
         <div class="form-row-2">
           <div class="form-group">
             <label for="idDocumentType" class="form-label">Tipo de documento</label>
@@ -218,9 +242,9 @@
           </div>
         </div>
 
-        <!-- Carga de Archivo Físico -->
+        <!-- Carga de Archivo Físico del Documento -->
         <div class="form-group file-upload-group">
-          <label class="form-label">Comprobante físico de identidad (Foto o PDF)</label>
+          <label class="form-label">Comprobante físico de identidad (Foto o PDF) <span class="required">*</span></label>
           
           <div 
             class="file-dropzone" 
@@ -242,7 +266,7 @@
                 <polyline points="17 8 12 3 7 8" />
                 <line x1="12" y1="3" x2="12" y2="15" />
               </svg>
-              <span class="dropzone-text">Haz clic para adjuntar tu documento</span>
+              <span class="dropzone-text">Haz clic para adjuntar tu documento de identidad</span>
               <span class="dropzone-hint">Formatos: JPG, PNG o PDF (Máximo 5MB)</span>
             </div>
 
@@ -262,6 +286,80 @@
           @if (fileError) {
             <div class="form-error">
               <span>{{ fileError }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- Documento de Poder / Tutela Notariada (Condicional) -->
+        <div *ngIf="isLegalRepresentative" class="form-group file-upload-group representation-upload-box">
+          <label class="form-label">
+            Poder de Representación o Sentencia de Tutela Notariada
+            <span class="required">*</span>
+          </label>
+          <p class="representation-desc">
+            Adjunta el poder especial notariado o resolución judicial de tutela que autoriza la representación legal del menor.
+          </p>
+
+          <div 
+            class="file-dropzone" 
+            [class.has-file]="!!selectedRepresentationFile"
+            [class.is-invalid]="representationFileError"
+            (click)="repFileInput.click()"
+            (dragover)="onRepresentationDragOver($event)"
+            (dragleave)="onRepresentationDragLeave($event)"
+            (drop)="onRepresentationDrop($event)"
+          >
+            <input
+              #repFileInput
+              type="file"
+              accept=".jpg,.jpeg,.png,.pdf"
+              (change)="onRepresentationSelected($event)"
+              style="display: none"
+            />
+
+            <div *ngIf="!selectedRepresentationFile" class="dropzone-empty">
+              <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="12" y1="18" x2="12" y2="12" />
+                <line x1="9" y1="15" x2="15" y2="15" />
+              </svg>
+              <span class="dropzone-text">Haz clic o arrastra tu poder notariado aquí</span>
+              <span class="dropzone-hint">Formatos: PDF, JPG o PNG (Máximo 10MB)</span>
+            </div>
+
+            <div *ngIf="selectedRepresentationFile" class="dropzone-file">
+              <svg class="file-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
+              <div class="file-info">
+                <span class="file-name">{{ selectedRepresentationFile.name }}</span>
+                <span class="file-size">{{ (selectedRepresentationFile.size / 1024 / 1024).toFixed(2) }} MB</span>
+              </div>
+              <button type="button" class="btn-remove-file" (click)="removeRepresentationFile($event)">✕</button>
+            </div>
+          </div>
+
+          @if (representationFileError) {
+            <div class="form-error">
+              <span>{{ representationFileError }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- Selfie en Vivo del Tutor -->
+        <div class="form-group file-upload-group">
+          <app-webcam-selfie-capture
+            label="Fotografía Selfie de Validación en Vivo"
+            helperText="Toma una selfie en tiempo real con tu cámara sosteniendo tu documento de identidad junto a tu rostro, o sube una fotografía si tu equipo carece de cámara."
+            [required]="true"
+            (photoSelected)="onSelfieCaptured($event)"
+            (photoCleared)="onSelfieCleared()"
+          ></app-webcam-selfie-capture>
+          @if (selfieError) {
+            <div class="form-error">
+              <span>{{ selfieError }}</span>
             </div>
           }
         </div>
@@ -317,7 +415,7 @@
       <button
         type="submit"
         class="btn btn-primary btn-block"
-        [disabled]="registerForm.invalid || !selectedFile || isLoading"
+        [disabled]="registerForm.invalid || !selectedFile || !selectedSelfieFile || (isLegalRepresentative && !selectedRepresentationFile) || isLoading"
       >
         @if (isLoading) {
           <span>Enviando registro y verificando...</span>
