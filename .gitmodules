@@ -4,3 +4,6 @@
 [submodule "talentus-scout-migrations"]
 	path = talentus-scout-migrations
 	url = https://github.com/edgonbr88/talentus-scout-migrations.git
+[submodule "talentus-scout-fe"]
+	path = talentus-scout-fe
+	url = https://github.com/edgonbr88/talentus-scout-fe.git
