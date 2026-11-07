@@ -1,0 +1,136 @@
+@if (isOpen) {
+  <div class="modal-backdrop" (click)="onClose()" role="presentation">
+    <div
+      class="terms-modal-card"
+      (click)="$event.stopPropagation()"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="terms-modal-title"
+    >
+      <!-- Cabecera del Modal -->
+      <div class="terms-modal-header">
+        <div class="header-icon-wrap">
+          <svg class="header-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+        <div class="header-text-block">
+          <div class="header-badge-row">
+            <span class="badge-legal">Protocolo Oficial</span>
+            <span class="badge-version">Versión 1.0</span>
+          </div>
+          <h2 id="terms-modal-title" class="terms-title">Términos y Condiciones para Scouts</h2>
+          <p class="terms-subtitle">
+            Compromiso ético de salvaguarda de atletas juveniles y cláusula de difusión institucional deportiva.
+          </p>
+        </div>
+        <button
+          type="button"
+          class="btn-close-modal"
+          (click)="onClose()"
+          aria-label="Cerrar modal de términos"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="close-svg">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Cuerpo Bento de Términos (4 Pilares) -->
+      <div class="terms-modal-body">
+        <div class="bento-grid">
+          <!-- Pilar 1 -->
+          <article class="bento-card card-safeguard">
+            <div class="card-pillar-header">
+              <span class="pillar-number">01</span>
+              <span class="pillar-tag">Protección del Menor</span>
+            </div>
+            <h3 class="pillar-title">Protección Integral del Menor y FIFA Guardians</h3>
+            <p class="pillar-text">
+              La integridad física, psicológica y moral de los atletas en edad formativa es el principio supremo de Talentus Scout.
+              Todo evaluador declara acatar estrictamente el marco jurídico de la <strong>LOPNNA (Art. 65)</strong> y los protocolos
+              internacionales de salvaguarda de <strong>FIFA Guardians</strong>, garantizando que el interés superior del deportista
+              prevalezca sobre cualquier interés deportivo o comercial.
+            </p>
+          </article>
+
+          <!-- Pilar 2 -->
+          <article class="bento-card card-confidentiality">
+            <div class="card-pillar-header">
+              <span class="pillar-number">02</span>
+              <span class="pillar-tag">Uso Ético de Fichas</span>
+            </div>
+            <h3 class="pillar-title">Confidencialidad y Contacto Exclusivo vía Tutores</h3>
+            <p class="pillar-text">
+              Las fichas biométricas, material audiovisual y estadísticas deportivas son suministradas con fines exclusivos de scouting
+              profesional. Queda <strong>terminantemente prohibido</strong> el contacto directo, particular o no tutelado con atletas menores
+              de edad. Todo acercamiento formal debe gestionarse a través del representante legal acreditado en la plataforma.
+            </p>
+          </article>
+
+          <!-- Pilar 3: Destacado Institucional -->
+          <article class="bento-card card-diffusion bento-span-2">
+            <div class="card-pillar-header">
+              <span class="pillar-number">03</span>
+              <span class="pillar-tag tag-accent">Cláusula de Autorización Expresa</span>
+            </div>
+            <h3 class="pillar-title">Autorización de Difusión Institucional de Clubes en Canales Oficiales</h3>
+            <p class="pillar-text">
+              Al postularse como scout oficial, usted declara bajo fe de juramento la veracidad de su afiliación al club, academia
+              o entidad deportiva señalada, y <strong>autoriza expresamente a Talentus Scout</strong> a publicar, visibilizar y difundir
+              en sus redes sociales (Instagram, LinkedIn, X, TikTok), notas de prensa y portal oficial la presencia e interacción
+              de evaluadores adscritos a su organización (ej. <em>"Scouts vinculados a [Nombre de Club/Academia] evalúan talento en Talentus Scout"</em>),
+              potenciando la exposición deportiva de los atletas y la transparencia del ecosistema formativo.
+            </p>
+          </article>
+
+          <!-- Pilar 4 -->
+          <article class="bento-card card-juramento bento-span-2">
+            <div class="card-pillar-header">
+              <span class="pillar-number">04</span>
+              <span class="pillar-tag tag-warning">Trazabilidad Legal</span>
+            </div>
+            <h3 class="pillar-title">Declaración Jurada, Responsabilidad y Consecuencias de Falsedad</h3>
+            <p class="pillar-text">
+              Usted certifica que la documentación aportada (credenciales, documento nacional de identidad y selfie de validación)
+              es verídica, vigente y legítima. Cualquier falsificación, simulación de acreditación o alteración documental facultará a Talentus Scout
+              a revocar inmediatamente la cuenta, denegar el acceso a la red y emprender las acciones legales civiles y penales que correspondan.
+            </p>
+          </article>
+        </div>
+
+        <div class="terms-legal-callout">
+          <svg class="callout-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <span class="callout-text">
+            Al pulsar "Aceptar y Volver al Registro", se registrará digitalmente su consentimiento vinculante junto con su dirección IP,
+            versión de términos y sellado temporal en nuestra base de datos para efectos probatorios.
+          </span>
+        </div>
+      </div>
+
+      <!-- Pie del Modal con Acciones -->
+      <div class="terms-modal-footer">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="onClose()"
+        >
+          Cerrar
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary btn-accept"
+          (click)="onAccept()"
+        >
+          Aceptar y Volver al Registro
+        </button>
+      </div>
+    </div>
+  </div>
+}

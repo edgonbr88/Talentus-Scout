@@ -7,11 +7,12 @@ import { AthleteService } from '../../../core/services/athlete.service';
 import { ClubDto } from '../../../core/models/athlete.model';
 import { BrandLogoComponent } from '../../../shared/components/brand-logo/brand-logo.component';
 import { WebcamSelfieCaptureComponent } from '../../../shared/components/webcam-selfie-capture/webcam-selfie-capture.component';
+import { ScoutTermsModalComponent } from './scout-terms-modal/scout-terms-modal.component';
 
 @Component({
   selector: 'app-register-scout',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, BrandLogoComponent, WebcamSelfieCaptureComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, BrandLogoComponent, WebcamSelfieCaptureComponent, ScoutTermsModalComponent],
   templateUrl: './register-scout.component.html',
   styleUrl: './register-scout.component.css'
 })
@@ -39,6 +40,7 @@ export class RegisterScoutComponent implements OnInit {
   errorMessage: string | null = null;
   conflictEmail: string | null = null;
   showCustomRoleInput = false;
+  showTermsModal = false;
 
   readonly scoutRoles = [
     'Reclutador Oficial',
@@ -82,8 +84,25 @@ export class RegisterScoutComponent implements OnInit {
       scoutRole: ['', [Validators.required, Validators.maxLength(100)]],
       customScoutRole: ['', [Validators.maxLength(100)]],
       linkedinUrl: ['', [Validators.maxLength(255)]],
-      acceptLegalNotice: [false, [Validators.requiredTrue]]
+      acceptTerms: [false, [Validators.requiredTrue]]
     });
+  }
+
+  openTermsModal(event?: Event): void {
+    if (event) {
+      event.preventDefault();
+    }
+    this.showTermsModal = true;
+  }
+
+  closeTermsModal(): void {
+    this.showTermsModal = false;
+  }
+
+  onAcceptTermsFromModal(): void {
+    this.registerForm.patchValue({ acceptTerms: true });
+    this.registerForm.get('acceptTerms')?.markAsTouched();
+    this.showTermsModal = false;
   }
 
   get isOtherOrganizationSelected(): boolean {
@@ -389,6 +408,7 @@ export class RegisterScoutComponent implements OnInit {
     formData.append('idDocumentNumber', this.registerForm.get('idDocumentNumber')?.value?.trim());
     formData.append('idDocumentFile', this.selectedIdDocumentFile);
     formData.append('selfieFile', this.selectedSelfieFile);
+    formData.append('acceptTerms', 'true');
 
     const email = this.registerForm.get('email')?.value?.trim();
     const finalDisplayOrg = orgNameValue || 'Agente Independiente';

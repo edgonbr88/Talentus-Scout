@@ -49,6 +49,7 @@ describe('RegisterScoutComponent', () => {
     expect(component).toBeTruthy();
     expect(component.registerForm.valid).toBeFalse();
     expect(component.selectedFile).toBeNull();
+    expect(component.showTermsModal).toBeFalse();
   });
 
   it('debe validar formato internacional en phoneNumber', () => {
@@ -100,15 +101,35 @@ describe('RegisterScoutComponent', () => {
     expect(component.fileError).toBeNull();
   });
 
+  it('debe abrir, cerrar y aceptar términos desde el modal', () => {
+    expect(component.showTermsModal).toBeFalse();
+    expect(component.registerForm.get('acceptTerms')?.value).toBeFalse();
+
+    component.openTermsModal();
+    expect(component.showTermsModal).toBeTrue();
+
+    component.closeTermsModal();
+    expect(component.showTermsModal).toBeFalse();
+
+    component.openTermsModal();
+    component.onAcceptTermsFromModal();
+    expect(component.showTermsModal).toBeFalse();
+    expect(component.registerForm.get('acceptTerms')?.value).toBeTrue();
+  });
+
   it('debe enviar el formulario válido con club oficial y redirigir a auditoría pendiente', () => {
     const file = new File(['dummy content'], 'credencial.pdf', { type: 'application/pdf' });
     component.selectedFile = file;
+    component.selectedIdDocumentFile = file;
+    component.selectedSelfieFile = file;
 
     component.registerForm.setValue({
       fullName: 'Carlos Scout',
       email: 'scout@caracasfc.org',
       password: 'password123',
       phoneNumber: '+584120001122',
+      idDocumentType: 'Cédula de Identidad',
+      idDocumentNumber: '12345678',
       organizationSelect: 'club-123',
       organizationName: 'Caracas FC',
       organizationClubId: 'club-123',
@@ -119,7 +140,7 @@ describe('RegisterScoutComponent', () => {
       scoutRole: 'Reclutador Oficial',
       customScoutRole: '',
       linkedinUrl: 'https://linkedin.com/in/carlos-scout',
-      acceptLegalNotice: true
+      acceptTerms: true
     });
 
     authServiceSpy.registerScout.and.returnValue(of({
@@ -138,6 +159,8 @@ describe('RegisterScoutComponent', () => {
     component.onSubmit();
 
     expect(authServiceSpy.registerScout).toHaveBeenCalled();
+    const sentFormData = authServiceSpy.registerScout.calls.mostRecent().args[0] as FormData;
+    expect(sentFormData.get('acceptTerms')).toBe('true');
     expect(router.navigate).toHaveBeenCalledWith(
       ['/auth/scout-pending-audit'],
       jasmine.objectContaining({
@@ -168,12 +191,16 @@ describe('RegisterScoutComponent', () => {
   it('debe enviar datos geográficos completos cuando se selecciona "Otro"', () => {
     const file = new File(['dummy content'], 'credencial.pdf', { type: 'application/pdf' });
     component.selectedFile = file;
+    component.selectedIdDocumentFile = file;
+    component.selectedSelfieFile = file;
 
     component.registerForm.setValue({
       fullName: 'Ojeador Andes',
       email: 'scout@andes.com',
       password: 'password123',
       phoneNumber: '+584120001122',
+      idDocumentType: 'Cédula de Identidad',
+      idDocumentNumber: '12345678',
       organizationSelect: 'OTHER',
       organizationName: '',
       organizationClubId: '',
@@ -184,7 +211,7 @@ describe('RegisterScoutComponent', () => {
       scoutRole: 'Director Deportivo',
       customScoutRole: '',
       linkedinUrl: '',
-      acceptLegalNotice: true
+      acceptTerms: true
     });
 
     authServiceSpy.registerScout.and.returnValue(of({
@@ -208,17 +235,22 @@ describe('RegisterScoutComponent', () => {
     expect(sentFormData.get('customClubCity')).toBe('Mérida');
     expect(sentFormData.get('customClubState')).toBe('Mérida');
     expect(sentFormData.get('customClubCountry')).toBe('Venezuela');
+    expect(sentFormData.get('acceptTerms')).toBe('true');
   });
 
   it('debe manejar error 409 por conflicto de correo electrónico', () => {
     const file = new File(['dummy content'], 'credencial.pdf', { type: 'application/pdf' });
     component.selectedFile = file;
+    component.selectedIdDocumentFile = file;
+    component.selectedSelfieFile = file;
 
     component.registerForm.setValue({
       fullName: 'Carlos Scout',
       email: 'duplicado@club.com',
       password: 'password123',
       phoneNumber: '+584120001122',
+      idDocumentType: 'Cédula de Identidad',
+      idDocumentNumber: '12345678',
       organizationSelect: 'club-123',
       organizationName: 'Caracas FC',
       organizationClubId: 'club-123',
@@ -229,7 +261,7 @@ describe('RegisterScoutComponent', () => {
       scoutRole: 'Reclutador Oficial',
       customScoutRole: '',
       linkedinUrl: '',
-      acceptLegalNotice: true
+      acceptTerms: true
     });
 
     authServiceSpy.registerScout.and.returnValue(throwError(() => ({ status: 409 })));

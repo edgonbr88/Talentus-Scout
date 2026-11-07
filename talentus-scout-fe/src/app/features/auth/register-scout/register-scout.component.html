@@ -506,18 +506,24 @@
         <label class="checkbox-label">
           <input
             type="checkbox"
-            formControlName="acceptLegalNotice"
+            formControlName="acceptTerms"
             class="checkbox-input"
           />
           <span class="checkbox-text">
-            Declaro bajo fe de juramento que represento legítimamente a la organización deportiva declarada,
-            que los documentos adjuntos son fidedignos y acepto que el acceso a datos juveniles está sujeto a auditoría previa
-            conforme a la LOPNNA y las directrices FIFA.
+            He leído y acepto los
+            <button
+              type="button"
+              class="terms-trigger-btn"
+              (click)="openTermsModal($event)"
+            >
+              Términos y Condiciones para Scouts
+            </button>,
+            declarando bajo fe de juramento la legitimidad de mi vinculación deportiva y autorizando expresamente a Talentus Scout a publicar en sus redes y plataformas institucionales la presencia de evaluadores adscritos a mi club u organización.
           </span>
         </label>
-        @if (isFieldInvalid('acceptLegalNotice')) {
+        @if (isFieldInvalid('acceptTerms')) {
           <div class="form-error" role="alert">
-            <span>Debes aceptar los términos y el protocolo de auditoría deportiva para continuar.</span>
+            <span>Debes aceptar obligatoriamente los Términos y Condiciones para Scouts y la cláusula de difusión institucional.</span>
           </div>
         }
       </div>
@@ -550,4 +556,11 @@
       </p>
     </div>
   </div>
+
+  <!-- Modal Bento de Términos y Condiciones -->
+  <app-scout-terms-modal
+    [isOpen]="showTermsModal"
+    (closeModal)="closeTermsModal()"
+    (acceptTerms)="onAcceptTermsFromModal()"
+  ></app-scout-terms-modal>
 </div>
