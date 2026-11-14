@@ -59,6 +59,7 @@ services:
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-super_secret_jwt_key_local_64_chars_talentus_scout_2026_dev_for_security}
       MAIL_ENABLED: ${MAIL_ENABLED:-true}
       MAIL_FROM: ${MAIL_FROM:-contacto@robomatic.cloud}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
       MAIL_SERVER: ${MAIL_SERVER:-smtp.gmail.com}
       MAIL_PORT: ${MAIL_PORT:-587}
       MAIL_USERNAME: ${MAIL_USERNAME:-contacto@robomatic.cloud}
