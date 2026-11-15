@@ -1,0 +1,321 @@
+primer_nombre,segundo_nombre,primer_apellido,segundo_apellido,cedula_identidad_atleta,fecha_nacimiento,genero,posicion_principal,posicion_secundaria,pie_dominante,nacionalidad,altura_cm,peso_kg,nombre_completo_tutor,cedula_identidad_tutor,correo_tutor,telefono_tutor
+Sebastián,José,Martínez,Rivera,QA-V-32000001,2009-02-02,masculino,GK,N/A,RIGHT,venezolana,"149,5",43.25,Daniel Martínez,V-15000001,tutor.qa.0001@ejemplo.com,+584121000001
+Mateo,Antonio,López,Ríos,QA-V-32000002,2010-03-03,MALE,arquero,Ninguna,diestro,COL,150.50,44.25,Lucas López,V-15000002,tutor.qa.0002@ejemplo.com,+584121000002
+Santiago,Luis,Ramírez,Rodríguez,QA-V-32000003,04/04/2011,M,Defensa Central,RB,Izquierdo,Colombia,"151,5",45.25,Diego Ramírez,V-15000003,tutor.qa.0003@ejemplo.com,+584121000003
+Gabriel,Miguel,Rivera,,QA-V-32000004,2012-05-05,hombre,DEFENSA_CENTRAL,Lateral Izquierdo,LEFT,chile,152.50,46.25,Carlos Rivera,V-15000004,tutor.qa.0004@ejemplo.com,+584121000004
+Lucía,Enrique,Rojas,Mendoza,QA-V-32000005,2013-06-06,dama,Zaguero,LATERAL_IZQUIERDO,zurdo,Perú,"153,5",47.25,José Ángel Rojas,V-15000005,tutor.qa.0005@ejemplo.com,+584121000005
+Lucas,María,Peña,Suárez,QA-V-32000006,07/07/2014,,Lateral Derecho,,Ambidiestro,peruana,154.50,48.25,Andrés Peña,V-15000006,tutor.qa.0006@ejemplo.com,+584121000006
+Diego,del Carmen,Medina,López,QA-V-32000007,2015-08-08,Masculino,LATERAL_DERECHO,N/A,BOTH,Ecuador,"155,5",49.25,Nicolás Medina,V-15000007,tutor.qa.0007@ejemplo.com,+584121000007
+Carlos,Alejandro,Pérez,,QA-V-32000008,2008-09-09,masculino,RB,Ninguna,,Bolivia,156.50,50.25,Tomás Pérez,V-15000008,tutor.qa.0008@ejemplo.com,+584121000008
+José Ángel,,Martínez,Vargas,QA-V-32000009,10/10/2009,MALE,Lateral Izquierdo,Pivote,Derecho,Argentina,"157,5",51.25,Samuel Martínez,V-15000009,tutor.qa.0009@ejemplo.com,+584121000009
+Gabriela,,López,Martínez,QA-V-32000010,2010-11-11,mujer,LATERAL_IZQUIERDO,Mediocampista Central,RIGHT,España,,,Emiliano López,V-15000010,tutor.qa.0010@ejemplo.com,+584121000010
+Nicolás,José,Ramírez,Torres,QA-V-32000011,2011-12-12,hombre,LB,MEDIOCAMPISTA_CENTRAL,diestro,,"159,5",53.25,Joaquín Ramírez,V-15000011,tutor.qa.0011@ejemplo.com,+584121000011
+Tomás,Antonio,Rivera,,QA-V-32000012,13/01/2012,varón,Mediocampista Defensivo,,Izquierdo,Venezuela,160.50,54.25,Matías Rivera,V-15000012,tutor.qa.0012@ejemplo.com,+584121000012
+Samuel,Luis,Rojas,Pérez,QA-V-32000013,2013-02-14,,mediocampista defensivo,N/A,LEFT,venezolana,"161,5",55.25,Benjamín Rojas,V-15000013,tutor.qa.0013@ejemplo.com,+584121000013
+Emiliano,Miguel,Peña,Díaz,QA-V-32000014,2014-03-15,Masculino,Pivote,Ninguna,zurdo,COL,162.50,56.25,Thiago Peña,V-15000014,tutor.qa.0014@ejemplo.com,+584121000014
+Natalia,Enrique,Medina,Morales,QA-V-32000015,16/04/2015,F,Mediocampista Central,10,Ambidiestro,Colombia,"163,5",57.25,Leonardo Medina,V-15000015,tutor.qa.0015@ejemplo.com,+584121000015
+Matías,María,Pérez,,QA-V-32000016,2008-05-17,MALE,MEDIOCAMPISTA_CENTRAL,Extremo Derecho,BOTH,chile,164.50,58.25,Adrián Pérez,V-15000016,tutor.qa.0016@ejemplo.com,+584121000016
+Benjamín,del Carmen,Martínez,González,QA-V-32000017,2009-06-18,M,Volante Mixto,EXTREMO_DERECHO,,Perú,"165,5",59.25,Rafael Martínez,V-15000017,tutor.qa.0017@ejemplo.com,+584121000017
+Thiago,Alejandro,López,Flores,QA-V-32000018,19/07/2010,hombre,Mediocampista Ofensivo,,Derecho,peruana,166.50,60.25,Iker López,V-15000018,tutor.qa.0018@ejemplo.com,+584121000018
+Leonardo,,Ramírez,Peña,QA-V-32000019,2011-08-20,varón,Enganche,N/A,RIGHT,Ecuador,"167,5",61.25,Dylan Ramírez,V-15000019,tutor.qa.0019@ejemplo.com,+584121000019
+Isabella,,Rivera,,QA-V-32000020,2012-09-21,FEMALE,10,Ninguna,diestro,Bolivia,,,Alejandro Rivera,V-15000020,tutor.qa.0020@ejemplo.com,+584121000020
+Rafael,José,Rojas,Sánchez,QA-V-32000021,22/10/2013,Masculino,Extremo Derecho,LW,Izquierdo,Argentina,"169,5",63.25,Sebastián Rojas,V-15000021,tutor.qa.0021@ejemplo.com,+584121000021
+Iker,Antonio,Peña,Rojas,QA-V-32000022,2014-11-23,masculino,EXTREMO_DERECHO,Delantero Centro,LEFT,España,170.50,64.25,Mateo Peña,V-15000022,tutor.qa.0022@ejemplo.com,+584121000022
+Dylan,Luis,Medina,Herrera,QA-V-32000023,2015-12-24,MALE,RW,DELANTERO_CENTRO,zurdo,,"171,5",65.25,Santiago Medina,V-15000023,tutor.qa.0023@ejemplo.com,+584121000023
+Alejandro,Miguel,Pérez,,QA-V-32000024,25/01/2008,M,Extremo Izquierdo,,Ambidiestro,Venezuela,172.50,66.25,Gabriel Pérez,V-15000024,tutor.qa.0024@ejemplo.com,+584121000024
+Victoria,Enrique,Martínez,Rivera,QA-V-32000025,2009-02-26,FEMENINO,EXTREMO_IZQUIERDO,N/A,BOTH,venezolana,"173,5",67.25,Daniel Martínez,V-15000025,tutor.qa.0025@ejemplo.com,+584121000025
+Mateo,María,López,Ríos,QA-V-32000026,2010-03-27,varón,LW,Ninguna,,COL,174.50,68.25,Lucas López,V-15000026,tutor.qa.0026@ejemplo.com,+584121000026
+Santiago,del Carmen,Ramírez,Rodríguez,QA-V-32000027,28/04/2011,,Delantero Centro,arquero,Derecho,Colombia,"175,5",69.25,Diego Ramírez,V-15000027,tutor.qa.0027@ejemplo.com,+584121000027
+Gabriel,Alejandro,Rivera,,QA-V-32000028,2012-05-01,Masculino,DELANTERO_CENTRO,Defensa Central,RIGHT,chile,176.50,70.25,Carlos Rivera,V-15000028,tutor.qa.0028@ejemplo.com,+584121000028
+Daniel,,Rojas,Mendoza,QA-V-32000029,2013-06-02,masculino,9,DEFENSA_CENTRAL,diestro,Perú,"177,5",71.25,José Ángel Rojas,V-15000029,tutor.qa.0029@ejemplo.com,+584121000029
+Andrea,,Peña,Suárez,QA-V-32000030,03/07/2014,Femenino,Portero,,Izquierdo,peruana,,,Andrés Peña,V-15000030,tutor.qa.0030@ejemplo.com,+584121000030
+Diego,José,Medina,López,QA-V-32000031,2015-08-04,M,GK,N/A,LEFT,Ecuador,"179,5",73.25,Nicolás Medina,V-15000031,tutor.qa.0031@ejemplo.com,+584121000031
+Carlos,Antonio,Pérez,,QA-V-32000032,2008-09-05,hombre,arquero,Ninguna,zurdo,Bolivia,180.50,74.25,Tomás Pérez,V-15000032,tutor.qa.0032@ejemplo.com,+584121000032
+José Ángel,Luis,Martínez,Vargas,QA-V-32000033,06/10/2009,varón,Defensa Central,RB,Ambidiestro,Argentina,"181,5",75.25,Samuel Martínez,V-15000033,tutor.qa.0033@ejemplo.com,+584121000033
+Andrés,Miguel,López,Martínez,QA-V-32000034,2010-11-07,,DEFENSA_CENTRAL,Lateral Izquierdo,BOTH,España,182.50,76.25,Emiliano López,V-15000034,tutor.qa.0034@ejemplo.com,+584121000034
+María Fernanda,Enrique,Ramírez,Torres,QA-V-32000035,2011-12-08,dama,Zaguero,LATERAL_IZQUIERDO,,,"183,5",42.25,Joaquín Ramírez,V-15000035,tutor.qa.0035@ejemplo.com,+584121000035
+Tomás,María,Rivera,,QA-V-32000036,09/01/2012,masculino,Lateral Derecho,,Derecho,Venezuela,184.50,43.25,Matías Rivera,V-15000036,tutor.qa.0036@ejemplo.com,+584121000036
+Samuel,del Carmen,Rojas,Pérez,QA-V-32000037,2013-02-10,MALE,LATERAL_DERECHO,N/A,RIGHT,venezolana,"185,5",44.25,Benjamín Rojas,V-15000037,tutor.qa.0037@ejemplo.com,+584121000037
+Emiliano,Alejandro,Peña,Díaz,QA-V-32000038,2014-03-11,M,RB,Ninguna,diestro,COL,148.50,45.25,Thiago Peña,V-15000038,tutor.qa.0038@ejemplo.com,+584121000038
+Joaquín,,Medina,Morales,QA-V-32000039,12/04/2015,hombre,Lateral Izquierdo,Pivote,Izquierdo,Colombia,"149,5",46.25,Leonardo Medina,V-15000039,tutor.qa.0039@ejemplo.com,+584121000039
+Mariana,,Pérez,,QA-V-32000040,2008-05-13,mujer,LATERAL_IZQUIERDO,Mediocampista Central,LEFT,chile,,,Adrián Pérez,V-15000040,tutor.qa.0040@ejemplo.com,+584121000040
+Benjamín,José,Martínez,González,QA-V-32000041,2009-06-14,,LB,MEDIOCAMPISTA_CENTRAL,zurdo,Perú,"151,5",48.25,Rafael Martínez,V-15000041,tutor.qa.0041@ejemplo.com,+584121000041
+Thiago,Antonio,López,Flores,QA-V-32000042,15/07/2010,Masculino,Mediocampista Defensivo,,Ambidiestro,peruana,152.50,49.25,Iker López,V-15000042,tutor.qa.0042@ejemplo.com,+584121000042
+Leonardo,Luis,Ramírez,Peña,QA-V-32000043,2011-08-16,masculino,mediocampista defensivo,N/A,BOTH,Ecuador,"153,5",50.25,Dylan Ramírez,V-15000043,tutor.qa.0043@ejemplo.com,+584121000043
+Adrián,Miguel,Rivera,,QA-V-32000044,2012-09-17,MALE,Pivote,Ninguna,,Bolivia,154.50,51.25,Alejandro Rivera,V-15000044,tutor.qa.0044@ejemplo.com,+584121000044
+Elena,Enrique,Rojas,Sánchez,QA-V-32000045,18/10/2013,F,Mediocampista Central,10,Derecho,Argentina,"155,5",52.25,Sebastián Rojas,V-15000045,tutor.qa.0045@ejemplo.com,+584121000045
+Iker,María,Peña,Rojas,QA-V-32000046,2014-11-19,hombre,MEDIOCAMPISTA_CENTRAL,Extremo Derecho,RIGHT,España,156.50,53.25,Mateo Peña,V-15000046,tutor.qa.0046@ejemplo.com,+584121000046
+Dylan,del Carmen,Medina,Herrera,QA-V-32000047,2015-12-20,varón,Volante Mixto,EXTREMO_DERECHO,diestro,,"157,5",54.25,Santiago Medina,V-15000047,tutor.qa.0047@ejemplo.com,+584121000047
+Alejandro,Alejandro,Pérez,,QA-V-32000048,21/01/2008,,Mediocampista Ofensivo,,Izquierdo,Venezuela,158.50,55.25,Gabriel Pérez,V-15000048,tutor.qa.0048@ejemplo.com,+584121000048
+Sebastián,,Martínez,Rivera,QA-V-32000049,2009-02-22,Masculino,Enganche,N/A,LEFT,venezolana,"159,5",56.25,Daniel Martínez,V-15000049,tutor.qa.0049@ejemplo.com,+584121000049
+Sofía,,López,Ríos,QA-V-32000050,2010-03-23,FEMALE,10,Ninguna,zurdo,COL,,,Lucas López,V-15000050,tutor.qa.0050@ejemplo.com,+584121000050
+Santiago,José,Ramírez,Rodríguez,QA-V-32000051,24/04/2011,MALE,Extremo Derecho,LW,Ambidiestro,Colombia,"161,5",58.25,Diego Ramírez,V-15000051,tutor.qa.0051@ejemplo.com,+584121000051
+Gabriel,Antonio,Rivera,,QA-V-32000052,2012-05-25,M,EXTREMO_DERECHO,Delantero Centro,BOTH,chile,162.50,59.25,Carlos Rivera,V-15000052,tutor.qa.0052@ejemplo.com,+584121000052
+Daniel,Luis,Rojas,Mendoza,QA-V-32000053,2013-06-26,hombre,RW,DELANTERO_CENTRO,,Perú,"163,5",60.25,José Ángel Rojas,V-15000053,tutor.qa.0053@ejemplo.com,+584121000053
+Lucas,Miguel,Peña,Suárez,QA-V-32000054,27/07/2014,varón,Extremo Izquierdo,,Derecho,peruana,164.50,61.25,Andrés Peña,V-15000054,tutor.qa.0054@ejemplo.com,+584121000054
+Valeria,Enrique,Medina,López,QA-V-32000055,2015-08-28,FEMENINO,EXTREMO_IZQUIERDO,N/A,RIGHT,Ecuador,"165,5",62.25,Nicolás Medina,V-15000055,tutor.qa.0055@ejemplo.com,+584121000055
+Carlos,María,Pérez,,QA-V-32000056,2008-09-01,Masculino,LW,Ninguna,diestro,Bolivia,166.50,63.25,Tomás Pérez,V-15000056,tutor.qa.0056@ejemplo.com,+584121000056
+José Ángel,del Carmen,Martínez,Vargas,QA-V-32000057,02/10/2009,masculino,Delantero Centro,arquero,Izquierdo,Argentina,"167,5",64.25,Samuel Martínez,V-15000057,tutor.qa.0057@ejemplo.com,+584121000057
+Andrés,Alejandro,López,Martínez,QA-V-32000058,2010-11-03,MALE,DELANTERO_CENTRO,Defensa Central,LEFT,España,168.50,65.25,Emiliano López,V-15000058,tutor.qa.0058@ejemplo.com,+584121000058
+Nicolás,,Ramírez,Torres,QA-V-32000059,2011-12-04,M,9,DEFENSA_CENTRAL,zurdo,,"169,5",66.25,Joaquín Ramírez,V-15000059,tutor.qa.0059@ejemplo.com,+584121000059
+Paula,,Rivera,,QA-V-32000060,05/01/2012,Femenino,Portero,,Ambidiestro,Venezuela,,,Matías Rivera,V-15000060,tutor.qa.0060@ejemplo.com,+584121000060
+Samuel,José,Rojas,Pérez,QA-V-32000061,2013-02-06,varón,GK,N/A,BOTH,venezolana,"171,5",68.25,Benjamín Rojas,V-15000061,tutor.qa.0061@ejemplo.com,+584121000061
+Emiliano,Antonio,Peña,Díaz,QA-V-32000062,2014-03-07,,arquero,Ninguna,,COL,172.50,69.25,Thiago Peña,V-15000062,tutor.qa.0062@ejemplo.com,+584121000062
+Joaquín,Luis,Medina,Morales,QA-V-32000063,08/04/2015,Masculino,Defensa Central,RB,Derecho,Colombia,"173,5",70.25,Leonardo Medina,V-15000063,tutor.qa.0063@ejemplo.com,+584121000063
+Matías,Miguel,Pérez,,QA-V-32000064,2008-05-09,masculino,DEFENSA_CENTRAL,Lateral Izquierdo,RIGHT,chile,174.50,71.25,Adrián Pérez,V-15000064,tutor.qa.0064@ejemplo.com,+584121000064
+Camila,Enrique,Martínez,González,QA-V-32000065,2009-06-10,dama,Zaguero,LATERAL_IZQUIERDO,diestro,Perú,"175,5",72.25,Rafael Martínez,V-15000065,tutor.qa.0065@ejemplo.com,+584121000065
+Thiago,María,López,Flores,QA-V-32000066,11/07/2010,M,Lateral Derecho,,Izquierdo,peruana,176.50,73.25,Iker López,V-15000066,tutor.qa.0066@ejemplo.com,+584121000066
+Leonardo,del Carmen,Ramírez,Peña,QA-V-32000067,2011-08-12,hombre,LATERAL_DERECHO,N/A,LEFT,Ecuador,"177,5",74.25,Dylan Ramírez,V-15000067,tutor.qa.0067@ejemplo.com,+584121000067
+Adrián,Alejandro,Rivera,,QA-V-32000068,2012-09-13,varón,RB,Ninguna,zurdo,Bolivia,178.50,75.25,Alejandro Rivera,V-15000068,tutor.qa.0068@ejemplo.com,+584121000068
+Rafael,,Rojas,Sánchez,QA-V-32000069,14/10/2013,,Lateral Izquierdo,Pivote,Ambidiestro,Argentina,"179,5",76.25,Sebastián Rojas,V-15000069,tutor.qa.0069@ejemplo.com,+584121000069
+Antonella,,Peña,Rojas,QA-V-32000070,2014-11-15,mujer,LATERAL_IZQUIERDO,Mediocampista Central,BOTH,España,,,Mateo Peña,V-15000070,tutor.qa.0070@ejemplo.com,+584121000070
+Dylan,José,Medina,Herrera,QA-V-32000071,2015-12-16,masculino,LB,MEDIOCAMPISTA_CENTRAL,,,"181,5",43.25,Santiago Medina,V-15000071,tutor.qa.0071@ejemplo.com,+584121000071
+Alejandro,Antonio,Pérez,,QA-V-32000072,17/01/2008,MALE,Mediocampista Defensivo,,Derecho,Venezuela,182.50,44.25,Gabriel Pérez,V-15000072,tutor.qa.0072@ejemplo.com,+584121000072
+Sebastián,Luis,Martínez,Rivera,QA-V-32000073,2009-02-18,M,mediocampista defensivo,N/A,RIGHT,venezolana,"183,5",45.25,Daniel Martínez,V-15000073,tutor.qa.0073@ejemplo.com,+584121000073
+Mateo,Miguel,López,Ríos,QA-V-32000074,2010-03-19,hombre,Pivote,Ninguna,diestro,COL,184.50,46.25,Lucas López,V-15000074,tutor.qa.0074@ejemplo.com,+584121000074
+Daniela,Enrique,Ramírez,Rodríguez,QA-V-32000075,20/04/2011,F,Mediocampista Central,10,Izquierdo,Colombia,"185,5",47.25,Diego Ramírez,V-15000075,tutor.qa.0075@ejemplo.com,+584121000075
+Gabriel,María,Rivera,,QA-V-32000076,2012-05-21,,MEDIOCAMPISTA_CENTRAL,Extremo Derecho,LEFT,chile,148.50,48.25,Carlos Rivera,V-15000076,tutor.qa.0076@ejemplo.com,+584121000076
+Daniel,del Carmen,Rojas,Mendoza,QA-V-32000077,2013-06-22,Masculino,Volante Mixto,EXTREMO_DERECHO,zurdo,Perú,"149,5",49.25,José Ángel Rojas,V-15000077,tutor.qa.0077@ejemplo.com,+584121000077
+Lucas,Alejandro,Peña,Suárez,QA-V-32000078,23/07/2014,masculino,Mediocampista Ofensivo,,Ambidiestro,peruana,150.50,50.25,Andrés Peña,V-15000078,tutor.qa.0078@ejemplo.com,+584121000078
+Diego,,Medina,López,QA-V-32000079,2015-08-24,MALE,Enganche,N/A,BOTH,Ecuador,"151,5",51.25,Nicolás Medina,V-15000079,tutor.qa.0079@ejemplo.com,+584121000079
+Valentina,,Pérez,,QA-V-32000080,2008-09-25,FEMALE,10,Ninguna,,Bolivia,,,Tomás Pérez,V-15000080,tutor.qa.0080@ejemplo.com,+584121000080
+José Ángel,José,Martínez,Vargas,QA-V-32000081,26/10/2009,hombre,Extremo Derecho,LW,Derecho,Argentina,"153,5",53.25,Samuel Martínez,V-15000081,tutor.qa.0081@ejemplo.com,+584121000081
+Andrés,Antonio,López,Martínez,QA-V-32000082,2010-11-27,varón,EXTREMO_DERECHO,Delantero Centro,RIGHT,España,154.50,54.25,Emiliano López,V-15000082,tutor.qa.0082@ejemplo.com,+584121000082
+Nicolás,Luis,Ramírez,Torres,QA-V-32000083,2011-12-28,,RW,DELANTERO_CENTRO,diestro,,"155,5",55.25,Joaquín Ramírez,V-15000083,tutor.qa.0083@ejemplo.com,+584121000083
+Tomás,Miguel,Rivera,,QA-V-32000084,01/01/2012,Masculino,Extremo Izquierdo,,Izquierdo,Venezuela,156.50,56.25,Matías Rivera,V-15000084,tutor.qa.0084@ejemplo.com,+584121000084
+Lucía,Enrique,Rojas,Pérez,QA-V-32000085,2013-02-02,FEMENINO,EXTREMO_IZQUIERDO,N/A,LEFT,venezolana,"157,5",57.25,Benjamín Rojas,V-15000085,tutor.qa.0085@ejemplo.com,+584121000085
+Emiliano,María,Peña,Díaz,QA-V-32000086,2014-03-03,MALE,LW,Ninguna,zurdo,COL,158.50,58.25,Thiago Peña,V-15000086,tutor.qa.0086@ejemplo.com,+584121000086
+Joaquín,del Carmen,Medina,Morales,QA-V-32000087,04/04/2015,M,Delantero Centro,arquero,Ambidiestro,Colombia,"159,5",59.25,Leonardo Medina,V-15000087,tutor.qa.0087@ejemplo.com,+584121000087
+Matías,Alejandro,Pérez,,QA-V-32000088,2008-05-05,hombre,DELANTERO_CENTRO,Defensa Central,BOTH,chile,160.50,60.25,Adrián Pérez,V-15000088,tutor.qa.0088@ejemplo.com,+584121000088
+Benjamín,,Martínez,González,QA-V-32000089,2009-06-06,varón,9,DEFENSA_CENTRAL,,Perú,"161,5",61.25,Rafael Martínez,V-15000089,tutor.qa.0089@ejemplo.com,+584121000089
+Gabriela,,López,Flores,QA-V-32000090,07/07/2010,Femenino,Portero,,Derecho,peruana,,,Iker López,V-15000090,tutor.qa.0090@ejemplo.com,+584121000090
+Leonardo,José,Ramírez,Peña,QA-V-32000091,2011-08-08,Masculino,GK,N/A,RIGHT,Ecuador,"163,5",63.25,Dylan Ramírez,V-15000091,tutor.qa.0091@ejemplo.com,+584121000091
+Adrián,Antonio,Rivera,,QA-V-32000092,2012-09-09,masculino,arquero,Ninguna,diestro,Bolivia,164.50,64.25,Alejandro Rivera,V-15000092,tutor.qa.0092@ejemplo.com,+584121000092
+Rafael,Luis,Rojas,Sánchez,QA-V-32000093,10/10/2013,MALE,Defensa Central,RB,Izquierdo,Argentina,"165,5",65.25,Sebastián Rojas,V-15000093,tutor.qa.0093@ejemplo.com,+584121000093
+Iker,Miguel,Peña,Rojas,QA-V-32000094,2014-11-11,M,DEFENSA_CENTRAL,Lateral Izquierdo,LEFT,España,166.50,66.25,Mateo Peña,V-15000094,tutor.qa.0094@ejemplo.com,+584121000094
+Natalia,Enrique,Medina,Herrera,QA-V-32000095,2015-12-12,dama,Zaguero,LATERAL_IZQUIERDO,zurdo,,"167,5",67.25,Santiago Medina,V-15000095,tutor.qa.0095@ejemplo.com,+584121000095
+Alejandro,María,Pérez,,QA-V-32000096,13/01/2008,varón,Lateral Derecho,,Ambidiestro,Venezuela,168.50,68.25,Gabriel Pérez,V-15000096,tutor.qa.0096@ejemplo.com,+584121000096
+Sebastián,del Carmen,Martínez,Rivera,QA-V-32000097,2009-02-14,,LATERAL_DERECHO,N/A,BOTH,venezolana,"169,5",69.25,Daniel Martínez,V-15000097,tutor.qa.0097@ejemplo.com,+584121000097
+Mateo,Alejandro,López,Ríos,QA-V-32000098,2010-03-15,Masculino,RB,Ninguna,,COL,170.50,70.25,Lucas López,V-15000098,tutor.qa.0098@ejemplo.com,+584121000098
+Santiago,,Ramírez,Rodríguez,QA-V-32000099,16/04/2011,masculino,Lateral Izquierdo,Pivote,Derecho,Colombia,"171,5",71.25,Diego Ramírez,V-15000099,tutor.qa.0099@ejemplo.com,+584121000099
+Isabella,,Rivera,,QA-V-32000100,2012-05-17,mujer,LATERAL_IZQUIERDO,Mediocampista Central,RIGHT,chile,,,Carlos Rivera,V-15000100,tutor.qa.0100@ejemplo.com,+584121000100
+Daniel,José,Rojas,Mendoza,QA-V-32000101,2013-06-18,M,LB,MEDIOCAMPISTA_CENTRAL,diestro,Perú,"173,5",73.25,José Ángel Rojas,V-15000101,tutor.qa.0101@ejemplo.com,+584121000101
+Lucas,Antonio,Peña,Suárez,QA-V-32000102,19/07/2014,hombre,Mediocampista Defensivo,,Izquierdo,peruana,174.50,74.25,Andrés Peña,V-15000102,tutor.qa.0102@ejemplo.com,+584121000102
+Diego,Luis,Medina,López,QA-V-32000103,2015-08-20,varón,mediocampista defensivo,N/A,LEFT,Ecuador,"175,5",75.25,Nicolás Medina,V-15000103,tutor.qa.0103@ejemplo.com,+584121000103
+Carlos,Miguel,Pérez,,QA-V-32000104,2008-09-21,,Pivote,Ninguna,zurdo,Bolivia,176.50,76.25,Tomás Pérez,V-15000104,tutor.qa.0104@ejemplo.com,+584121000104
+Victoria,Enrique,Martínez,Vargas,QA-V-32000105,22/10/2009,F,Mediocampista Central,10,Ambidiestro,Argentina,"177,5",42.25,Samuel Martínez,V-15000105,tutor.qa.0105@ejemplo.com,+584121000105
+Andrés,María,López,Martínez,QA-V-32000106,2010-11-23,masculino,MEDIOCAMPISTA_CENTRAL,Extremo Derecho,BOTH,España,178.50,43.25,Emiliano López,V-15000106,tutor.qa.0106@ejemplo.com,+584121000106
+Nicolás,del Carmen,Ramírez,Torres,QA-V-32000107,2011-12-24,MALE,Volante Mixto,EXTREMO_DERECHO,,,"179,5",44.25,Joaquín Ramírez,V-15000107,tutor.qa.0107@ejemplo.com,+584121000107
+Tomás,Alejandro,Rivera,,QA-V-32000108,25/01/2012,M,Mediocampista Ofensivo,,Derecho,Venezuela,180.50,45.25,Matías Rivera,V-15000108,tutor.qa.0108@ejemplo.com,+584121000108
+Samuel,,Rojas,Pérez,QA-V-32000109,2013-02-26,hombre,Enganche,N/A,RIGHT,venezolana,"181,5",46.25,Benjamín Rojas,V-15000109,tutor.qa.0109@ejemplo.com,+584121000109
+Andrea,,Peña,Díaz,QA-V-32000110,2014-03-27,FEMALE,10,Ninguna,diestro,COL,,,Thiago Peña,V-15000110,tutor.qa.0110@ejemplo.com,+584121000110
+Joaquín,José,Medina,Morales,QA-V-32000111,28/04/2015,,Extremo Derecho,LW,Izquierdo,Colombia,"183,5",48.25,Leonardo Medina,V-15000111,tutor.qa.0111@ejemplo.com,+584121000111
+Matías,Antonio,Pérez,,QA-V-32000112,2008-05-01,Masculino,EXTREMO_DERECHO,Delantero Centro,LEFT,chile,184.50,49.25,Adrián Pérez,V-15000112,tutor.qa.0112@ejemplo.com,+584121000112
+Benjamín,Luis,Martínez,González,QA-V-32000113,2009-06-02,masculino,RW,DELANTERO_CENTRO,zurdo,Perú,"185,5",50.25,Rafael Martínez,V-15000113,tutor.qa.0113@ejemplo.com,+584121000113
+Thiago,Miguel,López,Flores,QA-V-32000114,03/07/2010,MALE,Extremo Izquierdo,,Ambidiestro,peruana,148.50,51.25,Iker López,V-15000114,tutor.qa.0114@ejemplo.com,+584121000114
+María Fernanda,Enrique,Ramírez,Peña,QA-V-32000115,2011-08-04,FEMENINO,EXTREMO_IZQUIERDO,N/A,BOTH,Ecuador,"149,5",52.25,Dylan Ramírez,V-15000115,tutor.qa.0115@ejemplo.com,+584121000115
+Adrián,María,Rivera,,QA-V-32000116,2012-09-05,hombre,LW,Ninguna,,Bolivia,150.50,53.25,Alejandro Rivera,V-15000116,tutor.qa.0116@ejemplo.com,+584121000116
+Rafael,del Carmen,Rojas,Sánchez,QA-V-32000117,06/10/2013,varón,Delantero Centro,arquero,Derecho,Argentina,"151,5",54.25,Sebastián Rojas,V-15000117,tutor.qa.0117@ejemplo.com,+584121000117
+Iker,Alejandro,Peña,Rojas,QA-V-32000118,2014-11-07,,DELANTERO_CENTRO,Defensa Central,RIGHT,España,152.50,55.25,Mateo Peña,V-15000118,tutor.qa.0118@ejemplo.com,+584121000118
+Dylan,,Medina,Herrera,QA-V-32000119,2015-12-08,Masculino,9,DEFENSA_CENTRAL,diestro,,"153,5",56.25,Santiago Medina,V-15000119,tutor.qa.0119@ejemplo.com,+584121000119
+Mariana,,Pérez,,QA-V-32000120,09/01/2008,Femenino,Portero,,Izquierdo,Venezuela,,,Gabriel Pérez,V-15000120,tutor.qa.0120@ejemplo.com,+584121000120
+Sebastián,José,Martínez,Rivera,QA-V-32000121,2009-02-10,MALE,GK,N/A,LEFT,venezolana,"155,5",58.25,Daniel Martínez,V-15000121,tutor.qa.0121@ejemplo.com,+584121000121
+Mateo,Antonio,López,Ríos,QA-V-32000122,2010-03-11,M,arquero,Ninguna,zurdo,COL,156.50,59.25,Lucas López,V-15000122,tutor.qa.0122@ejemplo.com,+584121000122
+Santiago,Luis,Ramírez,Rodríguez,QA-V-32000123,12/04/2011,hombre,Defensa Central,RB,Ambidiestro,Colombia,"157,5",60.25,Diego Ramírez,V-15000123,tutor.qa.0123@ejemplo.com,+584121000123
+Gabriel,Miguel,Rivera,,QA-V-32000124,2012-05-13,varón,DEFENSA_CENTRAL,Lateral Izquierdo,BOTH,chile,158.50,61.25,Carlos Rivera,V-15000124,tutor.qa.0124@ejemplo.com,+584121000124
+Elena,Enrique,Rojas,Mendoza,QA-V-32000125,2013-06-14,dama,Zaguero,LATERAL_IZQUIERDO,,Perú,"159,5",62.25,José Ángel Rojas,V-15000125,tutor.qa.0125@ejemplo.com,+584121000125
+Lucas,María,Peña,Suárez,QA-V-32000126,15/07/2014,Masculino,Lateral Derecho,,Derecho,peruana,160.50,63.25,Andrés Peña,V-15000126,tutor.qa.0126@ejemplo.com,+584121000126
+Diego,del Carmen,Medina,López,QA-V-32000127,2015-08-16,masculino,LATERAL_DERECHO,N/A,RIGHT,Ecuador,"161,5",64.25,Nicolás Medina,V-15000127,tutor.qa.0127@ejemplo.com,+584121000127
+Carlos,Alejandro,Pérez,,QA-V-32000128,2008-09-17,MALE,RB,Ninguna,diestro,Bolivia,162.50,65.25,Tomás Pérez,V-15000128,tutor.qa.0128@ejemplo.com,+584121000128
+José Ángel,,Martínez,Vargas,QA-V-32000129,18/10/2009,M,Lateral Izquierdo,Pivote,Izquierdo,Argentina,"163,5",66.25,Samuel Martínez,V-15000129,tutor.qa.0129@ejemplo.com,+584121000129
+Sofía,,López,Martínez,QA-V-32000130,2010-11-19,mujer,LATERAL_IZQUIERDO,Mediocampista Central,LEFT,España,,,Emiliano López,V-15000130,tutor.qa.0130@ejemplo.com,+584121000130
+Nicolás,José,Ramírez,Torres,QA-V-32000131,2011-12-20,varón,LB,MEDIOCAMPISTA_CENTRAL,zurdo,,"165,5",68.25,Joaquín Ramírez,V-15000131,tutor.qa.0131@ejemplo.com,+584121000131
+Tomás,Antonio,Rivera,,QA-V-32000132,21/01/2012,,Mediocampista Defensivo,,Ambidiestro,Venezuela,166.50,69.25,Matías Rivera,V-15000132,tutor.qa.0132@ejemplo.com,+584121000132
+Samuel,Luis,Rojas,Pérez,QA-V-32000133,2013-02-22,Masculino,mediocampista defensivo,N/A,BOTH,venezolana,"167,5",70.25,Benjamín Rojas,V-15000133,tutor.qa.0133@ejemplo.com,+584121000133
+Emiliano,Miguel,Peña,Díaz,QA-V-32000134,2014-03-23,masculino,Pivote,Ninguna,,COL,168.50,71.25,Thiago Peña,V-15000134,tutor.qa.0134@ejemplo.com,+584121000134
+Valeria,Enrique,Medina,Morales,QA-V-32000135,24/04/2015,F,Mediocampista Central,10,Derecho,Colombia,"169,5",72.25,Leonardo Medina,V-15000135,tutor.qa.0135@ejemplo.com,+584121000135
+Matías,María,Pérez,,QA-V-32000136,2008-05-25,M,MEDIOCAMPISTA_CENTRAL,Extremo Derecho,RIGHT,chile,170.50,73.25,Adrián Pérez,V-15000136,tutor.qa.0136@ejemplo.com,+584121000136
+Benjamín,del Carmen,Martínez,González,QA-V-32000137,2009-06-26,hombre,Volante Mixto,EXTREMO_DERECHO,diestro,Perú,"171,5",74.25,Rafael Martínez,V-15000137,tutor.qa.0137@ejemplo.com,+584121000137
+Thiago,Alejandro,López,Flores,QA-V-32000138,27/07/2010,varón,Mediocampista Ofensivo,,Izquierdo,peruana,172.50,75.25,Iker López,V-15000138,tutor.qa.0138@ejemplo.com,+584121000138
+Leonardo,,Ramírez,Peña,QA-V-32000139,2011-08-28,,Enganche,N/A,LEFT,Ecuador,"173,5",76.25,Dylan Ramírez,V-15000139,tutor.qa.0139@ejemplo.com,+584121000139
+Paula,,Rivera,,QA-V-32000140,2012-09-01,FEMALE,10,Ninguna,zurdo,Bolivia,,,Alejandro Rivera,V-15000140,tutor.qa.0140@ejemplo.com,+584121000140
+Rafael,José,Rojas,Sánchez,QA-V-32000141,02/10/2013,masculino,Extremo Derecho,LW,Ambidiestro,Argentina,"175,5",43.25,Sebastián Rojas,V-15000141,tutor.qa.0141@ejemplo.com,+584121000141
+Iker,Antonio,Peña,Rojas,QA-V-32000142,2014-11-03,MALE,EXTREMO_DERECHO,Delantero Centro,BOTH,España,176.50,44.25,Mateo Peña,V-15000142,tutor.qa.0142@ejemplo.com,+584121000142
+Dylan,Luis,Medina,Herrera,QA-V-32000143,2015-12-04,M,RW,DELANTERO_CENTRO,,,"177,5",45.25,Santiago Medina,V-15000143,tutor.qa.0143@ejemplo.com,+584121000143
+Alejandro,Miguel,Pérez,,QA-V-32000144,05/01/2008,hombre,Extremo Izquierdo,,Derecho,Venezuela,178.50,46.25,Gabriel Pérez,V-15000144,tutor.qa.0144@ejemplo.com,+584121000144
+Camila,Enrique,Martínez,Rivera,QA-V-32000145,2009-02-06,FEMENINO,EXTREMO_IZQUIERDO,N/A,RIGHT,venezolana,"179,5",47.25,Daniel Martínez,V-15000145,tutor.qa.0145@ejemplo.com,+584121000145
+Mateo,María,López,Ríos,QA-V-32000146,2010-03-07,,LW,Ninguna,diestro,COL,180.50,48.25,Lucas López,V-15000146,tutor.qa.0146@ejemplo.com,+584121000146
+Santiago,del Carmen,Ramírez,Rodríguez,QA-V-32000147,08/04/2011,Masculino,Delantero Centro,arquero,Izquierdo,Colombia,"181,5",49.25,Diego Ramírez,V-15000147,tutor.qa.0147@ejemplo.com,+584121000147
+Gabriel,Alejandro,Rivera,,QA-V-32000148,2012-05-09,masculino,DELANTERO_CENTRO,Defensa Central,LEFT,chile,182.50,50.25,Carlos Rivera,V-15000148,tutor.qa.0148@ejemplo.com,+584121000148
+Daniel,,Rojas,Mendoza,QA-V-32000149,2013-06-10,MALE,9,DEFENSA_CENTRAL,zurdo,Perú,"183,5",51.25,José Ángel Rojas,V-15000149,tutor.qa.0149@ejemplo.com,+584121000149
+Antonella,,Peña,Suárez,QA-V-32000150,11/07/2014,Femenino,Portero,,Ambidiestro,peruana,,,Andrés Peña,V-15000150,tutor.qa.0150@ejemplo.com,+584121000150
+Diego,José,Medina,López,QA-V-32000151,2015-08-12,hombre,GK,N/A,BOTH,Ecuador,"185,5",53.25,Nicolás Medina,V-15000151,tutor.qa.0151@ejemplo.com,+584121000151
+Carlos,Antonio,Pérez,,QA-V-32000152,2008-09-13,varón,arquero,Ninguna,,Bolivia,148.50,54.25,Tomás Pérez,V-15000152,tutor.qa.0152@ejemplo.com,+584121000152
+José Ángel,Luis,Martínez,Vargas,QA-V-32000153,14/10/2009,,Defensa Central,RB,Derecho,Argentina,"149,5",55.25,Samuel Martínez,V-15000153,tutor.qa.0153@ejemplo.com,+584121000153
+Andrés,Miguel,López,Martínez,QA-V-32000154,2010-11-15,Masculino,DEFENSA_CENTRAL,Lateral Izquierdo,RIGHT,España,150.50,56.25,Emiliano López,V-15000154,tutor.qa.0154@ejemplo.com,+584121000154
+Daniela,Enrique,Ramírez,Torres,QA-V-32000155,2011-12-16,dama,Zaguero,LATERAL_IZQUIERDO,diestro,,"151,5",57.25,Joaquín Ramírez,V-15000155,tutor.qa.0155@ejemplo.com,+584121000155
+Tomás,María,Rivera,,QA-V-32000156,17/01/2012,MALE,Lateral Derecho,,Izquierdo,Venezuela,152.50,58.25,Matías Rivera,V-15000156,tutor.qa.0156@ejemplo.com,+584121000156
+Samuel,del Carmen,Rojas,Pérez,QA-V-32000157,2013-02-18,M,LATERAL_DERECHO,N/A,LEFT,venezolana,"153,5",59.25,Benjamín Rojas,V-15000157,tutor.qa.0157@ejemplo.com,+584121000157
+Emiliano,Alejandro,Peña,Díaz,QA-V-32000158,2014-03-19,hombre,RB,Ninguna,zurdo,COL,154.50,60.25,Thiago Peña,V-15000158,tutor.qa.0158@ejemplo.com,+584121000158
+Joaquín,,Medina,Morales,QA-V-32000159,20/04/2015,varón,Lateral Izquierdo,Pivote,Ambidiestro,Colombia,"155,5",61.25,Leonardo Medina,V-15000159,tutor.qa.0159@ejemplo.com,+584121000159
+Valentina,,Pérez,,QA-V-32000160,2008-05-21,mujer,LATERAL_IZQUIERDO,Mediocampista Central,BOTH,chile,,,Adrián Pérez,V-15000160,tutor.qa.0160@ejemplo.com,+584121000160
+Benjamín,José,Martínez,González,QA-V-32000161,2009-06-22,Masculino,LB,MEDIOCAMPISTA_CENTRAL,,Perú,"157,5",63.25,Rafael Martínez,V-15000161,tutor.qa.0161@ejemplo.com,+584121000161
+Thiago,Antonio,López,Flores,QA-V-32000162,23/07/2010,masculino,Mediocampista Defensivo,,Derecho,peruana,158.50,64.25,Iker López,V-15000162,tutor.qa.0162@ejemplo.com,+584121000162
+Leonardo,Luis,Ramírez,Peña,QA-V-32000163,2011-08-24,MALE,mediocampista defensivo,N/A,RIGHT,Ecuador,"159,5",65.25,Dylan Ramírez,V-15000163,tutor.qa.0163@ejemplo.com,+584121000163
+Adrián,Miguel,Rivera,,QA-V-32000164,2012-09-25,M,Pivote,Ninguna,diestro,Bolivia,160.50,66.25,Alejandro Rivera,V-15000164,tutor.qa.0164@ejemplo.com,+584121000164
+Lucía,Enrique,Rojas,Sánchez,QA-V-32000165,26/10/2013,F,Mediocampista Central,10,Izquierdo,Argentina,"161,5",67.25,Sebastián Rojas,V-15000165,tutor.qa.0165@ejemplo.com,+584121000165
+Iker,María,Peña,Rojas,QA-V-32000166,2014-11-27,varón,MEDIOCAMPISTA_CENTRAL,Extremo Derecho,LEFT,España,162.50,68.25,Mateo Peña,V-15000166,tutor.qa.0166@ejemplo.com,+584121000166
+Dylan,del Carmen,Medina,Herrera,QA-V-32000167,2015-12-28,,Volante Mixto,EXTREMO_DERECHO,zurdo,,"163,5",69.25,Santiago Medina,V-15000167,tutor.qa.0167@ejemplo.com,+584121000167
+Alejandro,Alejandro,Pérez,,QA-V-32000168,01/01/2008,Masculino,Mediocampista Ofensivo,,Ambidiestro,Venezuela,164.50,70.25,Gabriel Pérez,V-15000168,tutor.qa.0168@ejemplo.com,+584121000168
+Sebastián,,Martínez,Rivera,QA-V-32000169,2009-02-02,masculino,Enganche,N/A,BOTH,venezolana,"165,5",71.25,Daniel Martínez,V-15000169,tutor.qa.0169@ejemplo.com,+584121000169
+Gabriela,,López,Ríos,QA-V-32000170,2010-03-03,FEMALE,10,Ninguna,,COL,,,Lucas López,V-15000170,tutor.qa.0170@ejemplo.com,+584121000170
+Santiago,José,Ramírez,Rodríguez,QA-V-32000171,04/04/2011,M,Extremo Derecho,LW,Derecho,Colombia,"167,5",73.25,Diego Ramírez,V-15000171,tutor.qa.0171@ejemplo.com,+584121000171
+Gabriel,Antonio,Rivera,,QA-V-32000172,2012-05-05,hombre,EXTREMO_DERECHO,Delantero Centro,RIGHT,chile,168.50,74.25,Carlos Rivera,V-15000172,tutor.qa.0172@ejemplo.com,+584121000172
+Daniel,Luis,Rojas,Mendoza,QA-V-32000173,2013-06-06,varón,RW,DELANTERO_CENTRO,diestro,Perú,"169,5",75.25,José Ángel Rojas,V-15000173,tutor.qa.0173@ejemplo.com,+584121000173
+Lucas,Miguel,Peña,Suárez,QA-V-32000174,07/07/2014,,Extremo Izquierdo,,Izquierdo,peruana,170.50,76.25,Andrés Peña,V-15000174,tutor.qa.0174@ejemplo.com,+584121000174
+Natalia,Enrique,Medina,López,QA-V-32000175,2015-08-08,FEMENINO,EXTREMO_IZQUIERDO,N/A,LEFT,Ecuador,"171,5",42.25,Nicolás Medina,V-15000175,tutor.qa.0175@ejemplo.com,+584121000175
+Carlos,María,Pérez,,QA-V-32000176,2008-09-09,masculino,LW,Ninguna,zurdo,Bolivia,172.50,43.25,Tomás Pérez,V-15000176,tutor.qa.0176@ejemplo.com,+584121000176
+José Ángel,del Carmen,Martínez,Vargas,QA-V-32000177,10/10/2009,MALE,Delantero Centro,arquero,Ambidiestro,Argentina,"173,5",44.25,Samuel Martínez,V-15000177,tutor.qa.0177@ejemplo.com,+584121000177
+Andrés,Alejandro,López,Martínez,QA-V-32000178,2010-11-11,M,DELANTERO_CENTRO,Defensa Central,BOTH,España,174.50,45.25,Emiliano López,V-15000178,tutor.qa.0178@ejemplo.com,+584121000178
+Nicolás,,Ramírez,Torres,QA-V-32000179,2011-12-12,hombre,9,DEFENSA_CENTRAL,,,"175,5",46.25,Joaquín Ramírez,V-15000179,tutor.qa.0179@ejemplo.com,+584121000179
+Isabella,,Rivera,,QA-V-32000180,13/01/2012,Femenino,Portero,,Derecho,Venezuela,,,Matías Rivera,V-15000180,tutor.qa.0180@ejemplo.com,+584121000180
+Samuel,José,Rojas,Pérez,QA-V-32000181,2013-02-14,,GK,N/A,RIGHT,venezolana,"177,5",48.25,Benjamín Rojas,V-15000181,tutor.qa.0181@ejemplo.com,+584121000181
+Emiliano,Antonio,Peña,Díaz,QA-V-32000182,2014-03-15,Masculino,arquero,Ninguna,diestro,COL,178.50,49.25,Thiago Peña,V-15000182,tutor.qa.0182@ejemplo.com,+584121000182
+Joaquín,Luis,Medina,Morales,QA-V-32000183,16/04/2015,masculino,Defensa Central,RB,Izquierdo,Colombia,"179,5",50.25,Leonardo Medina,V-15000183,tutor.qa.0183@ejemplo.com,+584121000183
+Matías,Miguel,Pérez,,QA-V-32000184,2008-05-17,MALE,DEFENSA_CENTRAL,Lateral Izquierdo,LEFT,chile,180.50,51.25,Adrián Pérez,V-15000184,tutor.qa.0184@ejemplo.com,+584121000184
+Victoria,Enrique,Martínez,González,QA-V-32000185,2009-06-18,dama,Zaguero,LATERAL_IZQUIERDO,zurdo,Perú,"181,5",52.25,Rafael Martínez,V-15000185,tutor.qa.0185@ejemplo.com,+584121000185
+Thiago,María,López,Flores,QA-V-32000186,19/07/2010,hombre,Lateral Derecho,,Ambidiestro,peruana,182.50,53.25,Iker López,V-15000186,tutor.qa.0186@ejemplo.com,+584121000186
+Leonardo,del Carmen,Ramírez,Peña,QA-V-32000187,2011-08-20,varón,LATERAL_DERECHO,N/A,BOTH,Ecuador,"183,5",54.25,Dylan Ramírez,V-15000187,tutor.qa.0187@ejemplo.com,+584121000187
+Adrián,Alejandro,Rivera,,QA-V-32000188,2012-09-21,,RB,Ninguna,,Bolivia,184.50,55.25,Alejandro Rivera,V-15000188,tutor.qa.0188@ejemplo.com,+584121000188
+Rafael,,Rojas,Sánchez,QA-V-32000189,22/10/2013,Masculino,Lateral Izquierdo,Pivote,Derecho,Argentina,"185,5",56.25,Sebastián Rojas,V-15000189,tutor.qa.0189@ejemplo.com,+584121000189
+Andrea,,Peña,Rojas,QA-V-32000190,2014-11-23,mujer,LATERAL_IZQUIERDO,Mediocampista Central,RIGHT,España,,,Mateo Peña,V-15000190,tutor.qa.0190@ejemplo.com,+584121000190
+Dylan,José,Medina,Herrera,QA-V-32000191,2015-12-24,MALE,LB,MEDIOCAMPISTA_CENTRAL,diestro,,"149,5",58.25,Santiago Medina,V-15000191,tutor.qa.0191@ejemplo.com,+584121000191
+Alejandro,Antonio,Pérez,,QA-V-32000192,25/01/2008,M,Mediocampista Defensivo,,Izquierdo,Venezuela,150.50,59.25,Gabriel Pérez,V-15000192,tutor.qa.0192@ejemplo.com,+584121000192
+Sebastián,Luis,Martínez,Rivera,QA-V-32000193,2009-02-26,hombre,mediocampista defensivo,N/A,LEFT,venezolana,"151,5",60.25,Daniel Martínez,V-15000193,tutor.qa.0193@ejemplo.com,+584121000193
+Mateo,Miguel,López,Ríos,QA-V-32000194,2010-03-27,varón,Pivote,Ninguna,zurdo,COL,152.50,61.25,Lucas López,V-15000194,tutor.qa.0194@ejemplo.com,+584121000194
+María Fernanda,Enrique,Ramírez,Rodríguez,QA-V-32000195,28/04/2011,F,Mediocampista Central,10,Ambidiestro,Colombia,"153,5",62.25,Diego Ramírez,V-15000195,tutor.qa.0195@ejemplo.com,+584121000195
+Gabriel,María,Rivera,,QA-V-32000196,2012-05-01,Masculino,MEDIOCAMPISTA_CENTRAL,Extremo Derecho,BOTH,chile,154.50,63.25,Carlos Rivera,V-15000196,tutor.qa.0196@ejemplo.com,+584121000196
+Daniel,del Carmen,Rojas,Mendoza,QA-V-32000197,2013-06-02,masculino,Volante Mixto,EXTREMO_DERECHO,,Perú,"155,5",64.25,José Ángel Rojas,V-15000197,tutor.qa.0197@ejemplo.com,+584121000197
+Lucas,Alejandro,Peña,Suárez,QA-V-32000198,03/07/2014,MALE,Mediocampista Ofensivo,,Derecho,peruana,156.50,65.25,Andrés Peña,V-15000198,tutor.qa.0198@ejemplo.com,+584121000198
+Diego,,Medina,López,QA-V-32000199,2015-08-04,M,Enganche,N/A,RIGHT,Ecuador,"157,5",66.25,Nicolás Medina,V-15000199,tutor.qa.0199@ejemplo.com,+584121000199
+Mariana,,Pérez,,QA-V-32000200,2008-09-05,FEMALE,10,Ninguna,diestro,Bolivia,,,Tomás Pérez,V-15000200,tutor.qa.0200@ejemplo.com,+584121000200
+José Ángel,José,Martínez,Vargas,QA-V-32000201,06/10/2009,varón,Extremo Derecho,LW,Izquierdo,Argentina,"159,5",68.25,Samuel Martínez,V-15000201,tutor.qa.0201@ejemplo.com,+584121000201
+Andrés,Antonio,López,Martínez,QA-V-32000202,2010-11-07,,EXTREMO_DERECHO,Delantero Centro,LEFT,España,160.50,69.25,Emiliano López,V-15000202,tutor.qa.0202@ejemplo.com,+584121000202
+Nicolás,Luis,Ramírez,Torres,QA-V-32000203,2011-12-08,Masculino,RW,DELANTERO_CENTRO,zurdo,,"161,5",70.25,Joaquín Ramírez,V-15000203,tutor.qa.0203@ejemplo.com,+584121000203
+Tomás,Miguel,Rivera,,QA-V-32000204,09/01/2012,masculino,Extremo Izquierdo,,Ambidiestro,Venezuela,162.50,71.25,Matías Rivera,V-15000204,tutor.qa.0204@ejemplo.com,+584121000204
+Elena,Enrique,Rojas,Pérez,QA-V-32000205,2013-02-10,FEMENINO,EXTREMO_IZQUIERDO,N/A,BOTH,venezolana,"163,5",72.25,Benjamín Rojas,V-15000205,tutor.qa.0205@ejemplo.com,+584121000205
+Emiliano,María,Peña,Díaz,QA-V-32000206,2014-03-11,M,LW,Ninguna,,COL,164.50,73.25,Thiago Peña,V-15000206,tutor.qa.0206@ejemplo.com,+584121000206
+Joaquín,del Carmen,Medina,Morales,QA-V-32000207,12/04/2015,hombre,Delantero Centro,arquero,Derecho,Colombia,"165,5",74.25,Leonardo Medina,V-15000207,tutor.qa.0207@ejemplo.com,+584121000207
+Matías,Alejandro,Pérez,,QA-V-32000208,2008-05-13,varón,DELANTERO_CENTRO,Defensa Central,RIGHT,chile,166.50,75.25,Adrián Pérez,V-15000208,tutor.qa.0208@ejemplo.com,+584121000208
+Benjamín,,Martínez,González,QA-V-32000209,2009-06-14,,9,DEFENSA_CENTRAL,diestro,Perú,"167,5",76.25,Rafael Martínez,V-15000209,tutor.qa.0209@ejemplo.com,+584121000209
+Sofía,,López,Flores,QA-V-32000210,15/07/2010,Femenino,Portero,,Izquierdo,peruana,,,Iker López,V-15000210,tutor.qa.0210@ejemplo.com,+584121000210
+Leonardo,José,Ramírez,Peña,QA-V-32000211,2011-08-16,masculino,GK,N/A,LEFT,Ecuador,"169,5",43.25,Dylan Ramírez,V-15000211,tutor.qa.0211@ejemplo.com,+584121000211
+Adrián,Antonio,Rivera,,QA-V-32000212,2012-09-17,MALE,arquero,Ninguna,zurdo,Bolivia,170.50,44.25,Alejandro Rivera,V-15000212,tutor.qa.0212@ejemplo.com,+584121000212
+Rafael,Luis,Rojas,Sánchez,QA-V-32000213,18/10/2013,M,Defensa Central,RB,Ambidiestro,Argentina,"171,5",45.25,Sebastián Rojas,V-15000213,tutor.qa.0213@ejemplo.com,+584121000213
+Iker,Miguel,Peña,Rojas,QA-V-32000214,2014-11-19,hombre,DEFENSA_CENTRAL,Lateral Izquierdo,BOTH,España,172.50,46.25,Mateo Peña,V-15000214,tutor.qa.0214@ejemplo.com,+584121000214
+Valeria,Enrique,Medina,Herrera,QA-V-32000215,2015-12-20,dama,Zaguero,LATERAL_IZQUIERDO,,,"173,5",47.25,Santiago Medina,V-15000215,tutor.qa.0215@ejemplo.com,+584121000215
+Alejandro,María,Pérez,,QA-V-32000216,21/01/2008,,Lateral Derecho,,Derecho,Venezuela,174.50,48.25,Gabriel Pérez,V-15000216,tutor.qa.0216@ejemplo.com,+584121000216
+Sebastián,del Carmen,Martínez,Rivera,QA-V-32000217,2009-02-22,Masculino,LATERAL_DERECHO,N/A,RIGHT,venezolana,"175,5",49.25,Daniel Martínez,V-15000217,tutor.qa.0217@ejemplo.com,+584121000217
+Mateo,Alejandro,López,Ríos,QA-V-32000218,2010-03-23,masculino,RB,Ninguna,diestro,COL,176.50,50.25,Lucas López,V-15000218,tutor.qa.0218@ejemplo.com,+584121000218
+Santiago,,Ramírez,Rodríguez,QA-V-32000219,24/04/2011,MALE,Lateral Izquierdo,Pivote,Izquierdo,Colombia,"177,5",51.25,Diego Ramírez,V-15000219,tutor.qa.0219@ejemplo.com,+584121000219
+Paula,,Rivera,,QA-V-32000220,2012-05-25,mujer,LATERAL_IZQUIERDO,Mediocampista Central,LEFT,chile,,,Carlos Rivera,V-15000220,tutor.qa.0220@ejemplo.com,+584121000220
+Daniel,José,Rojas,Mendoza,QA-V-32000221,2013-06-26,hombre,LB,MEDIOCAMPISTA_CENTRAL,zurdo,Perú,"179,5",53.25,José Ángel Rojas,V-15000221,tutor.qa.0221@ejemplo.com,+584121000221
+Lucas,Antonio,Peña,Suárez,QA-V-32000222,27/07/2014,varón,Mediocampista Defensivo,,Ambidiestro,peruana,180.50,54.25,Andrés Peña,V-15000222,tutor.qa.0222@ejemplo.com,+584121000222
+Diego,Luis,Medina,López,QA-V-32000223,2015-08-28,,mediocampista defensivo,N/A,BOTH,Ecuador,"181,5",55.25,Nicolás Medina,V-15000223,tutor.qa.0223@ejemplo.com,+584121000223
+Carlos,Miguel,Pérez,,QA-V-32000224,2008-09-01,Masculino,Pivote,Ninguna,,Bolivia,182.50,56.25,Tomás Pérez,V-15000224,tutor.qa.0224@ejemplo.com,+584121000224
+Camila,Enrique,Martínez,Vargas,QA-V-32000225,02/10/2009,F,Mediocampista Central,10,Derecho,Argentina,"183,5",57.25,Samuel Martínez,V-15000225,tutor.qa.0225@ejemplo.com,+584121000225
+Andrés,María,López,Martínez,QA-V-32000226,2010-11-03,MALE,MEDIOCAMPISTA_CENTRAL,Extremo Derecho,RIGHT,España,184.50,58.25,Emiliano López,V-15000226,tutor.qa.0226@ejemplo.com,+584121000226
+Nicolás,del Carmen,Ramírez,Torres,QA-V-32000227,2011-12-04,M,Volante Mixto,EXTREMO_DERECHO,diestro,,"185,5",59.25,Joaquín Ramírez,V-15000227,tutor.qa.0227@ejemplo.com,+584121000227
+Tomás,Alejandro,Rivera,,QA-V-32000228,05/01/2012,hombre,Mediocampista Ofensivo,,Izquierdo,Venezuela,148.50,60.25,Matías Rivera,V-15000228,tutor.qa.0228@ejemplo.com,+584121000228
+Samuel,,Rojas,Pérez,QA-V-32000229,2013-02-06,varón,Enganche,N/A,LEFT,venezolana,"149,5",61.25,Benjamín Rojas,V-15000229,tutor.qa.0229@ejemplo.com,+584121000229
+Antonella,,Peña,Díaz,QA-V-32000230,2014-03-07,FEMALE,10,Ninguna,zurdo,COL,,,Thiago Peña,V-15000230,tutor.qa.0230@ejemplo.com,+584121000230
+Joaquín,José,Medina,Morales,QA-V-32000231,08/04/2015,Masculino,Extremo Derecho,LW,Ambidiestro,Colombia,"151,5",63.25,Leonardo Medina,V-15000231,tutor.qa.0231@ejemplo.com,+584121000231
+Matías,Antonio,Pérez,,QA-V-32000232,2008-05-09,masculino,EXTREMO_DERECHO,Delantero Centro,BOTH,chile,152.50,64.25,Adrián Pérez,V-15000232,tutor.qa.0232@ejemplo.com,+584121000232
+Benjamín,Luis,Martínez,González,QA-V-32000233,2009-06-10,MALE,RW,DELANTERO_CENTRO,,Perú,"153,5",65.25,Rafael Martínez,V-15000233,tutor.qa.0233@ejemplo.com,+584121000233
+Thiago,Miguel,López,Flores,QA-V-32000234,11/07/2010,M,Extremo Izquierdo,,Derecho,peruana,154.50,66.25,Iker López,V-15000234,tutor.qa.0234@ejemplo.com,+584121000234
+Daniela,Enrique,Ramírez,Peña,QA-V-32000235,2011-08-12,FEMENINO,EXTREMO_IZQUIERDO,N/A,RIGHT,Ecuador,"155,5",67.25,Dylan Ramírez,V-15000235,tutor.qa.0235@ejemplo.com,+584121000235
+Adrián,María,Rivera,,QA-V-32000236,2012-09-13,varón,LW,Ninguna,diestro,Bolivia,156.50,68.25,Alejandro Rivera,V-15000236,tutor.qa.0236@ejemplo.com,+584121000236
+Rafael,del Carmen,Rojas,Sánchez,QA-V-32000237,14/10/2013,,Delantero Centro,arquero,Izquierdo,Argentina,"157,5",69.25,Sebastián Rojas,V-15000237,tutor.qa.0237@ejemplo.com,+584121000237
+Iker,Alejandro,Peña,Rojas,QA-V-32000238,2014-11-15,Masculino,DELANTERO_CENTRO,Defensa Central,LEFT,España,158.50,70.25,Mateo Peña,V-15000238,tutor.qa.0238@ejemplo.com,+584121000238
+Dylan,,Medina,Herrera,QA-V-32000239,2015-12-16,masculino,9,DEFENSA_CENTRAL,zurdo,,"159,5",71.25,Santiago Medina,V-15000239,tutor.qa.0239@ejemplo.com,+584121000239
+Valentina,,Pérez,,QA-V-32000240,17/01/2008,Femenino,Portero,,Ambidiestro,Venezuela,,,Gabriel Pérez,V-15000240,tutor.qa.0240@ejemplo.com,+584121000240
+Sebastián,José,Martínez,Rivera,QA-V-32000241,2009-02-18,M,GK,N/A,BOTH,venezolana,"161,5",73.25,Daniel Martínez,V-15000241,tutor.qa.0241@ejemplo.com,+584121000241
+Mateo,Antonio,López,Ríos,QA-V-32000242,2010-03-19,hombre,arquero,Ninguna,,COL,162.50,74.25,Lucas López,V-15000242,tutor.qa.0242@ejemplo.com,+584121000242
+Santiago,Luis,Ramírez,Rodríguez,QA-V-32000243,20/04/2011,varón,Defensa Central,RB,Derecho,Colombia,"163,5",75.25,Diego Ramírez,V-15000243,tutor.qa.0243@ejemplo.com,+584121000243
+Gabriel,Miguel,Rivera,,QA-V-32000244,2012-05-21,,DEFENSA_CENTRAL,Lateral Izquierdo,RIGHT,chile,164.50,76.25,Carlos Rivera,V-15000244,tutor.qa.0244@ejemplo.com,+584121000244
+Lucía,Enrique,Rojas,Mendoza,QA-V-32000245,2013-06-22,dama,Zaguero,LATERAL_IZQUIERDO,diestro,Perú,"165,5",42.25,José Ángel Rojas,V-15000245,tutor.qa.0245@ejemplo.com,+584121000245
+Lucas,María,Peña,Suárez,QA-V-32000246,23/07/2014,masculino,Lateral Derecho,,Izquierdo,peruana,166.50,43.25,Andrés Peña,V-15000246,tutor.qa.0246@ejemplo.com,+584121000246
+Diego,del Carmen,Medina,López,QA-V-32000247,2015-08-24,MALE,LATERAL_DERECHO,N/A,LEFT,Ecuador,"167,5",44.25,Nicolás Medina,V-15000247,tutor.qa.0247@ejemplo.com,+584121000247
+Carlos,Alejandro,Pérez,,QA-V-32000248,2008-09-25,M,RB,Ninguna,zurdo,Bolivia,168.50,45.25,Tomás Pérez,V-15000248,tutor.qa.0248@ejemplo.com,+584121000248
+José Ángel,,Martínez,Vargas,QA-V-32000249,26/10/2009,hombre,Lateral Izquierdo,Pivote,Ambidiestro,Argentina,"169,5",46.25,Samuel Martínez,V-15000249,tutor.qa.0249@ejemplo.com,+584121000249
+Gabriela,,López,Martínez,QA-V-32000250,2010-11-27,mujer,LATERAL_IZQUIERDO,Mediocampista Central,BOTH,España,,,Emiliano López,V-15000250,tutor.qa.0250@ejemplo.com,+584121000250
+Sofía,Elena,Martínez,Rojas,QA-M-252,2010-03-11,Femenino,Delantero Centro,Extremo Derecho,Derecho,Venezuela,163.00,54.00,Carmen Elena Martínez,V-12001001,familia.martinez.multi@ejemplo.com,+584141001001
+Tomás,,Martínez,Rojas,QA-M-253,2012-07-19,Masculino,Mediocampista Central,N/A,Izquierdo,Venezuela,156.50,48.00,Carmen Elena Martínez,V-12001001,familia.martinez.multi@ejemplo.com,+584141001001
+Lucas,Andrés,Martínez,Rojas,QA-M-254,2014-11-04,Masculino,Portero,,Ambidiestro,Venezuela,145.00,40.00,Carmen Elena Martínez,V-12001001,familia.martinez.multi@ejemplo.com,+584141001001
+Nicolás,,Rodríguez,Paz,QA-M-255,2009-01-22,MALE,Defensa Central,Lateral Derecho,RIGHT,Colombia,178.00,70.00,Luis Alberto Rodríguez,V-11002002,familia.rodriguez.multi@ejemplo.com,+584142002002
+Camila,Lucía,Rodríguez,Paz,QA-M-256,2011-05-14,FEMALE,Lateral Izquierdo,,LEFT,Colombia,161.00,52.00,Luis Alberto Rodríguez,V-11002002,familia.rodriguez.multi@ejemplo.com,+584142002002
+Emiliano,,Rodríguez,Paz,QA-M-257,2013-09-08,M,Mediocampista Ofensivo,Extremo Izquierdo,Derecho,Colombia,152.00,45.00,Luis Alberto Rodríguez,V-11002002,familia.rodriguez.multi@ejemplo.com,+584142002002
+Valeria,,Rodríguez,Paz,QA-M-258,2015-02-27,F,Delantero Centro,,Ambidiestro,Colombia,141.00,37.00,Luis Alberto Rodríguez,V-11002002,familia.rodriguez.multi@ejemplo.com,+584142002002
+Diego,,Sánchez,Vargas,QA-M-259,2011-08-22,Masculino,Extremo Derecho,Delantero Centro,Derecho,Venezuela,165.00,55.00,Patricia Vargas de Sánchez,V-13503003,gemelos.sanchez.multi@ejemplo.com,+584163003003
+Mateo,,Sánchez,Vargas,QA-M-260,2011-08-22,Masculino,Extremo Izquierdo,Mediocampista Ofensivo,Izquierdo,Venezuela,166.00,56.00,Patricia Vargas de Sánchez,V-13503003,gemelos.sanchez.multi@ejemplo.com,+584163003003
+Adrián,,Méndez,Gil,QA-M-261,10/04/2009,Masculino,Portero,,Derecho,Chile,181.00,73.00,José Gregorio Méndez,V-10904004,academia.familia.multi@ejemplo.com,+584244004004
+Daniel,,Méndez,Gil,QA-M-262,15/06/2010,Masculino,Defensa Central,,Derecho,Chile,174.00,66.00,José Gregorio Méndez,V-10904004,academia.familia.multi@ejemplo.com,+584244004004
+Gabriel,,Méndez,Gil,QA-M-263,20/08/2011,Masculino,Mediocampista Defensivo,Defensa Central,Ambidiestro,Chile,168.00,59.00,José Gregorio Méndez,V-10904004,academia.familia.multi@ejemplo.com,+584244004004
+Isabella,,Méndez,Gil,QA-M-264,25/10/2012,Femenino,Mediocampista Central,,Izquierdo,Chile,158.00,49.00,José Gregorio Méndez,V-10904004,academia.familia.multi@ejemplo.com,+584244004004
+Samuel,,Méndez,Gil,QA-M-265,30/12/2014,Masculino,Delantero Centro,,Derecho,Chile,146.00,41.00,José Gregorio Méndez,V-10904004,academia.familia.multi@ejemplo.com,+584244004004
+Sebastián,Andrés,Gómez,Rivas,QA-M-266,2010-05-19,Masculino,Mediocampista Central,,Derecho,Venezuela,169.00,60.00,Tutor Secundario,V-14999888,tutor.secondary.1793102532890@talentus.app,+584149998877
+Mariana,José,Gómez,Rivas,QA-M-267,2012-09-03,Femenino,Extremo Derecho,,Izquierdo,Venezuela,157.00,48.00,Tutor Secundario,V-14999888,tutor.secondary.1793102532890@talentus.app,+584149998877
+Joaquín,,Gómez,Rivas,QA-M-268,2014-01-17,Masculino,Lateral Derecho,,Derecho,Venezuela,147.00,41.00,Tutor Secundario,V-14999888,tutor.secondary.1793102532890@talentus.app,+584149998877
+Andrés,,Castillo,Vera,QA-M-269,2010-07-07,Masculino,Defensa Central,,Derecho,Perú,171.00,62.00,Héctor Castillo,V-12777001,familia.castillo.multi@ejemplo.com,+584127770001
+Lucía,,Castillo,Vera,QA-M-270,2011-08-08,Femenino,Mediocampista Ofensivo,,Ambidiestro,Perú,160.00,51.00,Héctor Castillo,V-12777001,FAMILIA.CASTILLO.MULTI@EJEMPLO.COM,+584127770001
+Thiago,,Castillo,Vera,QA-M-271,2013-09-09,Masculino,Delantero Centro,,Izquierdo,Perú,153.00,46.00,Héctor Castillo,V-12777001,"  familia.castillo.multi@ejemplo.com  ",+584127770001
+Elena,,Castillo,Vera,QA-M-272,2015-10-10,Femenino,Portero,,Derecho,Perú,142.00,38.00,Héctor Castillo,V-12777001,Familia.Castillo.Multi@Ejemplo.Com,+584127770001
+Matías,,López,Cruz,QA-M-273,2010-12-01,Masculino,Lateral Izquierdo,,Izquierdo,Ecuador,170.00,61.00,Ana María Cruz,V-13888001,hermanos.lopez.multi@ejemplo.com,+584148880001
+Victoria,,López,Cruz,QA-M-274,2013-03-18,Femenino,Mediocampista Central,,Derecho,Ecuador,154.00,45.00,Ana María Cruz,V-13888001,hermanos.lopez.multi@ejemplo.com,+584148880001
+Benjamín,,Díaz,Núñez,QA-M-275,2009-06-21,Masculino,Mediocampista Defensivo,,Derecho,Bolivia,176.00,68.00,Ricardo Díaz,V-11999002,hermanos.diaz.multi@ejemplo.com,+584149990002
+Antonella,,Díaz,Núñez,QA-M-276,2012-11-29,Femenino,Extremo Izquierdo,,LEFT,Bolivia,156.00,47.00,Ricardo Díaz,V-11999002,hermanos.diaz.multi@ejemplo.com,+584149990002
+Juan,Carlos,Pérez,Gómez,V-31234567,2010-05-14,Masculino,Delantero Centro,Extremo Izquierdo,Derecho,Venezuela,165.50,58.00,Carlos Pérez,V-14234567,dup.db.1@ejemplo.com,+584121234567
+Mateo,,Pérez,,PN-2011-8899,2011-04-18,Masculino,Mediocampista Central,,Derecho,Venezuela,162.00,53.00,Tutor Mateo Dup,V-14888999,dup.db.2@ejemplo.com,+584128889900
+Juan,,Pérez,Gómez,"  V-31234567  ",2010-05-14,Masculino,Delantero Centro,,Derecho,Venezuela,165.50,58.00,Carlos Pérez,V-14234567,dup.db.3@ejemplo.com,+584121234567
+Leonardo,,Duplicado,Lote,QA-DUP-LOTE-001,2011-05-05,Masculino,Defensa Central,,Derecho,Venezuela,167.00,57.00,Tutor Lote Uno,V-16111001,dup.lote.1@ejemplo.com,+584121110001
+Leonardo,,Duplicado,Lote,QA-DUP-LOTE-001,2011-05-05,Masculino,Defensa Central,,Derecho,Venezuela,167.00,57.00,Tutor Lote Uno,V-16111001,dup.lote.1@ejemplo.com,+584121110001
+Otro,,Atleta,Clon,QA-DUP-LOTE-001,2012-01-10,Masculino,Portero,,Izquierdo,Venezuela,164.00,54.00,Tutor Lote Dos,V-16111002,dup.lote.2@ejemplo.com,+584121110002
+"",Carlos,FaltaNombre,Test,QA-ERR-283,2011-02-10,Masculino,Portero,,Derecho,Venezuela,160.00,52.00,Tutor Oblig 1,V-17000283,err.req.283@ejemplo.com,+584120000283
+Carlos,,,Test,QA-ERR-284,2011-02-11,Masculino,Portero,,Derecho,Venezuela,160.00,52.00,Tutor Oblig 2,V-17000284,err.req.284@ejemplo.com,+584120000284
+FaltaFecha,,Ramos,,QA-ERR-285,,Masculino,Defensa Central,,Derecho,Venezuela,162.00,54.00,Tutor Oblig 3,V-17000285,err.req.285@ejemplo.com,+584120000285
+FaltaPosicion,,Ramos,,QA-ERR-286,2011-03-12,Masculino,,,Derecho,Venezuela,162.00,54.00,Tutor Oblig 4,V-17000286,err.req.286@ejemplo.com,+584120000286
+PosNinguna,,Ramos,,QA-ERR-287,2011-03-13,Masculino,Ninguna,,Derecho,Venezuela,162.00,54.00,Tutor Oblig 5,V-17000287,err.req.287@ejemplo.com,+584120000287
+PosNA,,Ramos,,QA-ERR-288,2011-03-14,Masculino,N/A,,Derecho,Venezuela,162.00,54.00,Tutor Oblig 6,V-17000288,err.req.288@ejemplo.com,+584120000288
+FaltaNombreTutor,,Ramos,,QA-ERR-289,2011-03-15,Masculino,Delantero Centro,,Derecho,Venezuela,162.00,54.00,,V-17000289,err.req.289@ejemplo.com,+584120000289
+FaltaCorreoTutor,,Ramos,,QA-ERR-290,2011-03-16,Masculino,Delantero Centro,,Derecho,Venezuela,162.00,54.00,Tutor Oblig 8,V-17000290,,+584120000290
+"   ",,"   ",,QA-ERR-291,2011-03-17,Masculino,Portero,,Derecho,Venezuela,162.00,54.00,Tutor Espacios,V-17000291,"   ",+584120000291
+"",SoloSegundo,,,,,,,,,,,,,,,+584120000292
+FechaGuiones,,Error,,QA-BAD-293,14-05-2010,Masculino,Portero,,Derecho,Venezuela,165,55,Tutor Bad 1,V-18000293,err.bad.293@ejemplo.com,+584120000293
+FechaBarrasInv,,Error,,QA-BAD-294,2010/05/14,Masculino,Portero,,Derecho,Venezuela,165,55,Tutor Bad 2,V-18000294,err.bad.294@ejemplo.com,+584120000294
+FechaImposible,,Error,,QA-BAD-295,2010-02-30,Masculino,Defensa Central,,Derecho,Venezuela,165,55,Tutor Bad 3,V-18000295,err.bad.295@ejemplo.com,+584120000295
+FechaTexto,,Error,,QA-BAD-296,15 de mayo de 2011,Masculino,Delantero Centro,,Derecho,Venezuela,165,55,Tutor Bad 4,V-18000296,err.bad.296@ejemplo.com,+584120000296
+GeneroNoId,,Error,,QA-BAD-297,2011-04-10,No Binario,Portero,,Derecho,Venezuela,165,55,Tutor Bad 5,V-18000297,err.bad.297@ejemplo.com,+584120000297
+GeneroNumero,,Error,,QA-BAD-298,2011-04-11,99,Portero,,Derecho,Venezuela,165,55,Tutor Bad 6,V-18000298,err.bad.298@ejemplo.com,+584120000298
+PosNoId,,Error,,QA-BAD-299,2011-04-12,Masculino,Aguatero,,Derecho,Venezuela,165,55,Tutor Bad 7,V-18000299,err.bad.299@ejemplo.com,+584120000299
+PosOtroDeporte,,Error,,QA-BAD-300,2011-04-13,Masculino,Quarterback,,Derecho,Venezuela,165,55,Tutor Bad 8,V-18000300,err.bad.300@ejemplo.com,+584120000300
+PosSecNoId,,Error,,QA-BAD-301,2011-04-14,Masculino,Defensa Central,Libero Volador,Derecho,Venezuela,165,55,Tutor Bad 9,V-18000301,err.bad.301@ejemplo.com,+584120000301
+PieNoId,,Error,,QA-BAD-302,2011-04-15,Masculino,Mediocampista Central,,Centro,Venezuela,165,55,Tutor Bad 10,V-18000302,err.bad.302@ejemplo.com,+584120000302
+PieNinguno,,Error,,QA-BAD-303,2011-04-16,Femenino,Extremo Derecho,,Ninguno,Venezuela,165,55,Tutor Bad 11,V-18000303,err.bad.303@ejemplo.com,+584120000303
+NacDigitos,,Error,,QA-BAD-304,2011-04-17,Masculino,Delantero Centro,,Derecho,Venezuela123,165,55,Tutor Bad 12,V-18000304,err.bad.304@ejemplo.com,+584120000304
+NacSoloNum,,Error,,QA-BAD-305,2011-04-18,Masculino,Delantero Centro,,Derecho,5800,165,55,Tutor Bad 13,V-18000305,err.bad.305@ejemplo.com,+584120000305
+MultiErrores,,Catalogo,,QA-BAD-306,32/13/2010,Otro,Suplente,Recogepelotas,Ambos Pies,País99,165,55,Tutor Bad 14,V-18000306,err.bad.306@ejemplo.com,+584120000306
+MedidasTexto,,ParseNull,,QA-BAD-307,2011-04-19,Masculino,Portero,,Derecho,Venezuela,1.75 metros,sesenta kg,Tutor Bad 15,V-18000307,err.bad.307@ejemplo.com,+584120000307
+EmailSinArroba,,Malformado,,QA-BAD-308,2011-04-20,Masculino,Defensa Central,,Derecho,Venezuela,168.00,58.00,Tutor Bad 16,V-18000308,correo-invalido-sin-arroba,+584120000308
+NombreMuyLargo_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA,,Overflow,,QA-EXC-309,2011-06-01,Masculino,Delantero Centro,,Derecho,Venezuela,165,55,Tutor Exc 1,V-19000309,err.exc.309@ejemplo.com,+584120000309
+ApellidoLargo,,ApellidoMuyLargo_BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB,,QA-EXC-310,2011-06-02,Masculino,Portero,,Derecho,Venezuela,165,55,Tutor Exc 2,V-19000310,err.exc.310@ejemplo.com,+584120000310
+CedulaLarga,,Overflow,,DOC-9999999999999999999999999999999999999999999999999999999999999999999999,2011-06-03,Masculino,Defensa Central,,Derecho,Venezuela,165,55,Tutor Exc 3,V-19000311,err.exc.311@ejemplo.com,+584120000311
+TutorLargo,,Overflow,,QA-EXC-312,2011-06-04,Masculino,Lateral Derecho,,Derecho,Venezuela,165,55,TutorConNombreExtremadamenteLargo_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX,V-19000312,err.exc.312@ejemplo.com,+584120000312
+TelefonoLargo,,Overflow,,QA-EXC-313,2011-06-05,Masculino,Lateral Izquierdo,,Izquierdo,Venezuela,165,55,Tutor Exc 5,V-19000313,err.exc.313@ejemplo.com,+58444444444444444444444444444444444444444444444
+EmailLargo,,Overflow,,QA-EXC-314,2011-06-06,Femenino,Mediocampista Central,,Derecho,Venezuela,165,55,Tutor Exc 6,V-19000314,tutor.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx@ejemplo.com,+584120000314
+NacLarga,,Overflow,,QA-EXC-315,2011-06-07,Masculino,Extremo Derecho,,Derecho,RepublicaBolivarianaDeNombreExtremadamenteLargoSinDigitos,165,55,Tutor Exc 7,V-19000315,err.exc.315@ejemplo.com,+584120000315
+SlugNombre_NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN,,SlugApellido_PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP,,QA-EXC-316,2011-06-08,Masculino,Delantero Centro,,Derecho,Venezuela,165,55,Tutor Exc 8,V-19000316,err.exc.316@ejemplo.com,+584120000316
+AlturaOverflow,,Numeric,,QA-EXC-317,2011-06-09,Masculino,Portero,,Derecho,Venezuela,12345.67,60.00,Tutor Exc 9,V-19000317,err.exc.317@ejemplo.com,+584120000317
+PesoOverflow,,Numeric,,QA-EXC-318,2011-06-10,Masculino,Defensa Central,,Derecho,Venezuela,172.00,1500.00,Tutor Exc 10,V-19000318,err.exc.318@ejemplo.com,+584120000318
+MedidasNegativas,,Edge,,QA-EXC-319,2011-06-11,Masculino,Mediocampista Ofensivo,,Ambidiestro,Venezuela,-170.50,-55.00,Tutor Exc 11,V-19000319,err.exc.319@ejemplo.com,+584120000319
+FechaFutura,=CMD|' /C calc'!A0,Inyeccion,,QA-EXC-320,2035-06-15,Masculino,Delantero Centro,,Derecho,Venezuela,165.00,55.00,Tutor Exc 12,V-19000320,err.exc.320@ejemplo.com,+584120000320
+"Carlos ""El Rayo"", Jr.",,Pérez ⚽🔥,O'Connor,QA-EXC-321,2012-07-12,Masculino,Extremo Izquierdo,,Izquierdo,Venezuela,161.20,50.40,"Tutor Especial ""Comas, y Comillas""",V-19000321,err.exc.321@ejemplo.com,+584120000321
