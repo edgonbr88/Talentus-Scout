@@ -137,6 +137,7 @@ El `trello_planner` **DEBE** leer y cruzar la información de la tarjeta con los
 
 * **Entrada:** Lee el archivo generado en `plans/<TS-ID>-plan.md`.
 * **Acción:** Ejecuta el checklist paso a paso, escribe el código, corre las pruebas y valida la compilación.
+  * **Directiva Obligatoria de Base de Datos (Migraciones y Neon):** Queda terminantemente **PROHIBIDO ejecutar migraciones directamente en la base de datos productiva de NEON**. Todas las migraciones DDL/dbmate deben ejecutarse y validarse exclusivamente en el entorno de desarrollo local (PostgreSQL local).
   * **Directiva Obligatoria de Backend (Spring Boot 3 / Lombok):** En todas las entidades JPA, DTOs y modelos Java, el agente **DEBE** aplicar Project Lombok (`@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsConstructor`, `@Builder`, `@Builder.Default`). Está prohibido escribir constructores manuales extensos o métodos accesores/mutadores redundantes; la instanciación de objetos en servicios, controladores y pruebas debe realizarse mediante el patrón Builder (`Entity.builder()...build()`).
   * **Directiva Obligatoria de Frontend (Angular 18+ / UI):** Al construir componentes de Frontend, vistas o interfaces, el agente **DEBE** activar y aplicar estrictamente las directrices de diseño de [fe-desing.md](file:///home/edgar/Talentus%20Scout/fe-desing.md) (skill `frontend-design`). Debe huir de templates genéricos y clichés de IA (evitar el kit SaaS de tarjetas redondeadas idénticas con sombra suave, acentos aislados de una palabra, fondos crema-terracota no autorizados), aplicando diseño intencional y contemporáneo adaptado al fútbol juvenil de Talentus Scout (Bento Grid, accesibilidad, copywriting humano y tokens deliberados).
   * **Directiva Obligatoria de Separación de Plantillas Frontend (HTML y TS):** En todos los componentes de Angular 18+, el agente **DEBE** separar obligatoriamente la plantilla HTML en su respectivo archivo `.component.html` y vincularla en el componente TypeScript mediante `templateUrl: './<nombre>.component.html'`. Queda terminantemente prohibido utilizar plantillas inline (`template: \`...\``) dentro del archivo `.component.ts`, garantizando mantenibilidad, modularidad y orden en el código fuente.
@@ -146,6 +147,11 @@ El `trello_planner` **DEBE** leer y cruzar la información de la tarjeta con los
     3. Guía de verificación manual paso a paso (comandos `cURL` reproducibles con payloads, tokens y respuestas esperadas, o interacciones de UI).
     4. Matriz de validación de Criterios de Aceptación (DoD).
     5. Casos borde y consideraciones de seguridad/reglas de negocio validadas.
-* **Salida:** Cuando todos los Criterios de Aceptación están cumplidos, las pruebas pasan y el archivo en `test/` está generado, mueve la tarjeta en Trello de `in development` a `in testing` y deja un comentario en la tarjeta con el resumen de la implementación y enlace/referencia al plan de pruebas.
+  * **Directiva Obligatoria de Ramas Git y Pull Requests (GitHub):** Al finalizar la implementación, pruebas y generación del plan de pruebas:
+    1. Crear una rama a partir de `main` / `master` (convención `feature/<TS-ID>-<slug>`).
+    2. Confirmar (`git commit`) y subir (`git push`) los cambios en dicha rama (tanto en los submódulos afectados como en el repositorio principal).
+    3. Crear un Pull Request (PR) en GitHub desde la rama hacia la rama base (`main` / `master`) mediante la CLI de GitHub (`gh pr create`).
+    4. Compartir de forma obligatoria los enlaces (URLs) de los Pull Requests generados en el chat con el usuario.
+* **Salida:** Cuando todos los Criterios de Aceptación están cumplidos, las pruebas pasan, el archivo en `test/` está generado y el Pull Request está abierto, mueve la tarjeta en Trello de `in development` a `in testing` y deja un comentario en la tarjeta con el resumen de la implementación, enlace/referencia al plan de pruebas y enlaces a los PRs creados.
 
 
