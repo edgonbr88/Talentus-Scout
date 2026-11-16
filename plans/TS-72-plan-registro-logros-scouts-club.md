@@ -32,7 +32,9 @@
     - Modal ergonómico Bento (Título, Categoría, Fecha, Descripción) con validación y actualización reactiva de `athlete().badges`.
 
 ## 3. Modelo de Datos y Migraciones (PostgreSQL / Neon)
-- No requiere migraciones DDL; utiliza `athlete_badges` (`badge_type = 'SPORT_ACHIEVEMENT'`, `status = 'APPROVED'`).
+- Migración DDL dbmate: `migrations/20261116120000_add_sport_achievement_to_badge_type_enum.sql`.
+  - Agrega el valor `SPORT_ACHIEVEMENT` al tipo `ENUM badge_type` en PostgreSQL (`ALTER TYPE badge_type ADD VALUE IF NOT EXISTS 'SPORT_ACHIEVEMENT';`).
+  - Permite la inserción en `athlete_badges` con `badge_type = 'SPORT_ACHIEVEMENT'` y `status = 'APPROVED'`.
 
 ## 4. Backend: Spring Boot 3 (Java 21)
 - Paquete DTO: `com.talentus.scout.web.dto.CreateAthleteAchievementRequest` con `@Getter`, `@Setter`, `@NoArgsConstructor`, `@AllArgsConstructor`, `@Builder`.

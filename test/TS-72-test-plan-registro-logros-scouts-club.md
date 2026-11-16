@@ -8,6 +8,9 @@
 ---
 
 ## 1. Alcance de las Pruebas
+- **Base de Datos (`talentus-scout-migrations`):**
+  - `migrations/20261116120000_add_sport_achievement_to_badge_type_enum.sql`
+  - `schema.sql` (agregado de `SPORT_ACHIEVEMENT` al ENUM `badge_type`)
 - **Backend (`talentus-scout-be`):**
   - `src/main/java/com/talentus/scout/web/dto/UserProfileResponse.java`
   - `src/main/java/com/talentus/scout/web/controller/AuthController.java`
