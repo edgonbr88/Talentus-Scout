@@ -202,39 +202,39 @@
 ## 7. Checklist Paso a Paso (Para trello_implementer)
 
 ### Paso 1: Configuración de Ramas Git
-- [ ] En `talentus-scout-be`, crear y cambiar a rama `feature/TS-75-restringir-acceso-carga-masiva-admin`.
-- [ ] En `talentus-scout-fe`, crear y cambiar a rama `feature/TS-75-restringir-acceso-carga-masiva-admin`.
-- [ ] Recordatorio: En el repositorio orquestador raíz (`Talentus-Scout`), permanecer en `main` (no crear rama ni PR en orquestador).
+- [x] En `talentus-scout-be`, crear y cambiar a rama `feature/TS-75-restringir-acceso-carga-masiva-admin`.
+- [x] En `talentus-scout-fe`, crear y cambiar a rama `feature/TS-75-restringir-acceso-carga-masiva-admin`.
+- [x] Recordatorio: En el repositorio orquestador raíz (`Talentus-Scout`), permanecer en `main` (no crear rama ni PR en orquestador).
 
 ### Paso 2: Implementación Backend (`talentus-scout-be`)
-- [ ] En `BulkImportController.java`, remover `'ADMIN'` de la anotación `@PreAuthorize` en endpoints de subida, jobs y reporte de errores.
-- [ ] En `BulkImportService.java`, eliminar la excepción de bypass para `UserRole.ADMIN` y arrojar `AccessDeniedException` si un usuario `ADMIN` intenta iniciar o consultar trabajos de carga masiva.
-- [ ] Agregar o actualizar pruebas unitarias/integración para verificar que `ADMIN` recibe `403 Forbidden` al invocar los endpoints de carga masiva.
-- [ ] Ejecutar `./mvnw clean test` y verificar que el 100% de las pruebas pasen.
+- [x] En `BulkImportController.java`, remover `'ADMIN'` de la anotación `@PreAuthorize` en endpoints de subida, jobs y reporte de errores.
+- [x] En `BulkImportService.java`, eliminar la excepción de bypass para `UserRole.ADMIN` y arrojar `AccessDeniedException` si un usuario `ADMIN` intenta iniciar o consultar trabajos de carga masiva.
+- [x] Agregar o actualizar pruebas unitarias/integración para verificar que `ADMIN` recibe `403 Forbidden` al invocar los endpoints de carga masiva.
+- [x] Ejecutar `./mvnw clean test` y verificar que el 100% de las pruebas pasen.
 
 ### Paso 3: Implementación Frontend (`talentus-scout-fe`)
-- [ ] En `src/app/core/auth/auth.service.ts`, actualizar `canAccessBulkImport` para excluir al `ADMIN`.
-- [ ] Crear el guard `src/app/core/auth/bulk-import.guard.ts` con la lógica de redirección correspondiente.
-- [ ] Crear la suite de pruebas unitarias `src/app/core/auth/bulk-import.guard.spec.ts`.
-- [ ] En `src/app/app.routes.ts`, aplicar `bulkImportGuard` a la ruta `scout/bulk-import`.
-- [ ] Ejecutar `npm test -- --watch=false` y `npm run build` para asegurar tipado y pruebas en verde.
+- [x] En `src/app/core/auth/auth.service.ts`, actualizar `canAccessBulkImport` para excluir al `ADMIN`.
+- [x] Crear el guard `src/app/core/auth/bulk-import.guard.ts` con la lógica de redirección correspondiente.
+- [x] Crear la suite de pruebas unitarias `src/app/core/auth/bulk-import.guard.spec.ts`.
+- [x] En `src/app/app.routes.ts`, aplicar `bulkImportGuard` a la ruta `scout/bulk-import`.
+- [x] Ejecutar `npm test -- --watch=false` y `npm run build` para asegurar tipado y pruebas en verde.
 
 ### Paso 4: Generación de Plan de Pruebas y Documentación
-- [ ] Redactar el documento `test/TS-75-test-plan-restringir-acceso-carga-masiva-admin.md` con los resultados de pruebas y cURL reproducibles.
-- [ ] Actualizar el checklist de este plan marcando los pasos completados.
+- [x] Redactar el documento `test/TS-75-test-plan-restringir-acceso-carga-masiva-admin.md` con los resultados de pruebas y cURL reproducibles.
+- [x] Actualizar el checklist de este plan marcando los pasos completados.
 
 ### Paso 5: Git Commit, Push y Creación de PRs (Nueva Directiva)
-- [ ] En `talentus-scout-be`: `git commit`, `git push -u origin feature/TS-75-...` y `gh pr create --base main`.
-- [ ] En `talentus-scout-fe`: `git commit`, `git push -u origin feature/TS-75-...` y `gh pr create --base main`.
-- [ ] En el orquestador raíz `Talentus-Scout`:
+- [x] En `talentus-scout-be`: `git commit`, `git push -u origin feature/TS-75-...` y `gh pr create --base main`.
+- [x] En `talentus-scout-fe`: `git commit`, `git push -u origin feature/TS-75-...` y `gh pr create --base main`.
+- [x] En el orquestador raíz `Talentus-Scout`:
   - Asegurar estar en `main` (`git checkout main && git pull origin main`).
   - Añadir planes: `git add plans/TS-75-plan-*.md test/TS-75-test-plan-*.md`.
   - Commit y push directo a `main`: `git commit -m "docs(TS-75): plan y pruebas para restringir acceso carga masiva admin" && git push origin main`.
   - **NO** crear PR en el repositorio orquestador.
 
 ### Paso 6: Transición en Trello y Reporte
-- [ ] Mover la tarjeta de `in development` a `in testing` con el comentario de trazabilidad.
-- [ ] Compartir los enlaces a los PRs de los submódulos y el plan de pruebas en el chat.
+- [x] Mover la tarjeta de `in development` a `in testing` con el comentario de trazabilidad.
+- [x] Compartir los enlaces a los PRs de los submódulos y el plan de pruebas en el chat.
 
 ---
 
