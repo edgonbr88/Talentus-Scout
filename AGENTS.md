@@ -147,11 +147,19 @@ El `trello_planner` **DEBE** leer y cruzar la información de la tarjeta con los
     3. Guía de verificación manual paso a paso (comandos `cURL` reproducibles con payloads, tokens y respuestas esperadas, o interacciones de UI).
     4. Matriz de validación de Criterios de Aceptación (DoD).
     5. Casos borde y consideraciones de seguridad/reglas de negocio validadas.
-  * **Directiva Obligatoria de Ramas Git y Pull Requests (GitHub):** Al finalizar la implementación, pruebas y generación del plan de pruebas:
-    1. Crear una rama a partir de `main` / `master` (convención `feature/<TS-ID>-<slug>`).
-    2. Confirmar (`git commit`) y subir (`git push`) los cambios en dicha rama (tanto en los submódulos afectados como en el repositorio principal).
-    3. Crear un Pull Request (PR) en GitHub desde la rama hacia la rama base (`main` / `master`) mediante la CLI de GitHub (`gh pr create`).
-    4. Compartir de forma obligatoria los enlaces (URLs) de los Pull Requests generados en el chat con el usuario.
+  * **Directiva Obligatoria de Ramas Git y Pull Requests (GitHub — Arquitectura de Submódulos):**
+    Para evitar conflictos recurrentes de punteros de submódulos (`gitlink 160000`) en el repositorio orquestador, rige la siguiente política estricta:
+    1. **En los submódulos afectados (`talentus-scout-fe`, `talentus-scout-be`, `talentus-scout-migrations`):**
+       * Crear una rama a partir de `main` (convención `feature/<TS-ID>-<slug>`).
+       * Confirmar (`git commit`) y subir (`git push -u origin <rama>`) los cambios en dicha rama.
+       * Crear el Pull Request (PR) hacia `main` mediante la CLI de GitHub (`gh pr create`).
+       * Compartir de forma obligatoria los enlaces (URLs) de los Pull Requests generados en el chat con el usuario.
+    2. **En el repositorio orquestador raíz (`Talentus-Scout`):**
+       * **NUNCA crear ramas `feature/...` ni Pull Requests en el orquestador.**
+       * El orquestador opera directamente sobre la rama `main`.
+       * Al finalizar la tarea, cambiar a `main` (`git checkout main && git pull origin main`), agregar la documentación generada (`git add plans/<TS-ID>-plan-*.md test/<TS-ID>-test-plan-*.md`), y hacer commit y push directo a `origin main`:
+         `git commit -m "docs(TS-XX): plan y pruebas para <TS-ID>" && git push origin main`.
+       * La actualización de los punteros de submódulos en `main` del orquestador se sincroniza directamente sobre `main` una vez que el usuario apruebe y fusione los PRs de los submódulos.
 * **Salida:** Cuando todos los Criterios de Aceptación están cumplidos, las pruebas pasan, el archivo en `test/` está generado y el Pull Request está abierto, mueve la tarjeta en Trello de `in development` a `in testing` y deja un comentario en la tarjeta con el resumen de la implementación, enlace/referencia al plan de pruebas y enlaces a los PRs creados.
 
 

@@ -126,11 +126,24 @@ Edit the corresponding `plans/<TS-ID>-plan-*.md` file:
 * Add any technical notes or deviations in the plan notes section.
 
 ### 6. Git Branching, Commit, Push y Creación de Pull Requests (GitHub)
-Al finalizar la implementación, pruebas y generación del plan de pruebas:
-1. Crear una rama a partir de `main` / `master` (usando convención `feature/<TS-ID>-<slug-tarea>`).
-2. Confirmar (`git commit`) y subir (`git push -u origin <rama>`) los cambios en dicha rama (tanto en submódulos afectados como `talentus-scout-be`, `talentus-scout-migrations` y en el repositorio principal `Talentus-Scout`).
-3. Crear un Pull Request desde la rama hacia `main` / `master` en GitHub con `gh pr create` para cada repositorio modificado.
-4. Conservar las URLs de los Pull Requests generados para compartirlas con el usuario.
+Para evitar conflictos de punteros de submódulos en el repositorio orquestador, rige la siguiente política:
+
+1. **En los submódulos afectados (`talentus-scout-fe`, `talentus-scout-be`, `talentus-scout-migrations`):**
+   * Crear una rama a partir de `main` (usando la convención `feature/<TS-ID>-<slug-tarea>`).
+   * Confirmar (`git commit`) y subir (`git push -u origin <rama>`) los cambios en dicha rama.
+   * Crear el Pull Request desde la rama hacia `main` en GitHub con `gh pr create`.
+   * Conservar las URLs de los Pull Requests generados para compartirlas con el usuario.
+
+2. **En el repositorio orquestador raíz (`Talentus-Scout`):**
+   * **NUNCA crear ramas `feature/...` ni Pull Requests en el orquestador.**
+   * Trabajar directamente sobre la rama `main` (`git checkout main && git pull origin main`).
+   * Añadir los archivos de planes y pruebas generados:
+     ```bash
+     git add plans/<TS-ID>-plan-*.md test/<TS-ID>-test-plan-*.md
+     git commit -m "docs(TS-XX): planes de implementación y pruebas para <TS-ID>"
+     git push origin main
+     ```
+   * Los punteros de submódulos en el orquestador se sincronizan en `main` cuando los PRs de los submódulos sean aprobados y fusionados por el usuario.
 
 ### 7. Transition Card in Trello to `in testing`
 Run the automated helper script:
