@@ -136,3 +136,31 @@ Si deseas dejar tus credenciales preconfiguradas en el código fuente para compi
    * Ingresa tu correo (@outlook, @hotmail o corporativo) y contraseña.
    * Al otorgar permisos, la ventana retornará el token OIDC y se cerrará automáticamente.
    * El backend procesará los claims oficiales (`oid`, `email`/`preferred_username`, `name`) y habilitará la sesión.
+
+---
+
+## 5. Pase a Producción en Google Cloud Console y Cloud Run
+
+Cuando la plataforma pase de pruebas locales a producción (`https://talentusscout.com`):
+
+### 5.1. Configurar Credencial OAuth de Producción en GCP
+1. Crea un **ID de cliente de OAuth** específico para producción (ej. `Talentus Scout Web Prod`) en **APIs y servicios > Credenciales**:
+   * **Orígenes de JavaScript autorizados:**
+     * `https://talentusscout.com`
+     * `https://www.talentusscout.com`
+   * **URIs de redireccionamiento autorizados:**
+     * `https://talentusscout.com/auth/login`
+     * `https://www.talentusscout.com/auth/login`
+2. En **Pantalla de consentimiento de OAuth** (o *Google Auth Platform*):
+   * Agrega `talentusscout.com` en **Dominios autorizados** y verifica el dominio en Google Search Console mediante registro TXT en Cloudflare.
+   * Completa el logotipo oficial, página principal (`https://talentusscout.com`), política de privacidad y términos de servicio.
+   * Pulsa **"Publicar aplicación" (Publish App)** para salir del modo *Testing* y permitir el acceso a cualquier usuario real (al usar solo `openid`, `email` y `profile`, no requiere auditoría CASA).
+
+### 5.2. Variables de Entorno en Cloud Run (Backend)
+Configura las siguientes variables en el servicio Cloud Run del backend (`SPRING_PROFILES_ACTIVE=prod`):
+* `GOOGLE_OAUTH_CLIENT_ID=<TU_CLIENT_ID_DE_PRODUCCION.apps.googleusercontent.com>`
+* `MICROSOFT_OAUTH_CLIENT_ID=<TU_MICROSOFT_CLIENT_ID_PRODUCCION>` (opcional)
+* `OAUTH_MOCK_ENABLED=false` *(por defecto en `application-prod.yml`)*
+* `OAUTH_VERIFY_SIGNATURE=true` *(verificación RS256 contra JWKS de Google/Microsoft + validación estricta de `aud`, `iss` y `exp`)*
+
+> El frontend en producción obtiene automáticamente estos Client IDs desde `GET /api/v1/auth/oauth-config` (o desde `environment.prod.ts`) y oculta el botón técnico de configuración manual (`⚙️ Configurar Client IDs de OAuth2`).
