@@ -29,6 +29,7 @@
 
 ### 1.3 Frontend (`talentus-scout-fe`, Angular 18+)
 - **Modelos y Servicio HTTP:** `src/app/core/models/payment.model.ts`, `src/app/core/services/payment.service.ts`.
+- **Autenticación y SSR/CSR al retornar de pasarela externa:** `AuthService` (`src/app/core/auth/auth.service.ts`, `.spec.ts`), `authGuard`, `angular.json` + `prerender.routes.txt`, `nginx.conf` y `server.ts`.
 - **Checkout Modal:** `CheckoutPagoMovilModalComponent` (`.ts`, `.html`, `.css`, `.spec.ts`) — pestaña `VEXPAY`, cotización vía `GET /api/v1/payments/vexpay/quote`, soporte de cupones, creación de sesión y redirección a `checkoutUrl` con respaldo en `sessionStorage`.
 - **Dashboard de Retorno:** `TutorDashboardComponent` (`.ts`, `.html`, `.spec.ts`) — lectura de `payment=vexpay_return` / `payment=vexpay_cancelled`, verificación activa contra `POST /api/v1/payments/vexpay/sessions/{sessionId}/verify`, banners y re-consulta manual.
 - **Panel Administrativo de Pagos:** `AdminPaymentsComponent` (`.ts`, `.html`, `.css`, `.spec.ts`) — KPI de aprobados `VEXPAY`, filtros `VEXPAY` / `PENDING_GATEWAY` / `REVERSED`, chips/badges de estado, tarjeta Bento de configuración ON/OFF `vexpayEnabled` (sin campos de secreto en cliente) y botón de conciliación manual.
@@ -63,16 +64,22 @@
 - **Nota sobre suite completa backend (`./mvnw test`):** En la ejecución previa de toda la suite, las clases de pagos y VexPay aprobaron en su totalidad; únicamente fallaron 3 pruebas preexistentes en `RegisterTutorTest` por requerimiento `@NotNull selfieFile` introducido previamente en `RegisterTutorRequest` (TS-67, fuera del alcance de TS-78).
 
 ### 2.3 Pruebas Frontend y Build (`npm test` / `npm run build`)
-- **Suite focalizada de Checkout, Dashboard de Retorno y Admin Pagos (después de todas las ediciones FE):**
+- **Suite focalizada de Autenticación, Guards, Checkout, Dashboard de Retorno y Admin Pagos (después de todas las ediciones FE):**
   ```bash
   cd talentus-scout-fe && npm test -- \
+    --include src/app/core/auth/auth.service.spec.ts \
+    --include src/app/core/auth/admin.guard.spec.ts \
+    --include src/app/core/auth/tutor.guard.spec.ts \
+    --include src/app/core/auth/scout.guard.spec.ts \
+    --include src/app/core/auth/bulk-import.guard.spec.ts \
     --include src/app/features/payments/checkout-pago-movil-modal.component.spec.ts \
     --include src/app/features/admin/payments/admin-payments.component.spec.ts \
     --include src/app/features/dashboard/tutor-dashboard.component.spec.ts \
     --watch=false
   ```
-  - **Resultado observado:** `Executed 64 of 64 SUCCESS`, `TOTAL: 64 SUCCESS` (código de salida `0`).
+  - **Resultado observado:** `Executed 82 of 82 SUCCESS`, `TOTAL: 82 SUCCESS` (código de salida `0`).
   - Casos TS-78 cubiertos en estas specs:
+    - `auth.service.spec.ts`: rehidratación de sesión tras redirección externa (`/api/v1/auth/me` con `Bearer` token sin provocar `NG0200` ni cerrar sesión; cierre de sesión ante `401`).
     - `checkout-pago-movil-modal.component.spec.ts`: consulta de cotización oficial VexPay al activar pestaña `VEXPAY`; creación de sesión VexPay, respaldo en `sessionStorage` y redirección a `checkoutUrl`.
     - `tutor-dashboard.component.spec.ts`: verificación de sesión VexPay al retornar mostrando banner `ACTIVATED` (`Pago VexPay Confirmado`); estado `PENDING` (`En verificación bancaria`) con botón `"Verificar nuevamente"` (`authServiceMock` actualizado con `isAthlete: signal(false)`).
     - `admin-payments.component.spec.ts`: renderización de tarjeta VexPay y toggle `vexpayEnabled`; ejecución de conciliación manual VexPay desde pestaña `HISTORY`.
@@ -80,7 +87,7 @@
   ```bash
   cd talentus-scout-fe && npm run build
   ```
-  - **Resultado observado:** Código de salida `0`. Generación completa en `36.413 seconds` con prerenderizado de `21 static routes`.
+  - **Resultado observado:** Código de salida `0`. Generación completa en `37.373 seconds` con prerenderizado selectivo (`Prerendered 1 static route`, solo `/`; rutas protegidas servidas mediante shell CSR `index.csr.html`).
   - Advertencia no bloqueante observada: `admin-payments.component.css exceeded maximum budget. Budget 20.48 kB was not met by 5.08 kB with a total of 25.57 kB.`
 - **Nota sobre suite completa frontend (`npm test -- --watch=false`):** Antes de corregir `authServiceMock` en `tutor-dashboard.component.spec.ts`, existían fallos preexistentes en `RegisterAthleteComponent` spec (por falta de `ActivatedRoute` en su TestBed, fuera del alcance de TS-78).
 
@@ -174,7 +181,7 @@ curl -s -X POST http://localhost:8080/api/v1/admin/payments/vexpay/reconcile \
 | Retorno checkout ejecuta verificación activa contra backend; scheduler y botón admin concilian `PENDING_GATEWAY` | Cumplido | `VexPayReconciliationScheduler`, `POST /sessions/{id}/verify`, `POST /vexpay/reconcile`, `tutor-dashboard.component.spec.ts` |
 | Sesiones `PENDING_GATEWAY` abandonadas no aparecen en cola manual `PENDING_AUDIT` | Cumplido | Queries de `PaymentTransactionRepository` e `AdminPaymentService` acotadas a `PENDING_AUDIT` |
 | Admin alterna `vexpayEnabled`, filtra `VEXPAY`/`REVERSED` y lanza conciliación manual | Cumplido | `AdminPaymentGatewayConfigControllerTest` (8/8) y `admin-payments.component.spec.ts` |
-| Pruebas de pagos/VexPay BE (`66/66`), specs FE modificadas (`64/64`) y `ng build` en verde | Cumplido | `./mvnw test -Dtest="*Payment*,*VexPay*,..."` = `66/66`; Karma `64/64`; `npm run build` exit code `0` |
+| Pruebas de pagos/VexPay BE (`66/66`), specs FE modificadas + auth (`82/82`) y `ng build` en verde | Cumplido | `./mvnw test -Dtest="*Payment*,*VexPay*,..."` = `66/66`; Karma `82/82`; `npm run build` exit code `0` |
 
 ---
 
@@ -186,3 +193,4 @@ curl -s -X POST http://localhost:8080/api/v1/admin/payments/vexpay/reconcile \
 4. **Cuerpo Crudo en Webhook:** `PaymentController#handleVexPayWebhook` recibe `@RequestBody String rawBody` intacto antes de deserializar JSON para que el cálculo `HMAC-SHA256(<t>.<rawBody>)` coincida byte a byte con VexPay.
 5. **Reversión tras Extensión vs. Nueva Suscripción:** Si un pago confirmado había extendido una suscripción activa existente, `payment_transactions.previous_subscription_end_date` conserva la fecha previa para restaurarla ante un eventual `payment.reversed`, evitando cancelar meses pagados previamente.
 6. **Manejo de Errores VexPay (RFC 7807):** Errores HTTP de VexPay (`400`, `401`, `409`, `502/503`) se capturan en `VexPayApiException` y retornan `ProblemDetail` descriptivo sin exponer cabeceras ni secretos.
+7. **Retorno Externo / F5 en Rutas Protegidas (NG0200 + SSR/Prerender):** `AuthService` difiere `/api/v1/auth/me` con `queueMicrotask` para evitar dependencia circular `NG0200` con `jwtInterceptor` al recargar con token existente, y las rutas protegidas (`/dashboard`, `/admin`, `/scout`, `/auth/complete-profile`) se excluyen del prerenderizado (`prerender.routes.txt`) sirviéndose vía `index.csr.html` tanto en Nginx como en `server.ts`.
