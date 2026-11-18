@@ -65,6 +65,10 @@ services:
       MAIL_USERNAME: ${MAIL_USERNAME:-contacto@robomatic.cloud}
       MAIL_PASSWORD: ${MAIL_PASSWORD:-vyuoxcjawklsgryu}
       FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost}
+      VEXPAY_API_URL: ${VEXPAY_API_URL:-https://api.vexpay.app}
+      VEXPAY_API_KEY: ${VEXPAY_API_KEY:-}
+      VEXPAY_WEBHOOK_SECRET: ${VEXPAY_WEBHOOK_SECRET:-}
+      VEXPAY_LIVEMODE: ${VEXPAY_LIVEMODE:-false}
     volumes:
       - ./talentus-scout-be/uploads:/app/uploads
     healthcheck:
